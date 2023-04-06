@@ -9,7 +9,8 @@ const InputSelect = ({ denonState, setDenonState, updateDenonState }) => {
         // to pick up resulting changes
         setDenonState(prevState => ({
             ...prevState,
-            input: Object.values(DENON_INPUTS).find(input => input.value === event.target.value)
+            input: Object.values(DENON_INPUTS).find(input => input.value === event.target.value),
+            powerOn: true
         }))
 
         const response = await sendDenonCommand(event.target)
