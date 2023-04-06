@@ -125,7 +125,7 @@ DenonTelnet.prototype.sendNextTelnetQueueItem = function() {
             // timeout for no response (will be cleared in data handler on data)
             this.timeoutWatcher = setTimeout(() => {
                 this.connection.removeListener('data', this.currentCmdHandler)
-                item.callback("No Response")
+                item.callback("No response received from Command \"" + item.cmd + "\"")
             }, this.responseTimeout)
 
             //TODO: need to figure out a way to wait until prev res sent to send another command ... i think?
