@@ -5,13 +5,21 @@ import {buttonPress} from "@/utilities/utils.js";
 
 function RokuChannels({ setPowerOn }) {
 
+    const [iconsLoaded, setIconsLoaded] = useState(false)
+
     const [buttonPressTimer, setButtonPressTimer] = useState()
 
     useEffect(() => {
-        const channelButtons = document.querySelectorAll(".channel-button")
-        for (const button of channelButtons) {
-                fetchIcon(button)
+        const fetchIcons = async () => {
+            const channelButtons = document.querySelectorAll(".channel-button")
+            const promises = []
+            for (const button of channelButtons) {
+                promises.push(fetchIcon(button))
+            }
+            await Promise.all(promises)
+            setIconsLoaded(true)
         }
+        fetchIcons()
     }, [])
 
     const fetchIcon = async (button) => {
@@ -58,7 +66,7 @@ function RokuChannels({ setPowerOn }) {
 
     return (
         <div id="roku-channels" className="w-full flex place-content-center gap-2">
-            <div className="grid grid-cols-4 grid-rows-2 gap-3 w-full">
+            <div className={`grid grid-cols-4 grid-rows-2 gap-3 w-full ${iconsLoaded ? 'opacity-100': 'opacity-0'} transition duration-150 ease-in-out`}>
                 { Object.values(ROKU_APPS.CHANNELS).map(CHANNEL => (
                     <button onClick={handleClick}
                             key={ CHANNEL.id }
