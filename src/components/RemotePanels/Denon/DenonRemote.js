@@ -5,9 +5,9 @@ import SelectSoundMode from "./ButtonGroups/SelectSoundMode";
 import LevelsControl from "./ButtonGroups/LevelsControl";
 import BottomSection from "../Shared/BottomSection";
 import {fetchMainZoneData, sendDenonQuery} from "@/utilities/http"
-import {Fragment, useEffect} from "react";
-import {Transition} from "@headlessui/react";
+import {useEffect} from "react";
 import {toInteger} from "lodash/lang.js";
+import Overlay from "@/components/UI/Overlay.js";
 
 const remote = REMOTE.DENON
 
@@ -129,23 +129,7 @@ function DenonRemote({ denonState, setDenonState }) {
 
     return (
         <>
-            <Transition
-                appear
-                show={!denonState.powerOn}
-                as={Fragment}
-               >
-                    <Transition.Child
-                        as={Fragment}
-                        enter="ease-out duration-[1000ms]"
-                        enterFrom="opacity-0"
-                        enterTo="opacity-90"
-                        leave="ease-in duration-[1000ms]"
-                        leaveFrom="opacity-90"
-                        leaveTo="opacity-0"
-                    >
-                        <div className="absolute top-0 left-0 w-screen h-screen z-50 bg-slate-900" />
-                    </Transition.Child>
-            </Transition>
+            <Overlay show={!denonState.powerOn} />
             <div id="denon-remote" className="absolute panel-height w-full p-3 flex flex-col justify-between">
                 <div className="flex flex-col gap-4 justify-between">
                     <InputSelect denonState={ denonState }

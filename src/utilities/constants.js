@@ -258,7 +258,7 @@ export const DENON_INPUTS = {
 }
 
 export const DENON_STATE_DEFAULTS = {
-    powerOn: true,
+    powerOn: false,
     muteOn: false,
     input: "",
     soundMode: "",
