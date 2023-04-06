@@ -2,19 +2,6 @@ import express from 'express'
 import DenonTelnet from './denon-telnet.js'
 import {DENON_IP, KEYSTROKE} from '../src/utilities/constants.js'
 
-const denonState = {
-    powerOn: true,
-    muteOn: false,
-    input: "",
-    soundMode: "",
-    dynComp: "",
-    psDilOn: false,
-    PSDIL: 0,  //needs to be int so it can be incremented
-    PSDYNEQ: "OFF",
-    PSREFLEV: "0",
-    PSDYNVOL: "OFF"
-}
-
 const QUERY_NO_SPACE = ["PW", "ZM", "MV", "CV", "MU", "SI", "SD", "DC", "SV", "SLP", "ECO", "STBY", "MS"]
 
 const denonApp = express();
