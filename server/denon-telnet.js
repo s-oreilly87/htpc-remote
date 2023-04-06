@@ -427,7 +427,7 @@ DenonTelnet.prototype.getZonePowerState = function(callback, zone) {
  // Set POWER state of ZONE3 to OFF.
  */
 DenonTelnet.prototype.setZonePowerState = function(powerState, callback, zone) {
-    const commandPrefix = (!zone || (zone === 'ZM')) ? 'MV' : zone;
+    const commandPrefix = (!zone || (zone === 'ZM')) ? 'ZM' : zone;
 
     this.addCmdToQueue(commandPrefix + (powerState ? 'ON' : 'OFF'), (error, data) => {
         if (!error) {
