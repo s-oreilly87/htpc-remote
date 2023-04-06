@@ -1,0 +1,181 @@
+import {DENON_INPUTS, DENON_SOUND_MODES, REMOTE} from "@/utilities/constants.js";
+import InputSelect from "./ButtonGroups/InputSelect";
+import CycleSoundModes from "./ButtonGroups/CycleSoundModes";
+import SelectSoundMode from "./ButtonGroups/SelectSoundMode";
+import LevelsControl from "./ButtonGroups/LevelsControl";
+import BottomSection from "../Shared/BottomSection";
+import {fetchMainZoneData, sendDenonQuery} from "@/utilities/http"
+import {Fragment, useEffect} from "react";
+import {Transition} from "@headlessui/react";
+import {toInteger} from "lodash/lang.js";
+
+const remote = REMOTE.DENON
+
+function DenonRemote({ denonState, setDenonState }) {
+
+    // On render, query the amp for its current state (some data from MainZone HTTP request, levels data over telnet)
+    useEffect( () => {
+        updateDenonState()
+    }, [])
+
+    const updateDenonState = () => {
+        updateDenonStateFromMainZoneQuery()
+        updateDenonStateFromFetchLevels()
+    }
+    const updateDenonStateFromMainZoneQuery = async () => {
+        const response = await fetchMainZoneData()
+
+        if (response.error) {
+            return console.error(response.error)
+        }
+
+        const data = response.data
+
+        let input = Object.values(DENON_INPUTS).find(
+            input => input.inputFuncSelect.includes(data.inputFuncSelect)
+        )
+        if (!input) {
+            console.info(`Unknown Input: ${data.inputFuncSelect}`)
+        }
+
+        let soundMode = Object.values(DENON_SOUND_MODES).find(
+            mode => mode.selectSurround.includes(data.selectSurround)
+        )
+        if (!soundMode) {
+            console.info(`Unknown selectSurround: ${data.selectSurround}`)
+            if (data.selectSurround.includes("DOLBY_SURROUND")) {
+                console.info("Mapped to DOLBY_DIGITAL")
+                soundMode = "DOLBY_DIGITAL"
+            } else {
+                soundMode = DENON_SOUND_MODES.NONE
+            }
+        }
+
+        setDenonState(prevState =>
+            ({
+                ...prevState,
+                input: input,
+                powerOn: data.zonePower === "ON",
+                muteOn: data.mute === "ON",
+                soundMode: soundMode
+            }))
+    }
+
+    async function updateDenonStateFromFetchLevels() {
+        const refLevResponse = await sendDenonQuery("PSREFLEV")
+        if (refLevResponse.error) {
+            console.error(refLevResponse.error)
+        } else {
+            setDenonState(prevState => ({
+                ...prevState,
+                PSREFLEV: refLevResponse.data[0].split(" ")[1]
+            }))
+        }
+
+        const dynVolResponse = await sendDenonQuery("PSDYNVOL")
+        if (dynVolResponse.error) {
+            console.error(dynVolResponse.error)
+        } else {
+            setDenonState(prevState => ({
+                ...prevState,
+                PSDYNVOL: dynVolResponse.data[0].split(" ")[1]
+            }))
+        }
+
+        const dialogueAdjustResponse = await sendDenonQuery("PSDIL")
+        // dialogueAdjustResponse[0] = ON/OFF, [1] = LEVEL
+        if (dialogueAdjustResponse.error) {
+            console.error(dialogueAdjustResponse.error)
+        } else {
+            setDenonState(prevState => ({
+                ...prevState,
+                psDilOn: dialogueAdjustResponse.data[0].split(" ")[1] === "ON"
+            }))
+
+            if (dialogueAdjustResponse.data[1]) {
+                setDialogueAdjustFromResponseValue(dialogueAdjustResponse.data[1].split(" ")[1])
+            } else {
+                console.error('for some reason didnt get 2 part PSDIL data. Heres what we got:')
+                console.error(dialogueAdjustResponse.data)
+            }
+
+        }
+
+        const dynEqResponse = await sendDenonQuery("PSDYNEQ")
+        if (dynEqResponse.error) {
+            console.log(dynEqResponse.error)
+        } else {
+            setDenonState(prevState => ({
+                ...prevState,
+                PSDYNEQ: dynEqResponse.data[0]
+            }))
+        }
+    }
+
+    const setDialogueAdjustFromResponseValue = (responseValue) => {
+        // 0.5 steps come in without the decimal
+        if (responseValue.length === 3) {
+            responseValue = responseValue / 10
+        }
+
+        // 50 is the new 0
+        responseValue -= 50
+        setDenonState(prevState => ({
+            ...prevState,
+            PSDIL: toInteger(responseValue)
+        }))
+    }
+
+
+    return (
+        <>
+            <Transition
+                appear
+                show={!denonState.powerOn}
+                as={Fragment}
+               >
+                    <Transition.Child
+                        as={Fragment}
+                        enter="ease-out duration-[1000ms]"
+                        enterFrom="opacity-0"
+                        enterTo="opacity-90"
+                        leave="ease-in duration-[1000ms]"
+                        leaveFrom="opacity-90"
+                        leaveTo="opacity-0"
+                    >
+                        <div className="absolute top-0 left-0 w-screen h-screen z-50 bg-slate-900" />
+                    </Transition.Child>
+            </Transition>
+            <div id="denon-remote" className="absolute panel-height w-full p-3 flex flex-col justify-between">
+                <div className="flex flex-col gap-4 justify-between">
+                    <InputSelect denonState={ denonState }
+                                 setDenonState={setDenonState}
+                                 updateDenonState={ updateDenonState }
+                    />
+                    <CycleSoundModes
+                        setDenonState={ setDenonState }
+                        updateDenonState={ updateDenonState }
+
+                    />
+                    <SelectSoundMode
+                        denonState={ denonState }
+                        setDenonState={setDenonState}
+                    />
+                    <LevelsControl
+                        denonState={ denonState }
+                        setDenonState={ setDenonState }
+                        setDialogueAdjustFromResponseValue={setDialogueAdjustFromResponseValue}
+                    />
+                </div>
+                <div className="h-50 items-end">
+                    <BottomSection remote={remote}
+                                   denonState={denonState}
+                                   setDenonState={setDenonState}
+                    />
+                </div>
+            </div>
+        </>
+    );
+}
+
+export default DenonRemote;

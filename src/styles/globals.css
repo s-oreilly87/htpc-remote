@@ -1,0 +1,75 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+@layer base {
+    html {
+        font-family: Calibri, system-ui, sans-serif;
+    }
+}
+
+@layer components {
+    .nav-tab {
+       @apply btn w-1/3 rounded-t-2xl rounded-b-none items-end text-gray-400 bg-slate-700 transition-all-500
+    }
+    .nav-tab-active {
+        @apply nav-tab h-14 drop-shadow-2xl text-white
+    }
+    .nav-tab-inactive {
+        @apply nav-tab h-[50px]
+    }
+
+    .btn {
+        @apply py-2 px-2 rounded-lg shadow-md text-white focus:outline-none focus:ring-1 focus:ring-gray-700 focus:ring-opacity-75 select-none
+    }
+    .btn-primary-denon {
+        @apply bg-teal-600 text-white hover:bg-teal-500  focus:ring-teal-400;
+    }
+    .btn-primary-roku {
+        @apply bg-violet-800 text-white hover:bg-violet-700 focus:ring-violet-600;
+    }
+    .btn-primary-pc {
+        @apply bg-blue-600 text-white hover:bg-blue-500 focus:ring-blue-400 ;
+    }
+    .btn-secondary {
+        @apply bg-gray-500 hover:bg-gray-600 ;
+    }
+    .channel-button {
+        @apply btn bg-gray-500 aspect-4/3 text-white hover:opacity-90 focus:ring-gray-700 ;
+    }
+}
+
+@layer utilities {
+    .panel-height {
+        min-height: calc(100vh - 64px);
+        max-height: calc(100vh - 64px);
+        min-height: calc(100*var(--vh) - 64px);
+        max-height: calc(100*var(--vh) - 64px);
+
+    }
+
+    .panel-width {
+        width:calc(100vw - 1.5rem);
+        max-width:calc(550px - 1.5rem);
+    }
+
+    .viewport-height {
+        min-height: calc(100vh);
+        max-height: calc(100vh);
+        min-height: calc(100*var(--vh));
+        max-height: calc(100*var(--vh));
+    }
+
+    .input-active {
+        background-color: red!important;
+    }
+}
+
+.aspect-4\/3 {
+    aspect-ratio: 4/3;
+}
+
+.transition-all-500 {
+    transition: all 500ms ease-in-out;
+}
