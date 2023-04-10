@@ -1,4 +1,4 @@
-//   This is a modified version of marantz-denon-telnet.
+//   This is a modified version of marantz-denon.
 
 //   Uses telnet-stream module, instead of telnet-client (maybe a bad choice)
 
@@ -13,14 +13,10 @@
 import net from 'net'
 import {TelnetSocket} from 'telnet-stream'
 import DenonTelnetWrapper from './denon-telnet-wrapper.js'
+import {DENON_IP} from "@/utilities/constants.js";
 
 const DENON_PORT = 23
 
-/**
- Returns an instance of DenonTelnet that can handle telnet commands to the given IP.
- @constructor
- @param {string} ip Address of the AVR.
- */
 const DenonTelnet = function(ip) {
     this.params = {
         port: DENON_PORT,
@@ -37,11 +33,8 @@ const DenonTelnet = function(ip) {
     this.timeoutWatcher = null
     this.multipleDataTimeout = 100
     this.responseTimeout = 3000
-
     this.currentCmdHandler = null
-
 };
-
 
 DenonTelnet.prototype.connect = function() {
     // create a socket connection (And connects it!)
@@ -68,21 +61,6 @@ DenonTelnet.prototype.connect = function() {
         console.error('DENON-TELNET: Telnet Connection Error:');
         console.error(err)
     }
-
-    // // default data listener for logging (doesnt send response)
-    // this.connection.on('data', (data) => {
-    //     let cleanedData = data.toString().trim().split('\r')
-    //     this.receivedData.push(...cleanedData)
-    //     clearTimeout(this.timeout)
-    //
-    //     this.timeout = setTimeout(() => {
-    //         console.log(`Received data: `);
-    //         console.log(this.receivedData)
-    //         this.receivedData = []
-    //     }, this.responseTimeout)
-    // })
-
-
 }
 
 
@@ -129,7 +107,6 @@ DenonTelnet.prototype.sendNextTelnetQueueItem = function() {
             }, this.responseTimeout)
 
             //TODO: need to figure out a way to wait until prev res sent to send another command ... i think?
-
             setTimeout(() => {  // Send the COMMAND in 50ms or more intervals.
                 this.sendNextTelnetQueueItem();
             }, 50);
@@ -140,15 +117,7 @@ DenonTelnet.prototype.sendNextTelnetQueueItem = function() {
     }
 };
 
-
-
-/**
- Low level method to add a command to the Telnet queue.
- @param {string} cmd Telnet command
- @param {defaultCallback} callback Function to be called when the command is run and data is returned
- @param {?RegExp} waitfor Wait for this regexp to fulfill instead of a timeout.
- */
-DenonTelnet.prototype.addCmdToQueue = function(cmd, callback, waitfor=undefined) {
+DenonTelnet.prototype.addCmdToQueue = function (cmd, waitfor = undefined, callback) {
     this.cmdQueue.push({ cmd: cmd, callback: callback, waitfor: waitfor })
     if (!this.busy) {
         this.busy = true
@@ -156,20 +125,8 @@ DenonTelnet.prototype.addCmdToQueue = function(cmd, callback, waitfor=undefined)
     }
 };
 
-
-
-/**
- Send raw Telnet codes to the AVR.
- @see marantz Telnet Reference {@link http://www.us.marantz.com/DocumentMaster/US/Marantz_FY16_AV_SR_NR_PROTOCOL_V01(2).xls}
- @param {string} cmd Telnet command
- @param {defaultCallback} callback Function to be called when the command is run and data is returned
- @example
- var mdt = new MarantzDenonTelnet('127.0.0.1');
- mdt.cmd('PW?', function(error, data) {console.log('Power is: ' + data);});
- // Power is: [PWON,Z2ON,Z3ON|PWSTANDBY]
- */
 DenonTelnet.prototype.cmd = function(cmd, callback) {
-    this.addCmdToQueue(cmd, (error, data) => {
+    this.addCmdToQueue(cmd, null, (error, data) => {
         if (!error) {
             callback(null, data);
         } else {
@@ -178,14 +135,6 @@ DenonTelnet.prototype.cmd = function(cmd, callback) {
     });
 };
 
-
-
-/**
- Search for the required information in returned data array, as they may contain additional and random data from EVENTs.
- @param {Array} data Array of possible responses
- @param {RegExp} regexp to test against
- @return {string|null} found string or null
- */
 DenonTelnet.prototype.parseSimpleResponse = function(data, regexp) {
     let match
 
@@ -199,25 +148,11 @@ DenonTelnet.prototype.parseSimpleResponse = function(data, regexp) {
     return null;
 };
 
-
-
-/**
- Get the currently selected input of a zone.
- Telnet Command examples: SI?, Z2SOURCE
- @param {defaultCallback} callback Function to be called when the command is run and data is returned. Will return one or more of: 'CD', 'SPOTIFY', 'CBL/SAT', 'DVD', 'BD', 'GAME', 'GAME2', 'AUX1',
- 'MPLAY', 'USB/IPOD', 'TUNER', 'NETWORK', 'TV', 'IRADIO', 'SAT/CBL', 'DOCK',
- 'IPOD', 'NET/USB', 'RHAPSODY', 'PANDORA', 'LASTFM', 'IRP', 'FAVORITES', 'SERVER'
- @param {?string} zone NULL or ZM for MAIN ZONE, Z2 ... Zn for all others
- @example
- var mdt = new MarantzDenonTelnet('127.0.0.1');
- mdt.getInput(function(error, data) {console.log('INPUT of MAIN ZONE is: ' + JSON.stringify(data));}, 'ZM');
- // INPUT of MAIN ZONE is: "MPLAY"
- */
-DenonTelnet.prototype.getInput = function(callback, zone) {
+DenonTelnet.prototype.getInput = function (zone, callback) {
     const commandPrefix = (!zone || (zone === 'ZM')) ? 'SI' : zone;
     const regexp = RegExp('(?:^|[\r])' + commandPrefix + '([^O0-9]+[^NF]+)');
 
-    this.addCmdToQueue(commandPrefix + '?', (error, data) => {
+    this.addCmdToQueue(commandPrefix + '?', undefined, (error, data) => {
         if (!error) {
             const input = this.parseSimpleResponse(data, regexp)
             if (input) {
@@ -231,25 +166,10 @@ DenonTelnet.prototype.getInput = function(callback, zone) {
     });
 };
 
-
-
-/**
- Select the input of a zone.
- Telnet Command examples: SIMPLAY, Z2MPLAY, Z3CD
- @param {string} input Supported values: 'CD', 'SPOTIFY', 'CBL/SAT', 'DVD', 'BD', 'GAME', 'GAME2', 'AUX1',
- 'MPLAY', 'USB/IPOD', 'TUNER', 'NETWORK', 'TV', 'IRADIO', 'SAT/CBL', 'DOCK',
- 'IPOD', 'NET/USB', 'RHAPSODY', 'PANDORA', 'LASTFM', 'IRP', 'FAVORITES', 'SERVER'
- @param {defaultCallback} callback Function to be called when the command is run and data is returned
- @param {?string} zone NULL or ZM for MAIN ZONE, Z2 ... Zn for all others
- @example
- var mdt = new MarantzDenonTelnet('127.0.0.1');
- mdt.setInput('MPLAY', function(error, data) {console.log('Set INPUT of MAIN ZONE to MPLAY.');});
- // Set INPUT of MAIN ZONE to MPLAY.
- */
-DenonTelnet.prototype.setInput = function(input, callback, zone) {
+DenonTelnet.prototype.setInput = function (input, zone, callback) {
     const commandPrefix = (!zone || (zone === 'ZM')) ? 'SI' : zone;
 
-    this.addCmdToQueue(commandPrefix + input, (error, data) => {
+    this.addCmdToQueue(commandPrefix + input, undefined, (error, data) => {
         if (!error) {
             callback(null, data);
         } else {
@@ -258,24 +178,11 @@ DenonTelnet.prototype.setInput = function(input, callback, zone) {
     });
 };
 
-
-
-/**
- Get the current mute state of a zone.
- Defaults MAIN ZONE, if no zone set.
- Telnet Command examples: SIMPLAY, Z2MPLAY, Z3CD
- @param {defaultCallback} callback Function to be called when the command is run and data is returned
- @param {?string} zone NULL or ZM for MAIN ZONE, Z2 ... Zn for all others
- @example
- var mdt = new MarantzDenonTelnet('127.0.0.1');
- mdt.getMuteState(function(error, data) {console.log('MUTE state of ZONE2 is: ' + (data ? 'ON' : 'OFF'));}, 'Z2');
- // MUTE state of ZONE2 is: [ON|OFF]
- */
-DenonTelnet.prototype.getMuteState = function(callback, zone) {
+DenonTelnet.prototype.getMuteState = function (zone, callback) {
     const commandPrefix = (!zone || (zone === 'ZM')) ? '' : zone;
     const regexp = RegExp('(?:^|[\r])' + commandPrefix + 'MU(ON|OFF)');
 
-    this.addCmdToQueue(commandPrefix + 'MU?', (error, data) => {
+    this.addCmdToQueue(commandPrefix + 'MU?', regexp, (error, data) => {
 
         if (!error) {
             const muteState = this.parseSimpleResponse(data, regexp)
@@ -287,27 +194,13 @@ DenonTelnet.prototype.getMuteState = function(callback, zone) {
         } else {
             callback(error);
         }
-    }, regexp);
+    });
 };
 
-
-
-/**
- Set the mute state of a zone.
- Defaults MAIN ZONE, if no zone set.
- Telnet Command examples: MUON, MUOFF, Z2MUON, Z3MUOFF
- @param {boolean} muteState TRUE for muted
- @param {defaultCallback} callback Function to be called when the command is run and data is returned
- @param {?string} zone NULL or ZM for MAIN ZONE, Z2 ... Zn for all others
- @example
- var mdt = new MarantzDenonTelnet('127.0.0.1');
- mdt.setMuteState(true, function(error, data) {console.log('Set MUTE state of ZONE2 to ON.');}, 'Z2');
- // Set MUTE state of ZONE2 to ON.
- */
-DenonTelnet.prototype.setMuteState = function(muteState, callback, zone) {
+DenonTelnet.prototype.setMuteState = function (muteState, zone, callback) {
     const commandPrefix = (!zone || (zone === 'ZM')) ? '' : zone;
 
-    this.addCmdToQueue(commandPrefix + 'MU' + (muteState ? 'ON' : 'OFF'), (error, data) => {
+    this.addCmdToQueue(commandPrefix + 'MU' + (muteState ? 'ON' : 'OFF'), undefined, (error, data) => {
         if (!error) {
             callback(null, muteState);
         } else {
@@ -316,25 +209,12 @@ DenonTelnet.prototype.setMuteState = function(muteState, callback, zone) {
     });
 };
 
-
-
-/**
- Get the current volume of a zone.
- There is no MAIN ZONE Volue, its handled by the Mastervolume (MV)
- Telnet Command examples: MV10, Z215
- @param {defaultCallback} callback Function to be called when the command is run and data is returned
- @param {?string} zone NULL or ZM for MAIN ZONE, Z2 ... Zn for all others
- @example
- var mdt = new MarantzDenonTelnet('127.0.0.1');
- mdt.getVolume(function(error, data) {console.log('VOLUME of MAIN ZONE is: ' + data);}, 'ZM');
- // VOLUME of MAIN ZONE is: [0-100]
- */
-DenonTelnet.prototype.getVolume = function(callback, zone) {
+DenonTelnet.prototype.getVolume = function (zone, callback) {
 
     const commandPrefix = (!zone || (zone === 'ZM')) ? 'MV' : zone;
     const regexp = RegExp('(?:^|[\r])' + commandPrefix + '(\\d+)');
 
-    this.addCmdToQueue(commandPrefix + '?', (error, data) => {
+    this.addCmdToQueue(commandPrefix + '?', regexp, (error, data) => {
 
         if (!error) {
             const volume = this.parseSimpleResponse(data, regexp)
@@ -346,24 +226,10 @@ DenonTelnet.prototype.getVolume = function(callback, zone) {
         } else {
             callback(error);
         }
-    }, regexp);
+    });
 };
 
-
-
-/**
- Set the playback volume of a zone.
- There is no MAIN ZONE Volue, its handled by the Mastervolume (MV)
- Telnet Command examples: MV20, Z230, Z340
- @param {number} volume 0-100
- @param {defaultCallback} callback Function to be called when the command is run and data is returned
- @param {?string} zone NULL or ZM for MAIN ZONE, Z2 ... Zn for all others
- @example
- var mdt = new MarantzDenonTelnet('127.0.0.1');
- mdt.setVolume(30, function(error, data) {console.log('Set VOLUME of MAIN ZONE to 30.');}, 'ZM');
- // Set VOLUME of MAIN ZONE to 30.
- */
-DenonTelnet.prototype.setVolume = function(volume, callback, zone) {
+DenonTelnet.prototype.setVolume = function (volume, zone, callback) {
     const commandPrefix = (!zone || (zone === 'ZM')) ? 'MV' : zone;
     let vol = (volume * 10).toFixed(0);  //volume fix
 
@@ -372,7 +238,7 @@ DenonTelnet.prototype.setVolume = function(volume, callback, zone) {
     } else {
         vol = '' + vol;
     }
-    this.addCmdToQueue(commandPrefix + vol, (error, data) => {
+    this.addCmdToQueue(commandPrefix + vol, undefined, (error, data) => {
         if (!error) {
             callback(null, volume);
         } else {
@@ -381,23 +247,11 @@ DenonTelnet.prototype.setVolume = function(volume, callback, zone) {
     });
 };
 
-
-
-/**
- Returns the current power state of a zone.
- Telnet Command examples: PW?, Z2?, Z3?
- @param {defaultCallback} callback Function to be called when the command is run and data is returned
- @param {string} zone NULL or ZM for MAIN ZONE, Z2 ... Zn for all others
- @example
- var mdt = new MarantzDenonTelnet('127.0.0.1');
- mdt.getZonePowerState(function(error, data) {console.log('POWER state of ZONE3 is: ' + (data ? 'ON' : 'OFF'));}, 'Z3');
- // POWER state of ZONE3 is: [ON|OFF]
- */
-DenonTelnet.prototype.getZonePowerState = function(callback, zone) {
+DenonTelnet.prototype.getZonePowerState = function (zone, callback) {
     const commandPrefix = (!zone || (zone === 'ZM')) ? 'ZM' : zone;
     const regexp = RegExp('(?:^|[\r])' + commandPrefix + '(ON|OFF)');
 
-    this.addCmdToQueue(commandPrefix + '?', (error, data) => {
+    this.addCmdToQueue(commandPrefix + '?', regexp, (error, data) => {
 
 
         if (!error) {
@@ -410,26 +264,13 @@ DenonTelnet.prototype.getZonePowerState = function(callback, zone) {
         } else {
             callback(error);
         }
-    }, regexp);
+    });
 };
 
-
-
-/**
- Sets the power state of a zone.
- Telnet Command examples: PWON, PWSTANDBY, Z2ON, Z3OFF
- @param {boolean} powerState TRUE to power on
- @param {defaultCallback} callback Function to be called when the command is run and data is returned
- @param {string} zone NULL or ZM for MAIN ZONE, Z2 ... Zn for all others
- @example
- var mdt = new MarantzDenonTelnet('127.0.0.1');
- mdt.setZonePowerState(false, function(error, data) {console.log('Set POWER state of ZONE3 to OFF.');}, 'Z3');
- // Set POWER state of ZONE3 to OFF.
- */
-DenonTelnet.prototype.setZonePowerState = function(powerState, callback, zone) {
+DenonTelnet.prototype.setZonePowerState = function (powerState, zone, callback) {
     const commandPrefix = (!zone || (zone === 'ZM')) ? 'ZM' : zone;
 
-    this.addCmdToQueue(commandPrefix + (powerState ? 'ON' : 'OFF'), (error, data) => {
+    this.addCmdToQueue(commandPrefix + (powerState ? 'ON' : 'OFF'), undefined, (error, data) => {
         if (!error) {
             callback(null, powerState);
         } else {
@@ -438,9 +279,18 @@ DenonTelnet.prototype.setZonePowerState = function(powerState, callback, zone) {
     });
 };
 
-export default DenonTelnet
+//export as singleton to share instance between next api endpoints
+let denonTelnetInstance
+if (!global.denonTelnetInstance) {
+    console.log("no global denon. creating new one")
+    global.denonTelnetInstance = new DenonTelnet(DENON_IP)
+    denonTelnetInstance = global.denonTelnetInstance
+} else {
+    console.log("found global denon - using that")
+    denonTelnetInstance = global.denonTelnetInstance
+}
 
-
+export default denonTelnetInstance
 
 
 //

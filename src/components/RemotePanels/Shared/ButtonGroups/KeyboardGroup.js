@@ -1,4 +1,4 @@
-import {KEYSTROKE, REMOTE, URL_ENCODED_SYMBOLS} from "@/utilities/constants.js";
+import {KEYSTROKE, REMOTE, URL_ENCODED_SYMBOLS, PLATFORM } from "@/utilities/constants.js";
 import {useEffect, useRef, useState} from "react";
 import {Transition} from "@headlessui/react";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
@@ -59,9 +59,9 @@ function KeyboardGroup({ remote }) {
         } else if (remote === REMOTE.PC) {
             if (key === KEYSTROKE.KEYS.BACKSPACE) {
                 key = KEYSTROKE[remote].BACKSPACE
-            } else if (key === 'command') {
+            } else if (key === KEYSTROKE.KEYS.WIN_KEY) {
                 key = KEYSTROKE[remote].WIN_KEY
-            } else if (key === 'enter') {
+            } else if (key === KEYSTROKE.KEYS.ENTER) {
                 key = KEYSTROKE[remote].ENTER
             }
             sendKeystrokeToNutJS(key)
@@ -207,7 +207,10 @@ function KeyboardGroup({ remote }) {
                             ${ (inputExpanded ? "rounded-l-xl rounded-r-none bg-red-600" : "bg-green-700") } `}
                                 onClick={toggleInputExpanded}
                                 value={KEYSTROKE.PC.WIN_KEY}>
-                            { !inputExpanded &&
+                            { (!inputExpanded && PLATFORM === "MACOS") &&
+                                <FontAwesomeIcon icon={ faMagnifyingGlass } />
+                            }
+                            { (!inputExpanded && PLATFORM === "PC") &&
                                 <FontAwesomeIcon icon={ faWindows } />
                             }
                             { inputExpanded &&

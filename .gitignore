@@ -33,4 +33,5 @@ yarn-error.log*
 
 # SSL certificates
 /server/certificates
+/certificates
 

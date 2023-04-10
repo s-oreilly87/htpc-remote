@@ -17,17 +17,17 @@ function DenonBottomLeftButtons({ denonState, setDenonState }) {
         }))
 
         // Unless power state could be unknown, awaiting response is unnecessary and could be dropped for responsiveness
-        // For now it will change it, if response is unexpected
+        // For now it will change it back, if response is unexpected
         const response = await sendDenonCommand(event.currentTarget)
         if (response.error) {
             return console.error(response.error)
         }
 
-        let powerState = response.data === "ZMON"
+        let powerOn = response.data
 
         setDenonState(prevState => ({
             ...prevState,
-            powerOn: powerState ?? !prevState.powerOn
+            powerOn: powerOn ?? !prevState.powerOn
         }))
     }
     return (

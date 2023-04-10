@@ -4,12 +4,14 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "node server/main.js",
-    "build": "set NODE_ENV=production&&next build",
-    "start": "set NODE_ENV=production&&node server/main.js",
-    "lint": "next lint"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "proxy": "npx local-ssl-proxy --key ./certificates/remote-app-key.pem --cert ./certificates/remote-app-cert.pem --source 4000 --target 3000"
   },
   "dependencies": {
+    "@achingbrain/ssdp": "^4.0.1",
     "@fortawesome/fontawesome-svg-core": "^6.3.0",
     "@fortawesome/free-brands-svg-icons": "^6.3.0",
     "@fortawesome/free-solid-svg-icons": "^6.3.0",
@@ -22,9 +24,12 @@
     "express": "^4.18.2",
     "http-proxy-middleware": "^2.0.6",
     "ioredis": "^5.3.1",
+    "local-ssl-proxy": "^2.0.5",
     "lodash": "^4.17.21",
     "next": "13.2.3",
+    "node": "19.8.1",
     "node-gyp": "^9.3.1",
+    "node-ssdp": "^4.0.1",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-fiber-keep-alive": "^0.7.1",
@@ -32,6 +37,7 @@
     "react-screen-wake-lock": "^3.0.1",
     "socket.io": "^4.6.1",
     "telnet-stream": "^1.1.0",
+    "typescript": "^5.0.4",
     "xml2js": "^0.4.23"
   },
   "devDependencies": {

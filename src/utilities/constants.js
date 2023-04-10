@@ -1,11 +1,13 @@
-export const SERVER_IP = '192.168.1.227'
+export const PLATFORM = process.env.NEXT_PUBLIC_PLATFORM
+export const SERVER_IP = process.env.SERVER_IP
 export const DENON_IP = '192.168.1.101'
 export const ROKU_URL = 'http://192.168.1.102:8060'
 export const PROXY_URL = `https://${SERVER_IP}:4001`
 export const DENON_SERVER_URL = `https://${SERVER_IP}:4003`
 export const NUTJS_URL = `https://${SERVER_IP}:4004`
 export const EVENTGHOST_URL = `https://${SERVER_IP}:4005`
-export const DENON_HTTP_URL = `http://${DENON_IP}/goform/formiPhoneAppDirect.xml`
+export const DENON_HTTP_COMMAND_URL = 'goform/formiPhoneAppDirect.xml'
+export const DENON_HTTP_QUERY_URL = 'goform/formMainZone_MainZoneXml.xml'
 
 export const ROKU_POST_OPTIONS = {
     method: 'POST',
@@ -308,7 +310,8 @@ export const DENON_HTTP_COMMANDS = [
     KEYSTROKE.DENON.INFO,
     KEYSTROKE.DENON.OPTION,
     KEYSTROKE.DENON.VOL_UP,
-    KEYSTROKE.DENON.VOL_DOWN
+    KEYSTROKE.DENON.VOL_DOWN,
+    ...Object.values(DENON_INPUTS).map(input => input.value)
 ]
 
 const Constants = {
@@ -318,7 +321,7 @@ const Constants = {
     NUTJS_URL,
     DENON_IP,
     DENON_SERVER_URL,
-    DENON_HTTP_URL,
+    DENON_HTTP_URL: DENON_HTTP_COMMAND_URL,
     ROKU_POST_OPTIONS,
     REMOTE,
     REMOTE_INDEX,

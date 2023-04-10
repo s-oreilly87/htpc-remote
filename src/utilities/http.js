@@ -1,12 +1,12 @@
 import Constants, {
     DENON_HTTP_COMMANDS,
-    DENON_HTTP_URL,
+    DENON_HTTP_COMMAND_URL,
     DENON_SERVER_URL,
     EVENTGHOST_URL,
     NUTJS_URL,
     PROXY_URL,
     ROKU_POST_OPTIONS,
-    ROKU_URL
+    ROKU_URL, DENON_HTTP_QUERY_URL
 } from "@/utilities/constants.js";
 
 import {parseString} from "xml2js";
@@ -15,12 +15,12 @@ import {convertKebabToCamel} from "@/utilities/utils.js";
 
 // ########   Roku Control   ########
 export async function sendRokuQuery(query) {
-    return await fetch(`${PROXY_URL}/${ROKU_URL}/query/${query}`)
+    return await fetch(`api/roku/query/${query}`)
 }
 
 export async function fetchRokuDeviceInfo() {
     let data
-    const response = await fetch(`${Constants.PROXY_URL}/${Constants.ROKU_URL}/query/device-info`)
+    const response = await fetch(`api/roku/query/device-info`)
     if (200 !== response.status) {
         return {error: response.error}
     }
@@ -45,41 +45,41 @@ export async function fetchRokuDeviceInfo() {
 }
 
 export function sendRokuKeypress(button) {
-    fetch(`${PROXY_URL}/${ROKU_URL}/keypress/${button.value}`, ROKU_POST_OPTIONS)
+    fetch(`api/roku/keypress/${button.value}`, ROKU_POST_OPTIONS)
 }
 
 export function sendRokuKeydown(button) {
-    fetch(`${Constants.PROXY_URL}/${Constants.ROKU_URL}/keydown/${button.value}`, Constants.ROKU_POST_OPTIONS)
+    fetch(`api/roku/keydown/${button.value}`, ROKU_POST_OPTIONS)
 }
 
 export function sendRokuKeyup(button) {
-    fetch(`${Constants.PROXY_URL}/${Constants.ROKU_URL}/keyup/${button.value}`, Constants.ROKU_POST_OPTIONS)
+    fetch(`api/roku/keyup/${button.value}`, ROKU_POST_OPTIONS)
 }
 
 export function sendRokuLaunchCommand(button) {
-    fetch(`${PROXY_URL}/${ROKU_URL}/launch/${button.value}`, ROKU_POST_OPTIONS)
+    fetch(`api/roku/launch/${button.value}`, ROKU_POST_OPTIONS)
 }
 
 
 // ########   PC Control   ########
 export function sendEventToEventGhost(button, payload = "") {
-    fetch(`${EVENTGHOST_URL}?${button.value}${payload ? `&${payload}` : ""}`, { mode: "no-cors"})
+    fetch(`api/eventghost/?${button.value}${payload ? `&${payload}` : ""}`, { mode: "no-cors"})
 }
 
 export function sendOrientationToNutJS(type, x, y) {
-    fetch(`${NUTJS_URL}/${type}/${x}/${y}`, { mode: 'no-cors' })
+    fetch(`api/nutjs/${type}/${x}/${y}`, { mode: 'no-cors' })
 }
 
 export function sendClickToNutJS(button) {
-    fetch(`${NUTJS_URL}/${button}Click/`, { mode: 'no-cors' })
+    fetch(`api/nutjs/click/${button}`, { mode: 'no-cors' })
 }
 
 export function sendKeystrokeToNutJS(key) {
-    fetch(`${NUTJS_URL}/keystroke/${key}`, { mode: 'no-cors' })
+    fetch(`api/nutjs/keystroke/${key}`, { mode: 'no-cors' })
 }
 
 export function sendDisableCommandToNutJS() {
-    fetch(`${Constants.NUTJS_URL}/disable`, { mode: 'no-cors' })
+    fetch(`api/nutjs/disable`, { mode: 'no-cors' })
 }
 
 
@@ -89,12 +89,12 @@ export async function sendDenonCommand(button, path="command") {
 
     // If we dont need the return value, commands can be sent with HTTP request
     if (DENON_HTTP_COMMANDS.includes(command)) {
-        fetch(`${PROXY_URL}/${DENON_HTTP_URL}?${command}`, {mode: 'no-cors'})
+        fetch(`api/denon-http/command/${command}`,)
         return { msg: command + "sent with HTTP request!" }
     }
 
     // If we need the return value (or to toggle) then we must use telnet with Denon Server
-    const response = await fetch(`${PROXY_URL}/${DENON_SERVER_URL}/${path}/${command}`, { mode: 'cors' })
+    const response = await fetch(`api/denon/${path}/${command}`)
     const body = await response.json()
 
     if (200 === response.status) {
@@ -107,13 +107,13 @@ export async function sendDenonCommand(button, path="command") {
     }
 }
 
-export async function sendDenonQuery(command) {
-    return await sendDenonCommand({value: command}, "query")
+export async function sendDenonQuery(query) {
+    return await sendDenonCommand({value: query}, "query")
 }
 
 export async function fetchMainZoneData() {
     let data
-    const response = await fetch(`${Constants.PROXY_URL}/http://${Constants.DENON_IP}/goform/formMainZone_MainZoneXml.xml`, {mode: 'cors'})
+    const response = await fetch(`api/denon-http/queryMainZone`)
     if (200 !== response.status) {
         return {error: response.error}
     }

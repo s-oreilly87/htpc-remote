@@ -7,6 +7,7 @@ import BottomSection from "../Shared/BottomSection";
 import {useEffect} from "react";
 import {fetchRokuDeviceInfo} from "@/utilities/http.js";
 import Overlay from "@/components/UI/Overlay.js";
+import findRokuDevices from "@/utilities/roku-ssdp.js";
 
 
 const remote = Constants.REMOTE.ROKU
@@ -31,6 +32,11 @@ function RokuRemote({ rokuState, setRokuState }) {
         }))
     }
 
+    const searchForRoku = async () => {
+        const ipAddresses = await fetch('api/cors-proxy?url=http://192.168.1.102:8060/query/device-info')
+        console.log(ipAddresses)
+    }
+
     return (
         <>
             <Overlay show={!rokuState.powerOn} />
@@ -39,6 +45,7 @@ function RokuRemote({ rokuState, setRokuState }) {
                     <RokuChannels setPowerOn={setRokuPowerOn}/>
                     <HDMIInputs setPowerOn={setRokuPowerOn}/>
                     <MediaButtons remote={remote} />
+                    <button className="btn" onClick={searchForRoku}>Search For Roku</button>
                     <BackHomeOption
                     />
                 </div>
