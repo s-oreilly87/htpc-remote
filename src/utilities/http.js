@@ -18,6 +18,34 @@ export async function sendRokuQuery(query) {
     return await fetch(`api/roku/query/${query}`)
 }
 
+export async function fetchRokuChannels() {
+    const response = await fetch('api/roku/query/apps')
+
+    if (200 !== response.status) {
+        return {error: response.error}
+    }
+    const xmlText = await response.text()
+    let channels
+    parseString(xmlText,
+        {
+            explicitArray: false,
+            parseBooleans: true,
+            normalize: true
+        },
+        (error, results) => {
+            if (error) {
+                console.error("Error parsing xml response from Roku")
+            }
+            channels = {}
+
+            let apps = [...results.apps.app]
+
+            channels =  Object.values(apps).map((app) => {
+                return { id: app.$.id, label: app._ }
+            })
+        })
+    return channels ? { data: channels } : { error: "Parse error" }
+}
 export async function fetchRokuDeviceInfo() {
     let data
     const response = await fetch(`api/roku/query/device-info`)

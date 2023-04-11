@@ -142,10 +142,10 @@ export const ROKU_APPS = {
             id: "151908",
             label: "Roku"
         },
-        YOUTUBE: {
-            id: "837",
-            label: "Youtube"
-        },
+        // YOUTUBE: {
+        //     id: "837",
+        //     label: "Youtube"
+        // },
     },
     HDMI: {
         HDMI1: {

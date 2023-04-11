@@ -38,6 +38,12 @@
     .channel-button {
         @apply btn bg-gray-500 aspect-4/3 text-white hover:opacity-90 focus:ring-gray-700 ;
     }
+    .more-channels-button {
+        @apply channel-button bg-opacity-0
+    }
+    .extra-channel-button {
+        @apply channel-button bg-slate-800
+    }
 }
 
 @layer utilities {
