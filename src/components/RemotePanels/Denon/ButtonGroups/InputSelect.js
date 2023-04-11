@@ -17,7 +17,7 @@ const InputSelect = ({ denonState, setDenonState, updateDenonState }) => {
         if (response.error) {
             return console.log(response.error)
         }
-        setTimeout(updateDenonState, 1000)
+        setTimeout(updateDenonState, 2000)
     }
 
     return (
