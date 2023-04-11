@@ -282,11 +282,9 @@ DenonTelnet.prototype.setZonePowerState = function (powerState, zone, callback) 
 //export as singleton to share instance between next api endpoints
 let denonTelnetInstance
 if (!global.denonTelnetInstance) {
-    console.log("no global denon. creating new one")
     global.denonTelnetInstance = new DenonTelnet(DENON_IP)
     denonTelnetInstance = global.denonTelnetInstance
 } else {
-    console.log("found global denon - using that")
     denonTelnetInstance = global.denonTelnetInstance
 }
 

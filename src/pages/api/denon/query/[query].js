@@ -9,7 +9,6 @@ const cmdAsync = promisify(denon.cmd).bind(denon)
 
 export default async function queryHandler(req, res) {
     const {query} = req.query //toUpperCase() // toUpperCase() probably not necessary after the constants refactor
-    console.log(`QUERY: ${query}`)
     let data
     try {
         if (QUERY_NO_SPACE.includes(query)) {
