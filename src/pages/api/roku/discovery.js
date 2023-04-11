@@ -1,8 +1,6 @@
 import ssdp from '@achingbrain/ssdp'
 
-
-
-export default async function findRokuDevices(timeout) {
+export default async function handleDiscovery(timeout) {
 
     const bus = await ssdp()
 
