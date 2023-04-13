@@ -45,7 +45,7 @@ function RokuRemote({ rokuState, setRokuState }) {
                     <RokuChannels setPowerOn={setRokuPowerOn}/>
                     <HDMIInputs setPowerOn={setRokuPowerOn}/>
                     <MediaButtons remote={remote} />
-                    <button className="btn" onClick={searchForRoku}>Search For Roku</button>
+                    {/*<button className="btn" onClick={searchForRoku}>Search For Roku</button>*/}
                     <BackHomeOption
                     />
                 </div>
