@@ -2,10 +2,7 @@ export const PLATFORM = process.env.NEXT_PUBLIC_PLATFORM
 export const SERVER_IP = process.env.SERVER_IP
 export const DENON_IP = '192.168.1.101'
 export const ROKU_URL = 'http://192.168.1.102:8060'
-export const PROXY_URL = `https://${SERVER_IP}:4001`
-export const DENON_SERVER_URL = `https://${SERVER_IP}:4003`
-export const NUTJS_URL = `https://${SERVER_IP}:4004`
-export const EVENTGHOST_URL = `https://${SERVER_IP}:4005`
+export const EVENTGHOST_URL = `http://${SERVER_IP}:3005`
 export const DENON_HTTP_COMMAND_URL = 'goform/formiPhoneAppDirect.xml'
 export const DENON_HTTP_QUERY_URL = 'goform/formMainZone_MainZoneXml.xml'
 
@@ -107,10 +104,19 @@ export const KEYSTROKE = {
         BACKSPACE: "BACKSPACE",
         WIN_KEY: "WIN_KEY",
         ENTER: "ENTER",
+    },
+    KEY_COMBOS: {
+        MOVE_WINDOW: "KEYSTROKE_MOVE_WINDOW"
     }
 }
 
 export const SYSTEM_KEYS = ["Control", "Shift", "Alt", "CapsLock"] // Keys we dont want to send
+
+export const CLICK_TYPE = {
+    LEFT: "left",
+    RIGHT: 'right',
+    DOUBLE: 'double'
+}
 
 export const ROKU_APPS = {
     CHANNELS: {
@@ -264,12 +270,14 @@ export const DENON_STATE_DEFAULTS = {
     muteOn: false,
     input: "",
     soundMode: "",
+    soundModeLoading: false,
     dynComp: "",
     psDilOn: false,
     PSDIL: 0,  //needs to be int so it can be incremented
-    PSDYNEQ: "OFF",
+    psDynEqOn: false,
     PSREFLEV: "0",
-    PSDYNVOL: "OFF"
+    PSDYNVOL: "OFF",
+    cycleTimeout: null
 }
 
 export const ROKU_STATE_DEFAULTS = {
@@ -281,13 +289,18 @@ export const DOLBY_MODES = [
     "DOLBY_DIGITAL",
     "DOLBY_ATMOS",
 ]
+export const DTS_MODES = [
+    "DTS_NEURAL:X",
+    "DOLBY_DIGITAL_+_NEURAL:X",
+    "NEURAL:X"
+]
 
 export const DENON_SOUND_MODES = {
     NONE       : {label: "Select Sound Mode",   value: "placeholder", selectSurround: []},
     STEREO     : {label: "Stereo",              value: "MSSTEREO", selectSurround: ["STEREO"]},
     DOLBY      : {label: "Dolby Surround",      value: "MSDOLBY DIGITAL", selectSurround: DOLBY_MODES},
-    DTS        : {label: "DTS Neural:X",        value: "MSDTS SURROUND", selectSurround: ["DTS NEURAL:X"]},
-    MULTI      : {label: "Multi-Channel Stereo", value: "MSMCH STEREO", selectSurround: ["MULTI_CH_STEREO"]},
+    DTS        : {label: "DTS Neural:X",        value: "MSDTS SURROUND", selectSurround: DTS_MODES},
+    MULTI      : {label: "Multi-Ch Stereo", value: "MSMCH STEREO", selectSurround: ["MULTI_CH_STEREO"]},
     ROCK_ARENA : {label: "Rock Arena",          value: "MSROCK ARENA", selectSurround: ["ROCK_ARENA"]},
     JAZZ_CLUB  : {label: "Jazz Club",           value: "MSJAZZ CLUB", selectSurround: ["JAZZ_CLUB"]},
     MATRIX     : {label: "Matrix",              value: "MSMATRIX", selectSurround: ["MATRIX"]},
@@ -317,10 +330,7 @@ export const DENON_HTTP_COMMANDS = [
 const Constants = {
     EVENTGHOST_URL,
     ROKU_URL,
-    PROXY_URL,
-    NUTJS_URL,
     DENON_IP,
-    DENON_SERVER_URL,
     DENON_HTTP_URL: DENON_HTTP_COMMAND_URL,
     ROKU_POST_OPTIONS,
     REMOTE,
