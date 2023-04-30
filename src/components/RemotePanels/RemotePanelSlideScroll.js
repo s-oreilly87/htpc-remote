@@ -1,8 +1,8 @@
 import {REMOTE, REMOTE_INDEX} from "@/utilities/constants.js";
 import {KeepAlive} from "react-fiber-keep-alive";
-import PCRemote from "@/components/RemotePanels/PC/PCRemote";
-import RokuRemote from "@/components/RemotePanels/Roku/RokuRemote";
-import DenonRemote from "@/components/RemotePanels/Denon/DenonRemote";
+import PCRemotePanel from "@/components/RemotePanels/PC/PCRemotePanel";
+import RokuRemotePanel from "@/components/RemotePanels/Roku/RokuRemotePanel";
+import DenonRemotePanel from "@/components/RemotePanels/Denon/DenonRemotePanel";
 import SlideScrollTransition from "@/components/UI/SlideScrollTransition";
 
 function RemotePanel({
@@ -22,8 +22,8 @@ function RemotePanel({
                 selectedComponentIndex={ REMOTE_INDEX[selectedRemote] }
                 prevComponentIndex={ REMOTE_INDEX[prevRemote] }>
                 <KeepAlive name={ REMOTE.PC }>
-                    <PCRemote pcState={pcState}
-                              setPcState={setPcState}
+                    <PCRemotePanel pcState={pcState}
+                                   setPcState={setPcState}
                     />
                 </KeepAlive>
             </SlideScrollTransition>
@@ -33,8 +33,8 @@ function RemotePanel({
                 selectedComponentIndex={ REMOTE_INDEX[selectedRemote] }
                 prevComponentIndex={ REMOTE_INDEX[prevRemote] }>
                 <KeepAlive name={ REMOTE.ROKU }>
-                    <RokuRemote rokuState={rokuState}
-                                setRokuState={setRokuState}
+                    <RokuRemotePanel rokuState={rokuState}
+                                     setRokuState={setRokuState}
                     />
                 </KeepAlive>
             </SlideScrollTransition>
@@ -44,8 +44,8 @@ function RemotePanel({
                 selectedComponentIndex={ REMOTE_INDEX[selectedRemote] }
                 prevComponentIndex={ REMOTE_INDEX[prevRemote] }>
                 <KeepAlive name={ REMOTE.DENON }>
-                    <DenonRemote denonState={denonState}
-                                 setDenonState={setDenonState}
+                    <DenonRemotePanel denonState={denonState}
+                                      setDenonState={setDenonState}
                     />
                 </KeepAlive>
             </SlideScrollTransition>
