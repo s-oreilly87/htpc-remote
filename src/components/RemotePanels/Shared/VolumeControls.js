@@ -1,4 +1,4 @@
-import RemoteButton from "@/components/UI/RemoteButton";
+import KeypressButton from "@/components/UI/KeypressButton";
 import PressAndHoldButton from "@/components/UI/PressAndHoldButton";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faVolumeHigh, faVolumeLow, faVolumeXmark} from '@fortawesome/free-solid-svg-icons';
@@ -20,11 +20,11 @@ function VolumeControls({ remote }) {
                 </PressAndHoldButton>
             </div>
             <div className="h-1/4 flex place-content-center align-bottom">
-                <RemoteButton remote={ remote }
-                              className="btn bg-red-600 rounded-full aspect-square flex w-5/6 h-2/3 justify-center items-center"
-                              value={ KEYSTROKE[remote].MUTE }>
+                <KeypressButton remote={ remote }
+                                className="btn bg-red-600 rounded-full aspect-square flex w-5/6 h-2/3 justify-center items-center"
+                                value={ KEYSTROKE[remote].MUTE }>
                     <FontAwesomeIcon icon={ faVolumeXmark } />
-                </RemoteButton>
+                </KeypressButton>
             </div>
         </div>
     );
