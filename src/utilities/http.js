@@ -1,13 +1,4 @@
-import Constants, {
-    DENON_HTTP_COMMANDS,
-    DENON_HTTP_COMMAND_URL,
-    DENON_SERVER_URL,
-    EVENTGHOST_URL,
-    NUTJS_URL,
-    PROXY_URL,
-    ROKU_POST_OPTIONS,
-    ROKU_URL, DENON_HTTP_QUERY_URL
-} from "@/utilities/constants.js";
+import {DENON_HTTP_COMMANDS, ROKU_POST_OPTIONS,} from "@/utilities/constants.js";
 
 import {parseString} from "xml2js";
 import {convertKebabToCamel} from "@/utilities/utils.js";
@@ -90,16 +81,16 @@ export function sendRokuLaunchCommand(button) {
 
 
 // ########   PC Control   ########
-export function sendEventToEventGhost(button, payload = "") {
-    fetch(`api/eventghost/?${button.value}${payload ? `&${payload}` : ""}`, { mode: "no-cors"})
+export async function sendEventToEventGhost(button, payload = "") {
+    await fetch(`api/eventghost/${button.value}${payload ? `&${payload}` : ""}`)
 }
 
 export function sendOrientationToNutJS(type, x, y) {
     fetch(`api/nutjs/${type}/${x}/${y}`, { mode: 'no-cors' })
 }
 
-export function sendClickToNutJS(button) {
-    fetch(`api/nutjs/click/${button}`, { mode: 'no-cors' })
+export function sendClickToNutJS(type) {
+    fetch(`api/nutjs/click/${type}`, { mode: 'no-cors' })
 }
 
 export function sendKeystrokeToNutJS(key) {
