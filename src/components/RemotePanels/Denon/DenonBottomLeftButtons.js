@@ -1,5 +1,5 @@
 import Constants from "@/utilities/constants.js";
-import RemoteButton from "@/components/UI/RemoteButton";
+import KeypressButton from "@/components/UI/KeypressButton";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faPowerOff} from '@fortawesome/free-solid-svg-icons';
 import {sendDenonCommand} from "@/utilities/http";
@@ -32,17 +32,17 @@ function DenonBottomLeftButtons({ denonState, setDenonState }) {
     }
     return (
             <div className="flex flex-col menu-buttons justify-between w-5/6" >
-                <RemoteButton remote={ remote }
-                              className="btn bg-red-600 rounded-full aspect-square z-50"
-                              value={KEYSTROKE.DENON.POWER}
-                              onClick={ handleClickPowerButton }
+                <KeypressButton remote={ remote }
+                                className="btn bg-red-600 rounded-full aspect-square z-50"
+                                value={KEYSTROKE.DENON.POWER}
+                                onClick={ handleClickPowerButton }
                 >
                     <FontAwesomeIcon icon={faPowerOff} />
-                </RemoteButton>
-                <RemoteButton remote={ remote } className="btn-secondary" value={ KEYSTROKE.DENON.MENU_TOGGLE }>Menu</RemoteButton>
-                <RemoteButton remote={ remote } className="btn-secondary" value={ KEYSTROKE.DENON.OPTION }>Opt</RemoteButton>
-                <RemoteButton remote={ remote } className="btn-secondary" value={ KEYSTROKE.DENON.INFO }>Info</RemoteButton>
-                <RemoteButton remote={ remote } className="btn-secondary" value={ KEYSTROKE.DENON.BACK }>Back</RemoteButton>
+                </KeypressButton>
+                <KeypressButton remote={ remote } className="btn-secondary" value={ KEYSTROKE.DENON.MENU_TOGGLE }>Menu</KeypressButton>
+                <KeypressButton remote={ remote } className="btn-secondary" value={ KEYSTROKE.DENON.OPTION }>Opt</KeypressButton>
+                <KeypressButton remote={ remote } className="btn-secondary" value={ KEYSTROKE.DENON.INFO }>Info</KeypressButton>
+                <KeypressButton remote={ remote } className="btn-secondary" value={ KEYSTROKE.DENON.BACK }>Back</KeypressButton>
             </div>
     );
 }

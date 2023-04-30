@@ -1,12 +1,11 @@
 import {DENON_INPUTS, DENON_SOUND_MODES, REMOTE} from "@/utilities/constants.js";
-import InputSelect from "./ButtonGroups/InputSelect";
-import CycleSoundModes from "./ButtonGroups/CycleSoundModes";
-import SelectSoundMode from "./ButtonGroups/SelectSoundMode";
-import LevelsControl from "./ButtonGroups/LevelsControl";
+import InputButtons from "./InputButtons";
+import CycleSoundModeButtons from "./CycleSoundModeButtons";
+import SoundModeSelect from "./SoundModeSelect";
+import AdvancedVolumeControl from "./AdvancedVolumeControl";
 import BottomSection from "../Shared/BottomSection";
 import {fetchMainZoneData, sendDenonQuery} from "@/utilities/http"
 import {useEffect} from "react";
-import {toInteger} from "lodash/lang.js";
 import Overlay from "@/components/UI/Overlay.js";
 
 const remote = REMOTE.DENON
@@ -18,11 +17,15 @@ function DenonRemote({ denonState, setDenonState }) {
         updateDenonState()
     }, [])
 
-    const updateDenonState = () => {
-        updateDenonStateFromMainZoneQuery()
-        updateDenonStateFromFetchLevels()
+    const updateDenonState = async () => {
+        console.log('update denon state - setting laoding true')
+        setLoading(true)
+        await updateDenonStateFromMainZoneQuery()
+        await updateDenonStateFromFetchLevels()
+        setLoading(false)
     }
     const updateDenonStateFromMainZoneQuery = async () => {
+        setLoading(true)
         const response = await fetchMainZoneData()
 
         if (response.error) {
@@ -59,9 +62,11 @@ function DenonRemote({ denonState, setDenonState }) {
                 muteOn: data.mute === "ON",
                 soundMode: soundMode
             }))
+        setLoading(false)
     }
 
-    async function updateDenonStateFromFetchLevels() {
+    const updateDenonStateFromFetchLevels = async () => {
+        setLoading(true)
         const refLevResponse = await sendDenonQuery("PSREFLEV")
         if (refLevResponse.error) {
             console.error(refLevResponse.error)
@@ -93,12 +98,11 @@ function DenonRemote({ denonState, setDenonState }) {
             }))
 
             if (dialogueAdjustResponse.data[1]) {
-                setDialogueAdjustFromResponseValue(dialogueAdjustResponse.data[1].split(" ")[1])
+                parseAndSetDialogueAdjustLevel(dialogueAdjustResponse.data[1].split(" ")[1])
             } else {
                 console.error('for some reason didnt get 2 part PSDIL data. Heres what we got:')
                 console.error(dialogueAdjustResponse.data)
             }
-
         }
 
         const dynEqResponse = await sendDenonQuery("PSDYNEQ")
@@ -107,48 +111,69 @@ function DenonRemote({ denonState, setDenonState }) {
         } else {
             setDenonState(prevState => ({
                 ...prevState,
-                PSDYNEQ: dynEqResponse.data[0]
+                psDynEqOn: dynEqResponse.data[0].split(" ")[1] === "ON"
             }))
         }
+
+        setLoading(false)
     }
 
-    const setDialogueAdjustFromResponseValue = (responseValue) => {
+    const parseAndSetDialogueAdjustLevel = (responseValue) => {
         // 0.5 steps come in without the decimal
         if (responseValue.length === 3) {
-            responseValue = responseValue / 10
+            responseValue = parseFloat(responseValue) / 10
+        } else {
+            responseValue = parseFloat(responseValue)
         }
 
         // 50 is the new 0
         responseValue -= 50
         setDenonState(prevState => ({
             ...prevState,
-            PSDIL: toInteger(responseValue)
+            PSDIL: responseValue
         }))
     }
 
+    const setLoading = (bool) => {
+        setDenonState(prevState => ({
+                ...prevState,
+                loading: bool
+            })
+        )
+    }
+
+    const setSoundMode = (soundMode) => {
+        setDenonState(prevState => ({
+            ...prevState,
+            soundMode: soundMode,
+        }))
+    }
 
     return (
         <>
             <Overlay show={!denonState.powerOn} />
             <div id="denon-remote" className="absolute panel-height w-full p-3 flex flex-col justify-between">
-                <div className="flex flex-col gap-4 justify-between">
-                    <InputSelect denonState={ denonState }
-                                 setDenonState={setDenonState}
-                                 updateDenonState={ updateDenonState }
+                <div className="flex flex-col justify-between flex-grow pb-[15%]">
+                    <InputButtons denonState={ denonState }
+                                  setDenonState={ setDenonState }
+                                  updateDenonState={ updateDenonState }
                     />
-                    <CycleSoundModes
-                        setDenonState={ setDenonState }
-                        updateDenonState={ updateDenonState }
+                    <div className="flex flex-col gap-3">
+                        <SoundModeSelect
+                            denonState={ denonState }
+                            setDenonState={ setDenonState }
+                            updateDenonState = { updateDenonState }
+                        />
+                        <CycleSoundModeButtons
+                            denonState={ denonState }
+                            setDenonState={ setDenonState }
+                        />
+                    </div>
 
-                    />
-                    <SelectSoundMode
-                        denonState={ denonState }
-                        setDenonState={setDenonState}
-                    />
-                    <LevelsControl
+                    <AdvancedVolumeControl
                         denonState={ denonState }
                         setDenonState={ setDenonState }
-                        setDialogueAdjustFromResponseValue={setDialogueAdjustFromResponseValue}
+                        parseAndSetDialogueAdjustLevel={ parseAndSetDialogueAdjustLevel }
                     />
                 </div>
                 <div className="h-50 items-end">

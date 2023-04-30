@@ -4,8 +4,11 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faCheck, faChevronDown} from "@fortawesome/free-solid-svg-icons";
 import {sendDenonCommand} from "@/utilities/http";
 import {DENON_SOUND_MODES} from "@/utilities/constants.js";
+import LoadingSpinner from "@/components/UI/LoadingSpinner.js";
 
-const SelectSoundMode = ({ denonState, setDenonState }) => {
+import {dot_matrix} from "@/styles/fonts.js";
+
+const SelectSoundMode = ({ denonState, setDenonState, updateDenonState }) => {
     //TODO: update this component to use a similar pattern to AudioModeSelect and DisplayModeSelect
 
     const [selectedSoundMode, setSelectedSoundMode] = useState(DENON_SOUND_MODES.NONE)
@@ -14,7 +17,7 @@ const SelectSoundMode = ({ denonState, setDenonState }) => {
         if (denonState.soundMode) {
             setSelectedSoundMode(denonState.soundMode)
         }
-    }, [denonState.soundMode] )
+    }, [denonState.soundMode])
 
     const handleListBoxSelect = async (soundMode) => {
         setSelectedSoundMode(soundMode)
@@ -24,8 +27,9 @@ const SelectSoundMode = ({ denonState, setDenonState }) => {
         }))
         const response = await sendDenonCommand({ value: soundMode.value })
         if (response.error) {
-            console.error(response.error)
+            return console.error(response.error)
         }
+        updateDenonState()
     }
 
     return (
@@ -33,13 +37,20 @@ const SelectSoundMode = ({ denonState, setDenonState }) => {
             <Listbox value={ selectedSoundMode }
                      by="value"
                      onChange={handleListBoxSelect}>
-                <div className="relative mt-1 w-full">
-                    <Listbox.Button className="relative w-full cursor-default rounded-lg bg-slate-600 py-2 pl-3 pr-10 text-center shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm">
-                        <span className="block truncate text-white">{ selectedSoundMode.label }</span>
+                <div className="relative mt-1 w-full ">
+                    <Listbox.Button className="relative w-full h-[40px] cursor-default rounded-lg bg-slate-800 pt-1 pb-2 pl-3 pr-10 text-center shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm">
+                        { !denonState.loading &&
+                            <span className={`block truncate text-teal-400 text-xl ${dot_matrix.className} ${ denonState.cycleTimeout ? 'animate-pulse' : '' }`}>
+                                { selectedSoundMode.label}
+                            </span>
+                        }
+                        { denonState.loading &&
+                            <LoadingSpinner color={"teal-500"} size={"7"} />
+                        }
                         <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
                           <FontAwesomeIcon
                               icon={ faChevronDown }
-                              className="h-5 w-5 text-gray-800"
+                              className="h-5 w-5 text-teal-500"
                               aria-hidden="true"
                           />
                         </span>

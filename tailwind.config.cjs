@@ -19,6 +19,11 @@ module.exports = {
             xs: "420px",
             remote: "550px"
         },
+        fontFamily: {
+            inter: ['var(--font-inter)'],
+            roboto: ['var(--font-roboto-mono)'],
+            dotMatrix: ['var(--font-dot-matrix)']
+        }
     },
   },
   plugins: [],

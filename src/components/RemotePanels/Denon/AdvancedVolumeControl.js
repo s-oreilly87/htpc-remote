@@ -1,39 +1,29 @@
-import Constants from "@/utilities/constants.js";
-import RemoteButton from "@/components/UI/RemoteButton";
+import Constants, {DENON_SOUND_MODES} from "@/utilities/constants.js";
+import KeypressButton from "@/components/UI/KeypressButton";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faMinus, faPlus} from "@fortawesome/free-solid-svg-icons";
 import {useState} from "react";
 import {sendDenonCommand} from "@/utilities/http";
 import {buttonPress} from "@/utilities/utils.js";
+import Toggle from "@/components/UI/Toggle.js";
+import {dot_matrix} from "@/styles/fonts.js";
 
 const remote = Constants.REMOTE.DENON
-const LevelsControl = ({ denonState, setDenonState, setDialogueAdjustFromResponseValue }) => {
+
+const DIALOGUE_ADJUST_DISABLED_MODES = [
+    DENON_SOUND_MODES.STEREO,
+    DENON_SOUND_MODES.DIRECT,
+    DENON_SOUND_MODES.PURE_DIRECT
+]
+const AdvancedVolumeControl = ({ denonState, setDenonState, parseAndSetDialogueAdjustLevel }) => {
 
     const [buttonPressTimer, setButtonPressTimer] = useState()
 
     const handleClick = async (event) => {
-        const command = event.currentTarget.value
-        const splitCommand = command.split(" ")
+        const button = event.currentTarget
+        buttonPress(button, buttonPressTimer, setButtonPressTimer)
 
-        // Update denon state before sending command for responsiveness
-        // Maybe if telnet speed is sorted out this is unnecessary
-        //  - it will update again after response for accuracy
-        if (splitCommand[0] === "PSDIL") {
-            const increment = splitCommand[1] === "UP" ? 0.5 : -0.5
-            setDenonState(prevState => ({
-                ...prevState,
-                PSDIL: prevState.PSDIL + increment
-            }))
-        } else if (denonState.hasOwnProperty(splitCommand[0])) {
-            setDenonState(prevState => ({
-                ...prevState,
-                [splitCommand[0]] : splitCommand[1]
-            }))
-        } else {
-            console.info(`Unknown response type: ${command}`)
-        }
-
-        const response = await sendDenonCommand(event.target)
+        const response = await sendDenonCommand(button, "command")
         if (response.error) {
            return console.log(response.error)
         }
@@ -49,112 +39,148 @@ const LevelsControl = ({ denonState, setDenonState, setDialogueAdjustFromRespons
                     psDilOn: splitData[1] === "ON"
                 }))
             } else if (splitData[0] === "PSDIL") {
-                // PSDIL LEVEL needs special processing
-                 setDialogueAdjustFromResponseValue(splitData[1])
-            } else {
+                // PSDIL LEVEL needs to be parsed
+                 parseAndSetDialogueAdjustLevel(splitData[1])
+            } else if (denonState.hasOwnProperty(splitData[0])) {
                 setDenonState(prevState => ({
-                    ...prevState,
-                    [splitData[0]]: splitData[1]
-                }))
+                 ...prevState,
+                 [splitData[0]] : splitData[1]
+             }))
             }
         }
-        buttonPress(event.target, buttonPressTimer, setButtonPressTimer)
+    }
+
+    const handleDynEqToggle = (enabled) => {
+        setDenonState(prevState => ({
+            ...prevState,
+            psDynEqOn: enabled
+        }))
+       handleClick({ currentTarget: { value: `PSDYNEQ ${enabled ? 'ON' : 'OFF'}` } })
+    }
+
+    const handlePsDilToggle = (enabled) => {
+        setDenonState(prevState => ({
+            ...prevState,
+            psDilOn: enabled
+        }))
+        handleClick({ currentTarget: { value: `PSDIL ${enabled ? 'ON' : 'OFF'}` } })
     }
 
 
     return (
         <div className="flex gap-4 w-full max-h-18">
             <div className="flex flex-col w-1/3 items-center justify-center">
-                <label htmlFor="dialog-level" className="text-center"
-                       style={{color:'#00be9f'}}>
-                    Dialog Level<br />
-                       <span className="font-light font-mono">{
-                           denonState.PSDIL > 0 ?
-                               "+" + denonState.PSDIL.toFixed(1)
-                               : denonState.PSDIL.toFixed(1)
-                       }</span>
-                </label>
+                {/*<label htmlFor="dialog-level" className="text-center"*/}
+                {/*       style={{color:'#00be9f'}}>*/}
+                {/*    Dialog Level Adjust<br />*/}
+                {/*    */}
+                {/*    */}
+                {/*       */}
+                {/*</label>*/}
 
-                <div id="dialog-level" className="flex w-full p-2 space-x-1" role="group">
-                    <RemoteButton remote={Constants.REMOTE.DENON}
-                                  className="btn-secondary w-1/2 items-center justify-center"
-                                  value="PSDIL DOWN"
-                                  onClick={handleClick}>
+                <Toggle label={'Dialogue Adjust'}
+                        labelColor={'#00be9f'}
+                        labelPos={"above"}
+                        color={'teal-500'}
+                        enabled={denonState.psDilOn && !DIALOGUE_ADJUST_DISABLED_MODES.includes(denonState.soundMode)}
+                        onToggle={ handlePsDilToggle }
+                        disabled={DIALOGUE_ADJUST_DISABLED_MODES.includes(denonState.soundMode)}
+                />
+
+                <div id="dialog-level" className={`flex w-full p-2 space-x-1 ${denonState.psDilOn && !DIALOGUE_ADJUST_DISABLED_MODES.includes(denonState.soundMode) ? 'opacity:100' : 'opacity-0'} transition-all-500`} role="group">
+                    <KeypressButton remote={Constants.REMOTE.DENON}
+                                    className="btn-secondary w-1/3 items-center justify-center"
+                                    value="PSDIL DOWN"
+                                    onClick={handleClick}>
                         <FontAwesomeIcon icon={faMinus} />
-                    </RemoteButton>
-                    <RemoteButton remote={Constants.REMOTE.DENON}
-                                  className="btn-secondary w-1/2 items-center justify-center"
-                                  value="PSDIL UP"
-                                  onClick={handleClick}>
+                    </KeypressButton>
+                    <div className={"flex w-1/3 justify-center items-center"}>
+                        <span className={`text-teal-500 ${dot_matrix.className} ${ denonState.loading ? 'opacity-50' : '' }`}>
+                            {denonState.PSDIL > 0
+                                ? "+" + denonState.PSDIL.toFixed(1)
+                                : denonState.PSDIL.toFixed(1)}
+                        </span>
+                    </div>
+
+                    <KeypressButton remote={Constants.REMOTE.DENON}
+                                    className="btn-secondary w-1/3 items-center justify-center"
+                                    value="PSDIL UP"
+                                    onClick={handleClick}>
                         <FontAwesomeIcon icon={faPlus} />
-                    </RemoteButton>
+                    </KeypressButton>
                 </div>
             </div>
 
-            <div className="flex flex-col w-2/3 justify-end">
-                <div className="flex flex-col justify-center items-center ">
-                    <label htmlFor="dynamic-eq" className="text-center"
-                           style={{color:'#00be9f', width:'80%', paddingBottom:'5px'}}>Dynamic EQ</label>
-                    <div id="dynamic-eq" className="flex" role="group">
-                        <RemoteButton remote={ remote }
-                                      className={denonState.PSREFLEV === "0" ? 'btn-primary-denon' : 'btn-secondary'}
-                                      value="PSREFLEV 0"
-                                      onClick={handleClick}>
-                            0db
-                        </RemoteButton>
-                        <RemoteButton remote={ remote }
-                                      className={denonState.PSREFLEV === "5" ? 'btn-primary-denon' : 'btn-secondary'}
-                                      value="PSREFLEV 5"
-                                      onClick={handleClick}>
-                            5db
-                        </RemoteButton>
-                        <RemoteButton remote={ remote }
-                                      className={denonState.PSREFLEV === "10" ? 'btn-primary-denon' : 'btn-secondary'}
-                                      value="PSREFLEV 10"
-                                      onClick={handleClick}>
-                            10db
-                        </RemoteButton>
-                        <RemoteButton remote={ remote }
-                                      className={denonState.PSREFLEV === "15" ? 'btn-primary-denon' : 'btn-secondary'}
-                                      value="PSREFLEV 15"
-                                      onClick={handleClick}>
-                            15db
-                        </RemoteButton>
+            <div className="flex flex-col gap-3 w-2/3 justify-end">
+                <div className="flex flex-col gap-2 justify-center items-center ">
+                    <label htmlFor="dynamic-volume" className="text-center"
+                           style={{color:'#00be9f'}}>Dynamic Volume</label>
+
+                    <div id="dynamic-volume" className="flex" role="group">
+                        <KeypressButton remote={ remote }
+                                        className={`${denonState.PSDYNVOL === "OFF" ? (denonState.loading ? 'btn-primary-denon bg-teal-700' : 'btn-primary-denon') : 'btn-secondary'} \
+                                            w-1/4 items-center justify-center`}
+                                        value="PSDYNVOL OFF"
+                                        onClick={handleClick}
+                                        disabled={denonState.loading}>
+                            Off
+                        </KeypressButton>
+                        <KeypressButton remote={ remote }
+                                        className={`${denonState.PSDYNVOL === "LIT" ? (denonState.loading ? 'btn-primary-denon bg-teal-700' : 'btn-primary-denon') : 'btn-secondary'} \
+                                            ${denonState.loading ? 'animation-pulse' : ''} w-1/4 items-center justify-center`}
+                                        value="PSDYNVOL LIT"
+                                        onClick={handleClick}>
+                            Low
+                        </KeypressButton>
+                        <KeypressButton remote={ remote }
+                                        className={`${denonState.PSDYNVOL === "MED" ? (denonState.loading ? 'btn-primary-denon bg-teal-700' : 'btn-primary-denon') : 'btn-secondary'} \
+                                            ${denonState.loading ? 'animation-pulse' : ''} w-1/4 items-center justify-center`}
+                                        value="PSDYNVOL MED"
+                                        onClick={handleClick}>
+                            Med
+                        </KeypressButton>
+                        <KeypressButton remote={ remote }
+                                        className={`${denonState.PSDYNVOL === "HEV" ? (denonState.loading ? 'btn-primary-denon bg-teal-700' : 'btn-primary-denon') : 'btn-secondary'} \
+                                            ${denonState.loading ? 'animation-pulse' : ''} w-1/4 items-center justify-center`}
+                                        value="PSDYNVOL HEV"
+                                        onClick={handleClick}>
+                            High
+                        </KeypressButton>
                     </div>
                 </div>
 
-                <div className="flex flex-col justify-center items-center ">
-                    <label htmlFor="dynamic-volume" className="text-center"
-                           style={{color:'#00be9f'}}>Dynamic Volume</label>
-                    <div id="dynamic-volume" className="flex" role="group">
-                        <RemoteButton remote={ remote }
-                                      className={(denonState.PSDYNVOL === "OFF" ? 'btn-primary-denon' : 'btn-secondary')
-                                          + ' w-1/2 items-center justify-center'}
-                                      value="PSDYNVOL OFF"
-                                      onClick={handleClick}>
-                            Off
-                        </RemoteButton>
-                        <RemoteButton remote={ remote }
-                                      className={(denonState.PSDYNVOL === "LIT" ? 'btn-primary-denon' : 'btn-secondary')
-                                          + ' w-1/2 items-center justify-center'}
-                                      value="PSDYNVOL LIT"
-                                      onClick={handleClick}>
-                            Low
-                        </RemoteButton>
-                        <RemoteButton remote={ remote }
-                                      className={(denonState.PSDYNVOL === "MED" ? 'btn-primary-denon' : 'btn-secondary')
-                                          + ' w-1/2 items-center justify-center'}
-                                      value="PSDYNVOL MED"
-                                      onClick={handleClick}>
-                            Med
-                        </RemoteButton>
-                        <RemoteButton remote={ remote }
-                                      className={(denonState.PSDYNVOL === "HEV" ? 'btn-primary-denon' : 'btn-secondary')
-                                          + ' w-1/2 items-center justify-center'}
-                                      value="PSDYNVOL HEV"
-                                      onClick={handleClick}>
-                            High
-                        </RemoteButton>
+                <div className="flex flex-col gap-2 justify-center items-center ">
+                    <Toggle label={'Dynamic EQ'}
+                            labelColor={'#00be9f'}
+                            color={'teal-500'}
+                            enabled={denonState.psDynEqOn}
+                            onToggle={ handleDynEqToggle }
+                    />
+                    <div id="dynamic-eq" className={`flex ${denonState.psDynEqOn ? 'opacity-100' : 'opacity-0'} transition-all-500`} role="group">
+                        <KeypressButton remote={ remote }
+                                        className={`w-1/4 ${denonState.PSREFLEV === "0" ? 'btn-primary-denon' : 'btn-secondary'} ${denonState.loading ? 'animation-pulse' : ''} `}
+                                        value="PSREFLEV 0"
+                                        onClick={handleClick}>
+                            0db
+                        </KeypressButton>
+                        <KeypressButton remote={ remote }
+                                        className={`w-1/4 ${denonState.PSREFLEV === "5" ? 'btn-primary-denon' : 'btn-secondary'} ${denonState.loading ? 'animation-pulse' : ''}`}
+                                        value="PSREFLEV 5"
+                                        onClick={handleClick}>
+                            5db
+                        </KeypressButton>
+                        <KeypressButton remote={ remote }
+                                        className={`w-1/4 ${denonState.PSREFLEV === "10" ? 'btn-primary-denon' : 'btn-secondary'} ${denonState.loading ? 'animation-pulse' : ''}`}
+                                        value="PSREFLEV 10"
+                                        onClick={handleClick}>
+                            10db
+                        </KeypressButton>
+                        <KeypressButton remote={ remote }
+                                        className={`w-1/4 ${denonState.PSREFLEV === "15" ? 'btn-primary-denon' : 'btn-secondary'} ${denonState.loading ? 'animation-pulse' : ''}`}
+                                        value="PSREFLEV 15"
+                                        onClick={handleClick}>
+                            15db
+                        </KeypressButton>
                     </div>
                 </div>
             </div>
@@ -163,4 +189,4 @@ const LevelsControl = ({ denonState, setDenonState, setDialogueAdjustFromRespons
     );
 }
 
-export default LevelsControl;
+export default AdvancedVolumeControl;
