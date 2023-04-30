@@ -18,7 +18,8 @@ const nutKeyMap = {
     [KEYSTROKE.PC.REWIND]: Key.Left,
     [KEYSTROKE.PC.PLAY]: Key.AudioPlay,
     [KEYSTROKE.PC.FFWD]: Key.Right,
-    [KEYSTROKE.PC.NEXT]: Key.AudioNext
+    [KEYSTROKE.PC.NEXT]: Key.AudioNext,
+    [KEYSTROKE.KEY_COMBOS.MOVE_WINDOW]: [Key.LeftWin, Key.LeftShift, Key.Left]
 }
 if (PLATFORM === "MACOS") {
     nutKeyMap[KEYSTROKE.PC.WIN_KEY] = [Key.LeftSuper, Key.Space]
@@ -27,7 +28,8 @@ if (PLATFORM === "MACOS") {
 keyboard.config.autoDelayMs = 50
 
 export default async function handleKeystroke(req, res) {
-    let {key} = req.query   //.toUpperCase() //probably unnecessary with constants refactor
+    let {key} = req.query
+
     if (key.length > 1) {
         if (nutKeyMap.hasOwnProperty(key)) {
             key = nutKeyMap[key]
@@ -37,7 +39,13 @@ export default async function handleKeystroke(req, res) {
     }
 
     if (Array.isArray(key)) {
-        await keyboard.type(...key)
+        // nutJS pressKey(key[]) isnt working so doing it manually
+        for (const each of key) {
+            await keyboard.pressKey(each)
+        }
+        for (const each of key) {
+            await keyboard.releaseKey(each)
+        }
     } else {
         await keyboard.type(key)
     }
