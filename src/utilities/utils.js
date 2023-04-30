@@ -34,7 +34,7 @@ export function sleep(ms) {
 }
 
 export function buttonPress(button, buttonPressTimer, setButtonPressTimer) {
-    if (!button instanceof HTMLButtonElement) {
+    if (! (button instanceof HTMLButtonElement)) {
         return   // not a real button, just made a dummy object to send a request
     }
 
@@ -47,6 +47,7 @@ export function buttonPress(button, buttonPressTimer, setButtonPressTimer) {
 
     setButtonPressTimer(setTimeout(() => {
         button.classList.remove('text-blue-400')
+
         button.blur()
     }, 200, button))
 }
