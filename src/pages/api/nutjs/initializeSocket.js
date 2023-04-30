@@ -1,11 +1,14 @@
+import {Server} from 'socket.io'
 import {mouse, Point, screen, straightTo} from "@nut-tree/nut-js";
 import {getNutState, setNutState} from "@/api-modules/nutjs/nut-state.js";
 
+
+let busy = false
 async function initializeAirmouse(x, y) {
     const screenSize = await getDisplaySize()
     const centeredPosition = {
-            x: Math.floor(screenSize.width / 2),
-            y: Math.floor(screenSize.height / 2)
+        x: Math.floor(screenSize.width / 2),
+        y: Math.floor(screenSize.height / 2)
     }
 
     //console.log(`NUTJS: Moving mouse to centre: ${centeredPosition.x},${centeredPosition.y}`)
@@ -84,34 +87,62 @@ async function getNewMousePos(x, y) {
     return newMousePos
 }
 
-export default async function handleOrientation(req, res) {
-    const {orientation} = req.query   //.toUpperCase() //probably unnecessary with constants refactor
-    const x = parseFloat(orientation[0])
-    const y = parseFloat(orientation[1])
+async function handleOrientation(orientation) {
+    if (busy) {return}
+    busy = true
+    if (!orientation.hasOwnProperty('x') || !orientation.hasOwnProperty('y')) {
+        console.log('not an orientation!')
+        busy = false
+        return //res.status(500).send('not an orientation')
+    }
+
+    const x = parseFloat(orientation.x)
+    const y = parseFloat(orientation.y)
     const nutState = getNutState()
     // if its the first request, initialize (set default position, and move cursor to centre)
     if (!nutState.isInitialized) {
         if (nutState.awaitingInitialization) {
-            return res.send(" ... awaiting initialization ...")
+            busy = false
+            return //res.send(" ... awaiting initialization ...")
         }
 
         setNutState({awaitingInitialization: true})
         await initializeAirmouse(x, y)
-
-        return res.send("Initialization Complete")
+        busy = false
+        return //res.send("Initialization Complete")
     }
 
     if (!x || !y) {
-        return res.send("Bad orientation. Use '/api/nutjs/orientation/x :float/y :float'")
+        return //res.send("Bad orientation. Use '/api/nutjs/orientation/x :float/y :float'")
     }
 
     const newMousePos = await getNewMousePos(x, y)
 
     await mouse.move(straightTo(new Point(newMousePos.x, newMousePos.y)))
-
-    res.send(`Mouse moved to x: ${newMousePos.x}, y: ${newMousePos.y}`)
+    busy = false
+    //res.send(`Mouse moved to x: ${newMousePos.x}, y: ${newMousePos.y}`)
 }
 
+export default function handleInitializeSocket(req, res) {
+    if (res.socket.server.io) {
+        console.log('Socket is already running')
+        res.send("Socket already running")
+    } else {
+        console.log('Socket is initializing . . .')
+        const io = new Server(res.socket.server)
+        res.socket.server.io = io
+
+        io.on('connection', socket => {
+            console.log('socket connected!')
+            socket.on('orientation', orientation => {
+                handleOrientation(orientation)
+            })
+        })
+
+        res.send("Socket created")
+    }
+
+}
 
 // Function to find the angle for lerping
 

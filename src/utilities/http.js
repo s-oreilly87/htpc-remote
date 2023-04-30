@@ -85,10 +85,6 @@ export async function sendEventToEventGhost(button, payload = "") {
     await fetch(`api/eventghost/${button.value}${payload ? `&${payload}` : ""}`)
 }
 
-export function sendOrientationToNutJS(type, x, y) {
-    fetch(`api/nutjs/${type}/${x}/${y}`, { mode: 'no-cors' })
-}
-
 export function sendClickToNutJS(type) {
     fetch(`api/nutjs/click/${type}`, { mode: 'no-cors' })
 }

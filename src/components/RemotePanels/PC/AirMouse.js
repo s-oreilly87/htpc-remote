@@ -6,9 +6,12 @@ import {faLocationCrosshairs} from "@fortawesome/free-solid-svg-icons";
 import {hasRelativeOrientationSensor,} from "@/utilities/sensors";
 import AirMouseCalibrationModal from "@/components/RemotePanels/PC/AirMouseCalibrationModal";
 import RelativeOrientationSensor from "@/components/Sensors/RelativeOrientationSensor";
-import {sendClickToNutJS, sendDisableCommandToNutJS, sendOrientationToNutJS} from "@/utilities/http.js";
+import io from 'socket.io-client'
+import {sendClickToNutJS, sendDisableCommandToNutJS} from "@/utilities/http.js";
+import {CLICK_TYPE} from "@/utilities/constants.js";
 
 const AirMouse = () => {
+    const [socket, setSocket] = useState(io)
     const [enabled, setEnabled] = useState(false)
     const [hasRelOrientationSensor, setHasRelOrientationSensor] = useState(false)
     const [showCalibration, setShowCalibration] = useState(false)
@@ -43,33 +46,54 @@ const AirMouse = () => {
         if (prevOrientation) {
             const deltaX = prevOrientation.quaternion[2] - orientation.quaternion[2]
             const deltaY = prevOrientation.quaternion[0] - orientation.quaternion[0]
-            if (Math.abs(deltaX) > 0.0001 || Math.abs(deltaY) > 0.0005) {
-                sendOrientationToNutJS('orientation', orientation.quaternion[2], orientation.quaternion[0])
+            if (Math.abs(deltaX) > 0.00025 || Math.abs(deltaY) > 0.00025) {
+                socket.emit('orientation', { x: orientation.quaternion[2], y: orientation.quaternion[0] })
             }
         }
     }
 
+    const initializeSocket = async () => {
+        await fetch('/api/nutjs/initializeSocket')
+        const newSocket = io()
+        socket.on('connect', () => {
+            console.log('Socket connected')
+        })
+        setSocket(newSocket)
+    }
+
+    const closeSocket = async () => {
+        if (socket) {socket.close()}
+    }
+
     const handleEnable = (isEnabled) => {
-        if (!isEnabled) {
+        // Create websocket connection
+        if (isEnabled) {
+            initializeSocket()
+        } else {
+            closeSocket()
             sendDisableCommandToNutJS()
         }
         setEnabled(isEnabled)
     }
 
     const handleLeftClick = () => {
-        sendClickToNutJS('left')
+        sendClickToNutJS(CLICK_TYPE.LEFT)
     }
 
     const handleRightClick = () => {
-        sendClickToNutJS('right')
+        sendClickToNutJS(CLICK_TYPE.RIGHT)
+    }
+
+    const handleDoubleClick = () => {
+        sendClickToNutJS(CLICK_TYPE.DOUBLE)
     }
 
     const handleSetTopLeft = () => {
-        sendOrientationToNutJS('setTopLeft', currentOrientation.current.quaternion[2], currentOrientation.current.quaternion[0])
+        socket.emit('setTopLeft', { x: currentOrientation.current.quaternion[2], y: currentOrientation.current.quaternion[0] })
     }
 
     const handleSetBottomRight = () => {
-        sendOrientationToNutJS('setBottomRight', currentOrientation.current.quaternion[2], currentOrientation.current.quaternion[0])
+        socket.emit('setBottomRight', { x: currentOrientation.current.quaternion[2], y: currentOrientation.current.quaternion[0] })
     }
 
     return(
@@ -91,7 +115,7 @@ const AirMouse = () => {
                     <div className={"flex gap-3 mx-auto self-end"}>
 
                         { enabled &&
-                            <button className={"btn px-10 py-6 bg-gray-500"} onClick={ handleLeftClick }>L</button>
+                            <button className={"btn px-10 py-6 bg-gray-500"} onClick={ handleLeftClick } onDoubleClick={handleDoubleClick}>L</button>
                         }
 
                         <div className={"flex flex-col items-center gap-2"}>
