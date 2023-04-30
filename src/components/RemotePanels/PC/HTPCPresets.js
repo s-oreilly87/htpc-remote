@@ -37,17 +37,17 @@ function AudioVideoPresets() {
     const handleClick = async (event) => {
         const preset = presetToEffectsMap[event.currentTarget.value]
 
-        sendEventToEventGhost(event.currentTarget)
-        setSelectedAudioMode(preset.audioMode)
-        setSelectedDisplayMode(preset.displayMode)
-
         if (preset.rokuApp) {
             sendRokuLaunchCommand({value: preset.rokuApp.id})
         }
 
-        setTimeout(() => {
-            sendDenonCommand({ value: preset.audioMode.denonCmd })
-        }, 1000)
+        setSelectedAudioMode(preset.audioMode)
+        setSelectedDisplayMode(preset.displayMode)
+        sendEventToEventGhost(event.currentTarget).then(() => {
+            setTimeout(() => {
+                sendDenonCommand({ value: preset.audioMode.denonCmd })
+            }, 3000)
+        })
     }
 
     return (
