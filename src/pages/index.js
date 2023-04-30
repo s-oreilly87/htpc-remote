@@ -5,7 +5,8 @@ import {getKeyByValue, usePrevious} from "@/utilities/utils";
 import Head from "next/head";
 import SwipeDetector from "@/components/UI/SwipeDetector";
 import Navbar from "@/components/UI/Navbar";
-import RemotePanel from "@/components/RemotePanels/RemotePanel";
+import RemotePanelSlideScroll from "@/components/RemotePanels/RemotePanelSlideScroll.js";
+import {archivo_narrow} from "@/styles/fonts.js";
 
 const App = () => {
 
@@ -28,10 +29,6 @@ const App = () => {
     useEffect(() => {
         setIsClient(true);
     }, []);
-
-
-
-
 
     let currentlySelectedRemote = useRef();
     const prevRemote = usePrevious(selectedRemote);
@@ -73,11 +70,11 @@ const App = () => {
                             <link rel="icon" href="/favicon.ico" />
                         </Head>
                         <SwipeDetector onSwipe={ handleSwipe } />
-                            <div className="flex flex-col ">
+                            <div className="flex flex-col">
                                 <Navbar className="fixed top-0 w-screen"
                                         onClickHandler={handleSelectRemote}
                                         selectedRemote={selectedRemote} />
-                                <RemotePanel className="mx-auto min-w-[330px] max-w-[550px] place-content-center w-full mt-16"
+                                <RemotePanelSlideScroll className="mx-auto min-w-[330px] max-w-[550px] place-content-center w-full mt-16"
                                              selectedRemote={selectedRemote}
                                              prevRemote={prevRemote}
                                              denonState={denonState}

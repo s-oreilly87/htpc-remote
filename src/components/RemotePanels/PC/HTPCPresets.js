@@ -1,5 +1,5 @@
 import {AUDIO_MODES_FOR_SELECT, DISPLAY_MODES_FOR_SELECT, REMOTE, ROKU_APPS} from "@/utilities/constants.js";
-import RemoteButton from "@/components/UI/RemoteButton";
+import KeypressButton from "@/components/UI/KeypressButton";
 import CustomModesCollapse from "./CustomModesCollapse";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faDesktop, faTv} from "@fortawesome/free-solid-svg-icons";
@@ -53,38 +53,38 @@ function AudioVideoPresets() {
     return (
         <div className="flex flex-col gap-2">
             <div className="flex justify-around gap-2">
-                <RemoteButton remote={ remote }
-                              id="preset-pc-stereo"
-                              className="btn btn-primary-pc w-1/4 flex flex-col justify-center items-center"
-                              value="presetPCStereo"
-                              onClick={ handleClick }>
+                <KeypressButton remote={ remote }
+                                id="preset-pc-stereo"
+                                className="btn btn-primary-pc w-1/4 flex flex-col justify-center items-center"
+                                value="presetPCStereo"
+                                onClick={ handleClick }>
                     <FontAwesomeIcon icon={ faDesktop } className="h-6 w-6" />
                     PC<br/>Stereo
-                </RemoteButton>
-                <RemoteButton remote={ remote }
-                              id="preset-pc-surround"
-                              className="btn btn-primary-pc w-1/4 flex flex-col justify-center items-center"
-                              value="presetPCSurround"
-                              onClick={ handleClick }>
+                </KeypressButton>
+                <KeypressButton remote={ remote }
+                                id="preset-pc-surround"
+                                className="btn btn-primary-pc w-1/4 flex flex-col justify-center items-center"
+                                value="presetPCSurround"
+                                onClick={ handleClick }>
                     <FontAwesomeIcon icon={ faDesktop } className="h-6 w-6" />
                     PC<br/>Dolby
-                </RemoteButton>
-                <RemoteButton remote={ remote }
-                              id="preset-tv-4k"
-                              className="btn btn-primary-pc w-1/4 flex flex-col justify-center items-center"
-                              value="presetTV4K"
-                              onClick={ handleClick }>
+                </KeypressButton>
+                <KeypressButton remote={ remote }
+                                id="preset-tv-4k"
+                                className="btn btn-primary-pc w-1/4 flex flex-col justify-center items-center"
+                                value="presetTV4K"
+                                onClick={ handleClick }>
                     <FontAwesomeIcon icon={ faTv } className="h-8 w-8" />
                     4K60<br/>Atmos
-                </RemoteButton>
-                <RemoteButton remote={ remote }
-                              id="preset-tv-1440"
-                              className="btn btn-primary-pc w-1/4 flex flex-col justify-center items-center"
-                              value="presetTV1440"
-                              onClick={ handleClick }>
+                </KeypressButton>
+                <KeypressButton remote={ remote }
+                                id="preset-tv-1440"
+                                className="btn btn-primary-pc w-1/4 flex flex-col justify-center items-center"
+                                value="presetTV1440"
+                                onClick={ handleClick }>
                     <FontAwesomeIcon icon={ faTv } className="h-8 w-8" />
                     1440p120<br/>Atmos
-                </RemoteButton>
+                </KeypressButton>
             </div>
             <CustomModesCollapse selectedAudioMode={ selectedAudioMode }
                                  setSelectedAudioMode={ setSelectedAudioMode }

@@ -1,5 +1,5 @@
 import {DENON_INPUTS, REMOTE} from "@/utilities/constants.js";
-import RemoteButton from "@/components/UI/RemoteButton";
+import KeypressButton from "@/components/UI/KeypressButton";
 import {sendDenonCommand} from "@/utilities/http";
 
 const InputSelect = ({ denonState, setDenonState, updateDenonState }) => {
@@ -24,14 +24,14 @@ const InputSelect = ({ denonState, setDenonState, updateDenonState }) => {
         <div id="avr-inputs" className="w-full flex place-content-center gap-2">
             <div className="grid grid-cols-3 grid-rows-2 gap-2 w-full">
                 {Object.values(DENON_INPUTS).map(input => (
-                    <RemoteButton
+                    <KeypressButton
                             remote={REMOTE.DENON}
                             key={input.value}
                             className={`btn z-50 ${denonState.input.value === input.value ? 'btn-primary-denon' : 'btn-secondary'}`}
                             value={input.value}
                             onClick={ handleClick }>
                         { input.label }
-                    </RemoteButton>
+                    </KeypressButton>
                 ))
                 }
             </div>

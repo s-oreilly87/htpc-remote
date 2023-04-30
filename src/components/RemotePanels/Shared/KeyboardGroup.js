@@ -1,10 +1,10 @@
-import {KEYSTROKE, REMOTE, URL_ENCODED_SYMBOLS, PLATFORM } from "@/utilities/constants.js";
+import {KEYSTROKE, PLATFORM, REMOTE, URL_ENCODED_SYMBOLS} from "@/utilities/constants.js";
 import {useEffect, useRef, useState} from "react";
 import {Transition} from "@headlessui/react";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faKeyboard, faMagnifyingGlass, faXmark} from '@fortawesome/free-solid-svg-icons'
 import {faWindows} from "@fortawesome/free-brands-svg-icons";
-import RemoteButton from "@/components/UI/RemoteButton";
+import KeypressButton from "@/components/UI/KeypressButton";
 import {sendKeystrokeToNutJS, sendRokuKeypress} from "@/utilities/http";
 import {sleep} from "@/utilities/utils";
 import {throttle} from 'lodash'
@@ -268,11 +268,11 @@ function KeyboardGroup({ remote }) {
                 </Transition>
             </form>
             { remote === REMOTE.PC &&
-                <RemoteButton id="toggle-keyboard"
-                              className="btn-secondary absolute bottom-0 left-14 w-10"
-                              onClick={toggleInputExpanded}>
+                <KeypressButton id="toggle-keyboard"
+                                className="btn-secondary absolute bottom-0 left-14 w-10"
+                                onClick={toggleInputExpanded}>
                     <FontAwesomeIcon icon={faKeyboard} />
-                </RemoteButton>
+                </KeypressButton>
             }
         </div>
     );

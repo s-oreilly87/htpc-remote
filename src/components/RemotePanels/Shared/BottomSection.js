@@ -1,9 +1,9 @@
 import {REMOTE} from "@/utilities/constants.js";
-import RokuBottomLeftButtons from "../Roku/ButtonGroups/RokuBottomLeftButtons.js";
-import PCBottomLeftButtons from "../PC/ButtonGroups/PCBottomLeftButtons.js";
-import DenonBottomLeftButtons from "../Denon/ButtonGroups/DenonBottomLeftButtons.js";
-import Dpad from "./ButtonGroups/Dpad";
-import VolumeControls from "./ButtonGroups/VolumeControls";
+import RokuBottomLeftButtons from "../Roku/RokuBottomLeftButtons.js";
+import PCBottomLeftButtons from "../PC/PCBottomLeftButtons.js";
+import DenonBottomLeftButtons from "../Denon/DenonBottomLeftButtons.js";
+import Dpad from "./Dpad";
+import VolumeControls from "./VolumeControls";
 
 function BottomSection({ remote, denonState, setDenonState, rokuState, setRokuPowerOn }) {
     return (
