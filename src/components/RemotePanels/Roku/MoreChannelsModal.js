@@ -1,7 +1,6 @@
-import { Dialog, Transition } from '@headlessui/react'
+import {Dialog, Transition} from '@headlessui/react'
 import {Fragment, useEffect, useState} from 'react'
-import {fetchRokuChannels, sendRokuLaunchCommand} from "@/utilities/http.js";
-import {ROKU_APPS} from "@/utilities/constants.js";
+import {sendRokuLaunchCommand} from "@/utilities/http.js";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faXmark} from "@fortawesome/free-solid-svg-icons";
 import {buttonPress} from "@/utilities/utils.js";
@@ -9,7 +8,6 @@ import {buttonPress} from "@/utilities/utils.js";
 export default function MoreChannelsModal({isOpen, setIsOpen, moreChannels, fetchIcons, setPowerOn}) {
 
     const [iconsLoaded, setIconsLoaded] = useState(false)
-
     const [buttonPressTimer, setButtonPressTimer] = useState()
 
     function closeModal() {
