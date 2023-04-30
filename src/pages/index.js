@@ -59,11 +59,11 @@ const App = () => {
         <>
             {isClient && (
                 <KeepAlive.Provider value="root">
-                    {/* this div is so tailwind can find classes that don't exist until runtime*/}
+                    {/* this div is so tailwind can find classes that don't exist until runtime */}
                     <div id="dynamically-named-classes"
-                         className="hidden btn-primary-denon btn-primary-roku btn-primary-pc">
+                         className="hidden btn-primary-denon btn-primary-roku btn-primary-pc bg-teal-500 fill-teal-500">
                     </div>
-                    <div id='root' className="bg-slate-900 viewport-height overflow-y-hidden">
+                    <div id='root' className={`bg-slate-900 viewport-height overflow-y-hidden ${archivo_narrow.className}`}>
                         <Head>
                             <title>HTPC Remote</title>
                             <meta name="viewport" content="width=device-width, initial-scale=1" />
