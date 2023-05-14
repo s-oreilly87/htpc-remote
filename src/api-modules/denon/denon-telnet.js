@@ -55,7 +55,7 @@ DenonTelnet.prototype.connect = function() {
             console.log("TelNet connection closed!")
         })
 
-        // Wrap telnetSocket to allow removing listeners / once
+        // Wrap telnetSocket to allow removing listeners / once (not available in 'telnet-stream')
         this.connection = DenonTelnetWrapper(telnetSocket)
     } catch (err) {
         console.error('DENON-TELNET: Telnet Connection Error:');

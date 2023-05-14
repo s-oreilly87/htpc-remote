@@ -18,7 +18,7 @@ function DenonRemote({ denonState, setDenonState }) {
     }, [])
 
     const updateDenonState = async () => {
-        console.log('update denon state - setting laoding true')
+        console.log('update denon state - setting loading true')
         setLoading(true)
         await updateDenonStateFromMainZoneQuery()
         await updateDenonStateFromFetchLevels()

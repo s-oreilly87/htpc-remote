@@ -239,7 +239,7 @@ export const DENON_INPUTS = {
         inputFuncSelect: ["PCIN"]
     },
     PHONO: {
-        label: "TurnTable",
+        label: "Turntable",
         value: "SIDVD",
         inputFuncSelect: ["PHONO"]
     },
@@ -292,7 +292,9 @@ export const DOLBY_MODES = [
 export const DTS_MODES = [
     "DTS_NEURAL:X",
     "DOLBY_DIGITAL_+_NEURAL:X",
-    "NEURAL:X"
+    "NEURAL:X",
+    "DOLBY_DIGITAL_+_+_NEURAL:X",
+    "DTS:X_MSTR",
 ]
 
 export const DENON_SOUND_MODES = {
