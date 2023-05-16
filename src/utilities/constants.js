@@ -270,14 +270,13 @@ export const DENON_STATE_DEFAULTS = {
     muteOn: false,
     input: "",
     soundMode: "",
-    soundModeLoading: false,
+    loading: false,
     dynComp: "",
     psDilOn: false,
     PSDIL: 0,  //needs to be int so it can be incremented
     psDynEqOn: false,
     PSREFLEV: "0",
     PSDYNVOL: "OFF",
-    cycleTimeout: null
 }
 
 export const ROKU_STATE_DEFAULTS = {
@@ -288,6 +287,7 @@ export const DOLBY_MODES = [
     "DOLBY_SURROUND",
     "DOLBY_DIGITAL",
     "DOLBY_ATMOS",
+    "DOLBY_D_+_+DOLBY_SURROUND"
 ]
 export const DTS_MODES = [
     "DTS_NEURAL:X",

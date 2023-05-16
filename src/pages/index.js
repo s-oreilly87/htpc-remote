@@ -1,6 +1,6 @@
 import React, {useEffect, useRef, useState} from "react";
 import KeepAlive from "react-fiber-keep-alive";
-import {DENON_STATE_DEFAULTS, REMOTE, REMOTE_INDEX, ROKU_STATE_DEFAULTS} from "@/utilities/constants.js";
+import {REMOTE, REMOTE_INDEX, ROKU_STATE_DEFAULTS} from "@/utilities/constants.js";
 import {getKeyByValue, usePrevious} from "@/utilities/utils";
 import Head from "next/head";
 import SwipeDetector from "@/components/UI/SwipeDetector";
@@ -11,10 +11,8 @@ import {archivo_narrow} from "@/styles/fonts.js";
 const App = () => {
 
     const [selectedRemote, setSelectedRemote] = useState(REMOTE.ROKU);
-    const [denonState, setDenonState] = useState(DENON_STATE_DEFAULTS)
     const [rokuState, setRokuState] = useState(ROKU_STATE_DEFAULTS)
     const [pcState, setPcState] = useState()
-
     const resetDocHeight = () => {
             let vh = window.innerHeight * 0.01
             document.documentElement.style.setProperty('--vh', `${vh}px`)
@@ -77,8 +75,6 @@ const App = () => {
                                 <RemotePanelSlideScroll className="mx-auto min-w-[330px] max-w-[550px] place-content-center w-full mt-16"
                                              selectedRemote={selectedRemote}
                                              prevRemote={prevRemote}
-                                             denonState={denonState}
-                                             setDenonState={setDenonState}
                                              rokuState={rokuState}
                                              setRokuState={setRokuState}
                                              pcState={pcState}

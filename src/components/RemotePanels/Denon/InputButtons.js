@@ -1,38 +1,28 @@
 import {DENON_INPUTS, REMOTE} from "@/utilities/constants.js";
 import KeypressButton from "@/components/UI/KeypressButton";
 import {sendDenonCommand} from "@/utilities/http";
+import {useDenonContext} from "@/context/denon.js";
 
-const InputSelect = ({ denonState, setDenonState, updateDenonState }) => {
+const InputButtons = ({ }) => {
+
+    const [denonState, setDenonState, refreshDenonState] = useDenonContext();
 
     const handleClick = async (event) => {
-        //TODO: figure out why loading isnt set right away, (not getting set until updateState is called after timeout)
-        console.log('handleclick - setting loading true')
-        setLoading(true)   // why isnt this working?
-        // For responsiveness, update denonState.input before sending.  entire state will be refreshed afterwards
-        // to pick up resulting changes
-        setDenonState(prevState => ({
-            ...prevState,
+        // For responsiveness, update denonState.input before sending command.
+        // State will be refreshed afterwards to pick up resulting changes/confirm
+        setDenonState({
             input: Object.values(DENON_INPUTS).find(input => input.value === event.target.value),
             powerOn: true,
             loading: true
-        }))
+        })
 
         const response = await sendDenonCommand(event.target)
         if (response.error) {
-            setLoading(false)
-            console.log(response.error)
-            return
+            setDenonState({ loading: false })
+            return console.error(response.error)
         }
-        setTimeout(updateDenonState, 2500)
-        setLoading(false)
-    }
 
-    const setLoading = (bool) => {
-        setDenonState(prevState => ({
-                ...prevState,
-                loading: bool
-            })
-        )
+        setTimeout(refreshDenonState, 2500)
     }
 
     return (
@@ -54,4 +44,4 @@ const InputSelect = ({ denonState, setDenonState, updateDenonState }) => {
     );
 }
 
-export default InputSelect;
+export default InputButtons;

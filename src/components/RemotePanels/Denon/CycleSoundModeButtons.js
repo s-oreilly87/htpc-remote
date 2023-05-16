@@ -1,20 +1,23 @@
 import {DENON_SOUND_MODES, DOLBY_MODES, DTS_MODES, REMOTE} from "@/utilities/constants.js";
 import KeypressButton from "@/components/UI/KeypressButton";
 import {sendDenonCommand, sendDenonQuery} from "@/utilities/http";
+import {useDenonContext} from "@/context/denon.js";
 
 const CYCLE_TIMEOUT = 5000
 const RESPONSE_TIMEOUT = 2000
 const remote = REMOTE.DENON
-function CycleSoundModes({ denonState, setDenonState }) {
+
+function CycleSoundModes({ cycleTimeout, setCycleTimeout }) {
+    const [denonState, setDenonState, refreshDenonState] = useDenonContext();
 
     const handleCycleClick = async (event) => {
         // The first click of a cycle button brings up current sound mode on display - no response from denon
         // Must click again within 5 seconds to change Sound Mode and receive a response
 
         // Check if this is the first click
-        if (!denonState.cycleTimeout) {
+        if (!cycleTimeout) {
             sendDenonCommand(event.currentTarget) // no response on first click
-            setCycleTimeout()
+            setNewCycleTimeout()
             // when (cycleTimeout !== null && !loading), the SoundModeSelect display will animate
             return
         }
@@ -25,7 +28,7 @@ function CycleSoundModes({ denonState, setDenonState }) {
     }
 
     const handleClick = async (event) => {
-        setLoading(true)
+        setDenonState({loading: true})
 
         let responseTimeout = setResponseTimeout()
         const response = await sendDenonCommand(event.currentTarget)
@@ -36,54 +39,30 @@ function CycleSoundModes({ denonState, setDenonState }) {
         }
 
         let soundMode = await parseSoundModeFromResponseData(response.data)
-        if (soundMode) { setSoundMode(soundMode) }
+        if (soundMode) { setDenonState({ soundMode: soundMode }) }
 
-        setLoading(false)
+        setDenonState({loading: false})
 
-        // updateDenonState()
+        // refreshDenonState()
     }
 
-    const setCycleTimeout = () => {
-        let cycleTimeout = setTimeout(() => {
-            setDenonState(prevState => ({
-                    ...prevState,
-                    cycleTimeout: null
-                })
-            )
+    const setNewCycleTimeout = () => {
+        let newCycleTimeout = setTimeout(() => {
+            setCycleTimeout(null)
         }, CYCLE_TIMEOUT)
 
-        setDenonState(prevState => ({
-                ...prevState,
-                cycleTimeout: cycleTimeout
-            })
-        )
+        setCycleTimeout(newCycleTimeout)
     }
 
     const resetCycleTimeout = () => {
-        clearTimeout(denonState.cycleTimeout)
-        setCycleTimeout()
+        clearTimeout(cycleTimeout)
+        setNewCycleTimeout()
     }
 
     const setResponseTimeout = () => {
         return setTimeout(() => {
-            setLoading(false)
+            setDenonState({loading: false})
         }, RESPONSE_TIMEOUT)
-    }
-
-    const setLoading = (bool) => {
-        setDenonState(prevState => ({
-                ...prevState,
-                loading: bool
-            })
-        )
-    }
-
-    const setSoundMode = (soundMode) => {
-        setDenonState(prevState => ({
-            ...prevState,
-            soundMode: soundMode,
-        })
-        )
     }
 
     const parseSoundModeFromResponseData = async (denonResponse) => {
@@ -117,14 +96,12 @@ function CycleSoundModes({ denonState, setDenonState }) {
             if (DOLBY_MODES.includes(foundSoundMode.substring(2).replaceAll(" ", "_"))) {
                 soundMode = DENON_SOUND_MODES.DOLBY
                 console.info("Mapped " + foundSoundMode + " to DOLBY DIGITAL")
-            }
-
-            if (DTS_MODES.includes(foundSoundMode.substring(2))) {
+            } else if (DTS_MODES.includes(foundSoundMode.substring(2))) {
                 soundMode = DENON_SOUND_MODES.DTS
                 console.info("Mapped " + foundSoundMode + " to DTS NEURAL:X")
+            } else {
+                console.info(`Unknown Sound Mode: ${foundSoundMode}`)
             }
-
-            console.info(`Unknown Sound Mode: ${foundSoundMode}`)
         }
 
         return soundMode

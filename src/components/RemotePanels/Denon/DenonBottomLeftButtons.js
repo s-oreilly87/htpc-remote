@@ -3,18 +3,19 @@ import KeypressButton from "@/components/UI/KeypressButton";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faPowerOff} from '@fortawesome/free-solid-svg-icons';
 import {sendDenonCommand} from "@/utilities/http";
+import {useDenonContext} from "@/context/denon.js";
 
 const remote = Constants.REMOTE.DENON
 const KEYSTROKE = Constants.KEYSTROKE
 
-function DenonBottomLeftButtons({ denonState, setDenonState }) {
+function DenonBottomLeftButtons({ }) {
+    const [denonState, setDenonState, refreshDenonState] = useDenonContext();
 
     const handleClickPowerButton = async (event) => {
 
-        setDenonState(prevState => ({
-            ...prevState,
-            powerOn: !prevState.powerOn
-        }))
+        setDenonState({
+            powerOn: !denonState.powerOn
+        })
 
         // Unless power state could be unknown, awaiting response is unnecessary and could be dropped for responsiveness
         // For now it will change it back, if response is unexpected
@@ -25,10 +26,9 @@ function DenonBottomLeftButtons({ denonState, setDenonState }) {
 
         let powerOn = response.data
 
-        setDenonState(prevState => ({
-            ...prevState,
-            powerOn: powerOn ?? !prevState.powerOn
-        }))
+        setDenonState({
+            powerOn: powerOn ?? !denonState.powerOn
+        })
     }
     return (
             <div className="flex flex-col menu-buttons justify-between w-5/6" >

@@ -4,13 +4,12 @@ import PCRemotePanel from "@/components/RemotePanels/PC/PCRemotePanel";
 import RokuRemotePanel from "@/components/RemotePanels/Roku/RokuRemotePanel";
 import DenonRemotePanel from "@/components/RemotePanels/Denon/DenonRemotePanel";
 import SlideScrollTransition from "@/components/UI/SlideScrollTransition";
+import {DenonProvider} from "@/context/denon.js";
 
 function RemotePanel({
                          className,
                          selectedRemote,
                          prevRemote,
-                         denonState,
-                         setDenonState,
                          rokuState,
                          setRokuState,
                          pcState,
@@ -44,9 +43,9 @@ function RemotePanel({
                 selectedComponentIndex={ REMOTE_INDEX[selectedRemote] }
                 prevComponentIndex={ REMOTE_INDEX[prevRemote] }>
                 <KeepAlive name={ REMOTE.DENON }>
-                    <DenonRemotePanel denonState={denonState}
-                                      setDenonState={setDenonState}
-                    />
+                    <DenonProvider>
+                        <DenonRemotePanel />
+                    </DenonProvider>
                 </KeepAlive>
             </SlideScrollTransition>
         </div>

@@ -7,11 +7,14 @@ import {DENON_SOUND_MODES} from "@/utilities/constants.js";
 import LoadingSpinner from "@/components/UI/LoadingSpinner.js";
 
 import {dot_matrix} from "@/styles/fonts.js";
+import {useDenonContext} from "@/context/denon.js";
 
-const SelectSoundMode = ({ denonState, setDenonState, updateDenonState }) => {
+const SelectSoundMode = ({ cycleTimeout }) => {
+    const [denonState, setDenonState, refreshDenonState] = useDenonContext();
+
     //TODO: update this component to use a similar pattern to AudioModeSelect and DisplayModeSelect
 
-    const [selectedSoundMode, setSelectedSoundMode] = useState(DENON_SOUND_MODES.NONE)
+    const [selectedSoundMode, setSelectedSoundMode] = useState(denonState.soundMode)
 
     useEffect(() => {
         if (denonState.soundMode) {
@@ -20,16 +23,12 @@ const SelectSoundMode = ({ denonState, setDenonState, updateDenonState }) => {
     }, [denonState.soundMode])
 
     const handleListBoxSelect = async (soundMode) => {
-        setSelectedSoundMode(soundMode)
-        setDenonState(prevState => ({
-            ...prevState,
-            soundMode: soundMode
-        }))
+        setDenonState({ soundMode: soundMode })
         const response = await sendDenonCommand({ value: soundMode.value })
         if (response.error) {
             return console.error(response.error)
         }
-        updateDenonState()
+        refreshDenonState()
     }
 
     return (
@@ -40,7 +39,7 @@ const SelectSoundMode = ({ denonState, setDenonState, updateDenonState }) => {
                 <div className="relative mt-1 w-full ">
                     <Listbox.Button className="relative w-full h-[40px] cursor-default rounded-lg bg-slate-800 pt-1 pb-2 pl-3 pr-10 text-center shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm">
                         { !denonState.loading &&
-                            <span className={`block truncate text-teal-400 text-xl ${dot_matrix.className} ${ denonState.cycleTimeout ? 'animate-pulse' : '' }`}>
+                            <span className={`block truncate text-teal-400 text-xl ${dot_matrix.className} ${ cycleTimeout ? 'animate-pulse' : '' }`}>
                                 { selectedSoundMode.label}
                             </span>
                         }
