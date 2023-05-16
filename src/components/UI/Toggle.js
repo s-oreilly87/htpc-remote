@@ -1,12 +1,12 @@
 import {Switch} from "@headlessui/react";
 
 
-const Toggle = ({ enabled, onToggle, label, labelPos, color, disabled }) => {
+const Toggle = ({ enabled, onToggle, label, labelColor, labelPos, color, disabled }) => {
 
     return (
         <Switch.Group>
             <div className={`flex ${labelPos === 'above' ? 'flex-col' : ''} gap-3 items-center justify-center`}>
-                <Switch.Label className={`text-${color}`}>{ label }</Switch.Label>
+                <Switch.Label className={`text-${labelColor}`}>{ label }</Switch.Label>
                 <Switch
                     checked={ enabled }
                     onChange={ onToggle }
