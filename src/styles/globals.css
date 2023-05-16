@@ -26,7 +26,7 @@
         @apply py-2 px-2 rounded-lg shadow-md text-white focus:outline-none focus:ring-1 focus:ring-gray-700 focus:ring-opacity-75 select-none transition-colors
     }
     .btn-primary-denon {
-        @apply bg-teal-600 text-white hover:bg-teal-500  focus:ring-teal-400;
+        @apply bg-teal-600 text-white hover:bg-teal-500  focus:ring-teal-400 disabled:bg-teal-700;
     }
     .btn-primary-roku {
         @apply bg-violet-800 text-white hover:bg-violet-700 focus:ring-violet-600;
@@ -35,7 +35,7 @@
         @apply bg-blue-600 text-white hover:bg-blue-500 focus:ring-blue-400 ;
     }
     .btn-secondary {
-        @apply bg-slate-600 hover:bg-gray-600 ;
+        @apply bg-slate-600 hover:bg-gray-600 disabled:bg-gray-700;
     }
     .channel-button {
         @apply btn bg-gray-500 aspect-4/3 text-white hover:opacity-90 focus:ring-gray-700 ;
