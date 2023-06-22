@@ -2,7 +2,7 @@ import Constants from "@/utilities/constants.js";
 import KeypressButton from "@/components/UI/KeypressButton";
 import KeyboardGroup from "../Shared/KeyboardGroup";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faArrowRight, faDesktop, faPowerOff, faWindowMaximize} from '@fortawesome/free-solid-svg-icons';
+import {faArrowRight, faDesktop, faPowerOff, faWindowRestore} from '@fortawesome/free-solid-svg-icons';
 
 const REMOTE = Constants.REMOTE
 const KEYSTROKE = Constants.KEYSTROKE
@@ -22,8 +22,13 @@ function PCBottomLeftButtons(props) {
                     <KeypressButton remote={ REMOTE.PC } className="btn-secondary w-2/3 text-center" value={ KEYSTROKE.PC.ESCAPE } >Esc</KeypressButton>
                     <KeypressButton remote={ REMOTE.PC } className="btn-secondary w-full" value={ KEYSTROKE.PC.TAB }>Tab</KeypressButton>
                 </div>
-                <KeypressButton remote={ REMOTE.PC } className="btn-secondary -translate-y-9" value={ KEYSTROKE.KEY_COMBOS.MOVE_WINDOW }>
-                    <FontAwesomeIcon icon={ faWindowMaximize } />
+                {/*<KeypressButton remote={ REMOTE.PC } className="btn-secondary -translate-y-9" value={ KEYSTROKE.KEY_COMBOS.MOVE_WINDOW }>*/}
+                {/*    <FontAwesomeIcon icon={ faWindowMaximize } />*/}
+                {/*    &nbsp;*/}
+                {/*    <FontAwesomeIcon icon={ faArrowRight } />*/}
+                {/*</KeypressButton>*/}
+                <KeypressButton remote={ REMOTE.PC } className="btn-secondary -translate-y-9" value="moveAllWindowsToPrimary">
+                    <FontAwesomeIcon icon={ faWindowRestore } />
                     &nbsp;
                     <FontAwesomeIcon icon={ faArrowRight } />
                 </KeypressButton>
