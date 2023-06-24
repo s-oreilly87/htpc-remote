@@ -10,7 +10,7 @@ import {dot_matrix} from "@/styles/fonts.js";
 import {useDenonContext} from "@/context/denon.js";
 
 const SelectSoundMode = ({ cycleTimeout }) => {
-    const [denonState, setDenonState, refreshDenonState] = useDenonContext();
+    const [denonState, updateDenonState, refreshDenonState] = useDenonContext();
 
     //TODO: update this component to use a similar pattern to AudioModeSelect and DisplayModeSelect
 
@@ -23,7 +23,7 @@ const SelectSoundMode = ({ cycleTimeout }) => {
     }, [denonState.soundMode])
 
     const handleListBoxSelect = async (soundMode) => {
-        setDenonState({ soundMode: soundMode })
+        updateDenonState({ soundMode: soundMode })
         const response = await sendDenonCommand({ value: soundMode.value })
         if (response.error) {
             return console.error(response.error)

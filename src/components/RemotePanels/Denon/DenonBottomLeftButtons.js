@@ -9,11 +9,11 @@ const remote = Constants.REMOTE.DENON
 const KEYSTROKE = Constants.KEYSTROKE
 
 function DenonBottomLeftButtons({ }) {
-    const [denonState, setDenonState, refreshDenonState] = useDenonContext();
+    const [denonState, updateDenonState, refreshDenonState] = useDenonContext();
 
     const handleClickPowerButton = async (event) => {
 
-        setDenonState({
+        updateDenonState({
             powerOn: !denonState.powerOn
         })
 
@@ -26,7 +26,7 @@ function DenonBottomLeftButtons({ }) {
 
         let powerOn = response.data
 
-        setDenonState({
+        updateDenonState({
             powerOn: powerOn ?? !denonState.powerOn
         })
     }

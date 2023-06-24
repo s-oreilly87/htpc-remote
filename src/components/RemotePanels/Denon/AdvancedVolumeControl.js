@@ -17,7 +17,7 @@ const DIALOGUE_ADJUST_DISABLED_MODES = [
     DENON_SOUND_MODES.PURE_DIRECT
 ]
 const AdvancedVolumeControl = ({ }) => {
-    const [denonState, setDenonState, refreshDenonState] = useDenonContext();
+    const [denonState, updateDenonState, refreshDenonState] = useDenonContext();
 
     const [buttonPressTimer, setButtonPressTimer] = useState()
 
@@ -31,7 +31,7 @@ const AdvancedVolumeControl = ({ }) => {
 
         // 50 is the new 0
         responseValue -= 50
-        setDenonState({ PSDIL: responseValue })
+        updateDenonState({ PSDIL: responseValue })
     }
 
     const handleClick = async (event) => {
@@ -49,23 +49,23 @@ const AdvancedVolumeControl = ({ }) => {
             const splitData = line.split(" ")
 
             if (splitData[0] === "PSDIL" && ["ON", "OFF"].includes(splitData[1])) {
-                setDenonState({ psDilOn: splitData[1] === "ON"})
+                updateDenonState({ psDilOn: splitData[1] === "ON"})
             } else if (splitData[0] === "PSDIL") {
                 // PSDIL LEVEL needs to be parsed
                  parseAndSetDialogueAdjustLevel(splitData[1])
             } else if (denonState.hasOwnProperty(splitData[0])) {
-                setDenonState({ [splitData[0]] : splitData[1] })
+                updateDenonState({ [splitData[0]] : splitData[1] })
             }
         }
     }
 
     const handleDynEqToggle = (enabled) => {
-        setDenonState({ psDynEqOn: enabled })
+        updateDenonState({ psDynEqOn: enabled })
         handleClick({ currentTarget: { value: `PSDYNEQ ${enabled ? 'ON' : 'OFF'}` } })
     }
 
     const handlePsDilToggle = (enabled) => {
-        setDenonState({ psDilOn: enabled })
+        updateDenonState({ psDilOn: enabled })
         handleClick({ currentTarget: { value: `PSDIL ${enabled ? 'ON' : 'OFF'}` } })
     }
 

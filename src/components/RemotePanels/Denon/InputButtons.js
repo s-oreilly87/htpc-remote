@@ -5,12 +5,12 @@ import {useDenonContext} from "@/context/denon.js";
 
 const InputButtons = ({ }) => {
 
-    const [denonState, setDenonState, refreshDenonState] = useDenonContext();
+    const [denonState, updateDenonState, refreshDenonState] = useDenonContext();
 
     const handleClick = async (event) => {
         // For responsiveness, update denonState.input before sending command.
         // State will be refreshed afterwards to pick up resulting changes/confirm
-        setDenonState({
+        updateDenonState({
             input: Object.values(DENON_INPUTS).find(input => input.value === event.target.value),
             powerOn: true,
             loading: true
@@ -18,7 +18,7 @@ const InputButtons = ({ }) => {
 
         const response = await sendDenonCommand(event.target)
         if (response.error) {
-            setDenonState({ loading: false })
+            updateDenonState({ loading: false })
             return console.error(response.error)
         }
 

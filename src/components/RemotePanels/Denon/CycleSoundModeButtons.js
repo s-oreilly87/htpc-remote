@@ -8,7 +8,7 @@ const RESPONSE_TIMEOUT = 2000
 const remote = REMOTE.DENON
 
 function CycleSoundModes({ cycleTimeout, setCycleTimeout }) {
-    const [denonState, setDenonState, refreshDenonState] = useDenonContext();
+    const [denonState, updateDenonState, refreshDenonState] = useDenonContext();
 
     const handleCycleClick = async (event) => {
         // The first click of a cycle button brings up current sound mode on display - no response from denon
@@ -28,7 +28,7 @@ function CycleSoundModes({ cycleTimeout, setCycleTimeout }) {
     }
 
     const handleClick = async (event) => {
-        setDenonState({loading: true})
+        updateDenonState({loading: true})
 
         let responseTimeout = setResponseTimeout()
         const response = await sendDenonCommand(event.currentTarget)
@@ -39,9 +39,9 @@ function CycleSoundModes({ cycleTimeout, setCycleTimeout }) {
         }
 
         let soundMode = await parseSoundModeFromResponseData(response.data)
-        if (soundMode) { setDenonState({ soundMode: soundMode }) }
+        if (soundMode) { updateDenonState({ soundMode: soundMode }) }
 
-        setDenonState({loading: false})
+        updateDenonState({loading: false})
 
         // refreshDenonState()
     }
@@ -61,7 +61,7 @@ function CycleSoundModes({ cycleTimeout, setCycleTimeout }) {
 
     const setResponseTimeout = () => {
         return setTimeout(() => {
-            setDenonState({loading: false})
+            updateDenonState({loading: false})
         }, RESPONSE_TIMEOUT)
     }
 
