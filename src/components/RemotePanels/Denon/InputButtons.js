@@ -22,7 +22,7 @@ const InputButtons = ({ }) => {
             return console.error(response.error)
         }
 
-        setTimeout(refreshDenonState, 2500)
+        setTimeout(refreshDenonState.all, 2500)
     }
 
     return (

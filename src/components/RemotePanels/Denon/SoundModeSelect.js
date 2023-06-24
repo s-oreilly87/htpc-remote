@@ -28,7 +28,7 @@ const SelectSoundMode = ({ cycleTimeout }) => {
         if (response.error) {
             return console.error(response.error)
         }
-        refreshDenonState()
+        refreshDenonState.all()
     }
 
     return (

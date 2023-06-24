@@ -274,6 +274,7 @@ export const DENON_STATE_DEFAULTS = {
     dynComp: "",
     psDilOn: false,
     psDynEqOn: false,
+    MV: 50.0,
     PSDIL: 0,  //needs to be int so it can be incremented
     PSREFLEV: "0", // These are all caps so they can be dynamically set from incoming data
     PSDYNVOL: "OFF",

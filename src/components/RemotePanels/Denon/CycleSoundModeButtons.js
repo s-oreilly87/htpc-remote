@@ -43,7 +43,7 @@ function CycleSoundModes({ cycleTimeout, setCycleTimeout }) {
 
         updateDenonState({loading: false})
 
-        // refreshDenonState()
+        // refreshDenonState.all()
     }
 
     const setNewCycleTimeout = () => {

@@ -2,6 +2,7 @@ import {REMOTE} from "@/utilities/constants.js";
 import {useState} from "react";
 import {
     sendDenonCommand,
+    sendDenonQuery,
     sendEventToEventGhost,
     sendKeystrokeToNutJS,
     sendRokuKeydown,
@@ -9,14 +10,17 @@ import {
     sendRokuKeyup
 } from "@/utilities/http";
 import {buttonPress} from "@/utilities/utils";
+import {useDenonContext} from "@/context/denon.js";
 
-const PressAndHoldButton = ({ remote, children, ...props }) => {
+const PressAndHoldButton = ({ remote, volumeButton = false, children, ...props }) => {
 
     const [isHeld, setIsHeld] = useState(false);
     const [touchTimer, setTouchTimer] = useState(null);
     const [vibrateInterval, setVibrateInterval] = useState(null);
     const [sendKeyInterval, setSendKeyInterval] = useState(null);
     const [buttonPressTimer, setButtonPressTimer] = useState(null)
+
+    const [denonState, updateDenonState, refreshDenonState, setDenonState] = useDenonContext()
 
     const pressAndHoldVibration = () => {
         setVibrateInterval(setInterval(() => navigator.vibrate(1), 75))
@@ -87,19 +91,65 @@ const PressAndHoldButton = ({ remote, children, ...props }) => {
     // #######  FOR DENON  #######
 
     // SIMULATE keydown by sending keypress repeatedly instead of keydown event
-    const denonSimulatePressAndHoldStart = button => {
-        sendDenonCommand(button)
-        buttonPress(button, buttonPressTimer, setButtonPressTimer)
+    const denonSimulatePressAndHoldStart = async button => {
         setTouchTimer(setTimeout(() => {
             pressAndHoldVibration()
-            setSendKeyInterval(setInterval(() => sendDenonCommand(button), 100))
+            setSendKeyInterval(setInterval(async () => {
+                sendDenonCommand(button)
+                maybeChangeVolDisplay(button)
+            }, 150))
         }, 500))
+
+        sendDenonCommand(button)
+        maybeChangeVolDisplay(button)
+        buttonPress(button, buttonPressTimer, setButtonPressTimer)
     }
 
-    const denonSimulatePressAndHoldEnd = button => {
+    const maybeChangeVolDisplay = (button) => {
+        // Have to use setDenonState directly here to make sure I have access to the latest state when incrementing/decrementing
+        if (button.value === "MVUP") {
+            setDenonState((prevState) => ({
+                ...prevState,
+                MV: (parseFloat(prevState.MV) + 0.5).toFixed(1),
+            }));
+        } else if (button.value === "MVDOWN") {
+            setDenonState((prevState) => ({
+                ...prevState,
+                MV: (parseFloat(prevState.MV) - 0.5).toFixed(1),
+            }));
+        }
+    }
+
+    const updateVolDisplayFromResponse = (response) => {
+        if (response.data) {
+            let value;
+            for (const val of response.data) {
+                if (val.startsWith("MV") && !val.startsWith("MVMAX")) {
+                    value = val.split("V")[1]
+                    break;
+                }
+            }
+
+            if (value.length === 3) {
+                value = parseFloat(value) / 10
+            } else if (value[0] === "0") {
+                value = parseFloat(value[1]).toFixed(1)
+            } else {
+                value = parseFloat(value).toFixed(1)
+            }
+
+            updateDenonState({ MV: value })
+        }
+    }
+
+    const denonSimulatePressAndHoldEnd = async button => {
         clearTimeout(touchTimer)
         clearInterval(sendKeyInterval)
         clearInterval(vibrateInterval)
+        if (button.value.startsWith("MV")) {
+            const response = await sendDenonQuery("MV")
+            updateVolDisplayFromResponse(response)
+        }
     }
 
     const handleStartPressAndHold = event => {

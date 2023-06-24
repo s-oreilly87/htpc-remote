@@ -11,12 +11,13 @@ export function DenonProvider({ children }) {
         setDenonState((prevState) => ({ ...prevState, ...props }));
     }
 
-    const refreshDenonState = async () => {
+    const refreshAll = async () => {
         updateDenonState({loading: true})
         await updateDenonStateFromMainZoneQuery()
         await updateDenonStateFromFetchLevels()
         updateDenonState({loading: false})
     }
+
     const updateDenonStateFromMainZoneQuery = async () => {
         const response = await fetchMainZoneData()
 
@@ -56,43 +57,101 @@ export function DenonProvider({ children }) {
 
     const updateDenonStateFromFetchLevels = async () => {
         const toUpdate = {}
-
-        const dynVolResponse = await sendDenonQuery("PSDYNVOL")
-        if (dynVolResponse.error) {
-            console.error(dynVolResponse.error)
-        } else {
-            toUpdate.PSDYNVOL = dynVolResponse.data[0].split(" ")[1]
+        toUpdate.MV = await fetchMasterVolume()
+        toUpdate.PSDYNVOL = await fetchLevel("PSDYNVOL")
+        toUpdate.psDynEqOn = await fetchOnState("PSDYNEQ")
+        toUpdate.PSREFLEV = await fetchLevel("PSREFLEV")
+        const dialogueAdjust = await fetchDialogueAdjust()
+        if (dialogueAdjust) {
+            toUpdate.psDilOn = dialogueAdjust[0]
+            toUpdate.PSDIL = dialogueAdjust[1]
         }
 
-        const dynEqResponse = await sendDenonQuery("PSDYNEQ")
-        if (dynEqResponse.error) {
-            console.log(dynEqResponse.error)
-        } else {
-            toUpdate.psDynEqOn= dynEqResponse.data[0].split(" ")[1] === "ON"
-        }
+        updateDenonState(toUpdate)
+    }
 
-        const refLevResponse = await sendDenonQuery("PSREFLEV")
-        if (refLevResponse.error) {
-            console.error(refLevResponse.error)
+    const fetchLevel = async (query) => {
+        const response = await sendDenonQuery(query)
+        if (response.error) {
+            console.error(response.error)
         } else {
-            toUpdate.PSREFLEV = refLevResponse.data[0].split(" ")[1]
+            return response.data[0].split(" ")[1]
         }
+    }
 
+    const refreshLevel = async (query) => {
+        updateDenonState({
+            [query]: await fetchLevel(query)
+        })
+    }
+
+    const fetchOnState = async (query) => {
+        const response = await sendDenonQuery(query)
+        if (response.error) {
+            console.error(response.error)
+        } else {
+            return response.data[0].split(" ")[1] === "ON"
+        }
+    }
+
+    const refreshOnState = async (query) => {
+        updateDenonState({
+            [query]: await fetchOnState(query)
+        })
+    }
+
+    const fetchMasterVolume = async () => {
+        const masterVolResponse = await sendDenonQuery("MV")
+        if (masterVolResponse.error) {
+            console.error(masterVolResponse.error)
+        } else { // "MV415" -> 41.5
+            let value;
+            for (const val of masterVolResponse.data) {
+                if (val.startsWith("MV") && !val.startsWith("MVMAX")) {
+                    value = val.split("V")[1]
+                    break;
+                }
+            }
+
+            if (value.length === 3) {
+                value = parseFloat(value) / 10
+            } else if (value[0] === "0") {
+                value = parseFloat(value[1]).toFixed(1)
+            } else {
+                value = parseFloat(value).toFixed(1)
+            }
+            return value
+        }
+    }
+
+    const refreshMasterVolume = async () => {
+        updateDenonState({ MV: await fetchMasterVolume() })
+    }
+
+    const fetchDialogueAdjust = async () => {
         const dialogueAdjustResponse = await sendDenonQuery("PSDIL")
         // dialogueAdjustResponse[0] = ON/OFF, [1] = LEVEL
         if (dialogueAdjustResponse.error) {
             console.error(dialogueAdjustResponse.error)
         } else {
-            toUpdate.psDilOn = dialogueAdjustResponse.data[0].split(" ")[1] === "ON"
-
+            const psDilOn = dialogueAdjustResponse.data[0].split(" ")[1] === "ON"
+            let PSDIL = 0
             if (dialogueAdjustResponse.data[1]) {
-                toUpdate.PSDIL = parseDialogueAdjustLevel(dialogueAdjustResponse.data[1].split(" ")[1])
+                PSDIL = parseDialogueAdjustLevel(dialogueAdjustResponse.data[1].split(" ")[1])
             } else {
                 console.error('for some reason didnt get 2 part PSDIL data. Heres what we got:')
                 console.error(dialogueAdjustResponse.data)
             }
+            return [psDilOn, PSDIL]
         }
-        updateDenonState(toUpdate)
+    }
+
+    const refreshDialogueAdjust = async () => {
+        const dialogueAdjust = await fetchDialogueAdjust()
+        updateDenonState({
+            psDilOn: dialogueAdjust[0],
+            PSDIL: dialogueAdjust[1]
+        })
     }
 
     const parseDialogueAdjustLevel = (responseValue) => {
@@ -108,9 +167,15 @@ export function DenonProvider({ children }) {
         return responseValue
     }
 
-
+    const refreshDenonState = {
+        all: refreshAll,
+        masterVol: refreshMasterVolume,
+        level: refreshLevel,
+        onState: refreshOnState,
+        dialogueAdjust: refreshDialogueAdjust
+    }
     return (
-        <Context.Provider value={[denonState, updateDenonState, refreshDenonState]}>
+        <Context.Provider value={[denonState, updateDenonState, refreshDenonState, setDenonState]}>
             {children}
         </Context.Provider>
     );
