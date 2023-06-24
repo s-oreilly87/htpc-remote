@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 // next.config.js
 import {DENON_HTTP_COMMAND_URL, DENON_HTTP_QUERY_URL, DENON_IP, ROKU_URL} from "./src/utilities/constants.js"
+import withPWA from 'next-pwa'
 
 
 const nextConfig = {
@@ -23,5 +24,10 @@ const nextConfig = {
   },
 }
 
-export default nextConfig
+export default withPWA({
+  dest: 'public',
+  register: true,
+  skipWaiting: true,
+  disable: process.env.NODE_ENV === 'development'
+})(nextConfig)
 
