@@ -55,18 +55,27 @@ export function DenonProvider({ children }) {
     }
 
     const updateDenonStateFromFetchLevels = async () => {
-        const refLevResponse = await sendDenonQuery("PSREFLEV")
-        if (refLevResponse.error) {
-            console.error(refLevResponse.error)
-        } else {
-            updateDenonState({ PSREFLEV: refLevResponse.data[0].split(" ")[1] })
-        }
+        const toUpdate = {}
 
         const dynVolResponse = await sendDenonQuery("PSDYNVOL")
         if (dynVolResponse.error) {
             console.error(dynVolResponse.error)
         } else {
-            updateDenonState({ PSDYNVOL: dynVolResponse.data[0].split(" ")[1] })
+            toUpdate.PSDYNVOL = dynVolResponse.data[0].split(" ")[1]
+        }
+
+        const dynEqResponse = await sendDenonQuery("PSDYNEQ")
+        if (dynEqResponse.error) {
+            console.log(dynEqResponse.error)
+        } else {
+            toUpdate.psDynEqOn= dynEqResponse.data[0].split(" ")[1] === "ON"
+        }
+
+        const refLevResponse = await sendDenonQuery("PSREFLEV")
+        if (refLevResponse.error) {
+            console.error(refLevResponse.error)
+        } else {
+            toUpdate.PSREFLEV = refLevResponse.data[0].split(" ")[1]
         }
 
         const dialogueAdjustResponse = await sendDenonQuery("PSDIL")
@@ -74,25 +83,19 @@ export function DenonProvider({ children }) {
         if (dialogueAdjustResponse.error) {
             console.error(dialogueAdjustResponse.error)
         } else {
-            updateDenonState({ psDilOn: dialogueAdjustResponse.data[0].split(" ")[1] === "ON" })
+            toUpdate.psDilOn = dialogueAdjustResponse.data[0].split(" ")[1] === "ON"
 
             if (dialogueAdjustResponse.data[1]) {
-                parseAndSetDialogueAdjustLevel(dialogueAdjustResponse.data[1].split(" ")[1])
+                toUpdate.PSDIL = parseDialogueAdjustLevel(dialogueAdjustResponse.data[1].split(" ")[1])
             } else {
                 console.error('for some reason didnt get 2 part PSDIL data. Heres what we got:')
                 console.error(dialogueAdjustResponse.data)
             }
         }
-
-        const dynEqResponse = await sendDenonQuery("PSDYNEQ")
-        if (dynEqResponse.error) {
-            console.log(dynEqResponse.error)
-        } else {
-            updateDenonState({ psDynEqOn: dynEqResponse.data[0].split(" ")[1] === "ON" })
-        }
+        updateDenonState(toUpdate)
     }
 
-    const parseAndSetDialogueAdjustLevel = (responseValue) => {
+    const parseDialogueAdjustLevel = (responseValue) => {
         // 0.5 steps come in without the decimal
         if (responseValue.length === 3) {
             responseValue = parseFloat(responseValue) / 10
@@ -102,7 +105,7 @@ export function DenonProvider({ children }) {
 
         // 50 is the new 0
         responseValue -= 50
-        updateDenonState({ PSDIL: responseValue })
+        return responseValue
     }
 
 

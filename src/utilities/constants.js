@@ -273,9 +273,9 @@ export const DENON_STATE_DEFAULTS = {
     loading: false,
     dynComp: "",
     psDilOn: false,
-    PSDIL: 0,  //needs to be int so it can be incremented
     psDynEqOn: false,
-    PSREFLEV: "0",
+    PSDIL: 0,  //needs to be int so it can be incremented
+    PSREFLEV: "0", // These are all caps so they can be dynamically set from incoming data
     PSDYNVOL: "OFF",
 }
 

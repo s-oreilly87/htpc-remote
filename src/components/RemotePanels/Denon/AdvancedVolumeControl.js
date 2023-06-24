@@ -92,7 +92,7 @@ const AdvancedVolumeControl = ({ }) => {
                         <FontAwesomeIcon icon={faMinus} />
                     </KeypressButton>
                     <div className={"flex w-1/3 justify-center items-center"}>
-                        <span className={`text-teal-500 ${dot_matrix.className} ${ denonState.loading ? 'opacity-50' : '' }`}>
+                        <span className={`text-teal-500 ${dot_matrix.className} ${ denonState.loading ? 'opacity-50 animate-pulse' : '' }`}>
                             {denonState.PSDIL > 0
                                 ? "+" + denonState.PSDIL.toFixed(1)
                                 : denonState.PSDIL.toFixed(1)}
