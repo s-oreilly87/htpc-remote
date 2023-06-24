@@ -13,42 +13,41 @@ function RemotePanel({
                          rokuState,
                          setRokuState,
                          pcState,
-                         setPcState}) {
+                         setPcState
+}) {
     return (
-        <div className={className}>
-            <SlideScrollTransition
-                show={ selectedRemote === REMOTE.PC }
-                selectedComponentIndex={ REMOTE_INDEX[selectedRemote] }
-                prevComponentIndex={ REMOTE_INDEX[prevRemote] }>
-                <KeepAlive name={ REMOTE.PC }>
-                    <PCRemotePanel pcState={pcState}
-                                   setPcState={setPcState}
-                    />
-                </KeepAlive>
-            </SlideScrollTransition>
+        <DenonProvider>
+            <div className={className}>
+                <SlideScrollTransition
+                    show={ selectedRemote === REMOTE.PC }
+                    selectedComponentIndex={ REMOTE_INDEX[selectedRemote] }
+                    prevComponentIndex={ REMOTE_INDEX[prevRemote] }>
+                    <KeepAlive name={ REMOTE.PC }>
+                        <PCRemotePanel pcState={pcState}
+                                       setPcState={setPcState}
+                        />
+                    </KeepAlive>
+                </SlideScrollTransition>
 
-            <SlideScrollTransition
-                show={ selectedRemote === REMOTE.ROKU }
-                selectedComponentIndex={ REMOTE_INDEX[selectedRemote] }
-                prevComponentIndex={ REMOTE_INDEX[prevRemote] }>
-                <KeepAlive name={ REMOTE.ROKU }>
-                    <RokuRemotePanel rokuState={rokuState}
-                                     setRokuState={setRokuState}
-                    />
-                </KeepAlive>
-            </SlideScrollTransition>
+                <SlideScrollTransition
+                    show={ selectedRemote === REMOTE.ROKU }
+                    selectedComponentIndex={ REMOTE_INDEX[selectedRemote] }
+                    prevComponentIndex={ REMOTE_INDEX[prevRemote] }>
+                    <KeepAlive name={ REMOTE.ROKU }>
+                        <RokuRemotePanel rokuState={rokuState}
+                                         setRokuState={setRokuState}
+                        />
+                    </KeepAlive>
+                </SlideScrollTransition>
 
-            <SlideScrollTransition
-                show={ selectedRemote === REMOTE.DENON }
-                selectedComponentIndex={ REMOTE_INDEX[selectedRemote] }
-                prevComponentIndex={ REMOTE_INDEX[prevRemote] }>
-                <KeepAlive name={ REMOTE.DENON }>
-                    <DenonProvider>
-                        <DenonRemotePanel />
-                    </DenonProvider>
-                </KeepAlive>
-            </SlideScrollTransition>
-        </div>
+                <SlideScrollTransition
+                    show={ selectedRemote === REMOTE.DENON }
+                    selectedComponentIndex={ REMOTE_INDEX[selectedRemote] }
+                    prevComponentIndex={ REMOTE_INDEX[prevRemote] }>
+                    <DenonRemotePanel />
+                </SlideScrollTransition>
+            </div>
+        </DenonProvider>
     );
 }
 
