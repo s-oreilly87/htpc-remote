@@ -1,7 +1,7 @@
 export const PLATFORM = process.env.NEXT_PUBLIC_PLATFORM
 export const SERVER_IP = process.env.SERVER_IP
-export const DENON_IP = '192.168.1.101'
-export const ROKU_URL = 'http://192.168.1.102:8060'
+export const DENON_IP = '192.168.1.11'
+export const ROKU_URL = 'http://192.168.1.126:8060'
 export const EVENTGHOST_URL = `http://${SERVER_IP}:3005`
 export const DENON_HTTP_COMMAND_URL = 'goform/formiPhoneAppDirect.xml'
 export const DENON_HTTP_QUERY_URL = 'goform/formMainZone_MainZoneXml.xml'
@@ -184,7 +184,7 @@ export const AUDIO_MODES_FOR_SELECT = {
         key: "STEREO",
         label: 'Stereo',
         value: "audioModeStereo",
-        denonCmd: "MSQUICK1"
+        denonCmd: "MSQUICK4"
     },
     DOLBY_UPMIX: {
         key: "DOLBY_UPMIX",

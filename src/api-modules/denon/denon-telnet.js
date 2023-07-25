@@ -40,7 +40,7 @@ DenonTelnet.prototype.connect = function() {
     // create a socket connection (And connects it!)
     try {
         const socket = net.createConnection(this.params, () => {
-            console.log("Telnet Socket created and connected!")
+            console.log('Telnet Socket created and connected!')
             // once connected, go back and start working through the queue
             this.sendNextTelnetQueueItem()
         })
@@ -52,7 +52,12 @@ DenonTelnet.prototype.connect = function() {
         });
 
         telnetSocket.on('close', () => {
-            console.log("TelNet connection closed!")
+            console.log('TelNet connection closed!')
+        })
+
+        telnetSocket.on('error', (error) => {
+            console.log('TelNet Error!')
+            this.connect()
         })
 
         // Wrap telnetSocket to allow removing listeners / once (not available in 'telnet-stream')
