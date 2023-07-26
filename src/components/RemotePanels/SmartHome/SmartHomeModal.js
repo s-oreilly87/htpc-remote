@@ -116,11 +116,9 @@ const SmartHomeModal = ({isOpen, setIsOpen}) => {
                                         </div>
                                         )}
                                     {tplinkState.loading && (
-                                        <div className="flex justify-center items-center text-amber-400 my-16">
-                                            <div>
+                                        <div className="flex flex-col justify-center items-center text-amber-400 h-[425px] gap-3">
                                                 Connecting to lights . . .
                                                 <LoadingSpinner color="amber-400" size={32}/>
-                                            </div>
                                         </div>
                                         )}
                                 </Dialog.Panel>
