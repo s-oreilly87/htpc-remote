@@ -35,10 +35,10 @@ function Navbar({ className, selectedRemote, onClickHandler }) {
                     <div className="py-1 absolute left-0 top-0 aspect-video">
                         <Image src={'/icons/app-icon.png'} alt="Remote" width={60} height={50} onClick={handleIconClick}/>
                     </div>
-                    <div className="py-1 absolute right-0 top-0 aspect-video hover:cursor-pointer">
-                        <Image src={'/icons/lightbulb.png'} alt="Lightbulb" width={60} height={50} onClick={handleLightClick}/>
+                    <div className="py-1 absolute right-2 top-3 hover:cursor-pointer">
+                        <Image src={'/icons/lightbulb.png'} alt="Lightbulb" width={50} height={50} onClick={handleLightClick}/>
                     </div>
-                    <div className="flex w-5/6 max-w-[550px] min-w-[270px] justify-center">
+                    <div className="flex w-3/4 max-w-[550px] min-w-[270px] justify-center">
                         <div className="w-full flex items-end">
                             <button onClick={handleClick}
                                     className={ (selectedRemote === REMOTE.DENON ?

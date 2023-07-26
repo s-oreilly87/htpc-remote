@@ -1,5 +1,7 @@
 import {Dialog, Transition} from "@headlessui/react";
 import {Fragment, useState} from 'react'
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faXmark} from "@fortawesome/free-solid-svg-icons";
 
 const SmartHome = ({isOpen, setIsOpen}) => {
 
@@ -50,6 +52,15 @@ const SmartHome = ({isOpen, setIsOpen}) => {
                                 leaveTo="opacity-0 scale-95"
                             >
                                 <Dialog.Panel className="w-full max-w-md relative transform overflow-visible rounded-2xl bg-slate-800 p-6 text-left align-middle shadow-xl transition-all -top-3">
+                                    <div className="mt-1 flex justify-end">
+                                        <button
+                                            type="button"
+                                            className="absolute -right-3 -top-4 z-50 shadow-2xl inline-flex justify-center rounded-md border border-transparent bg-red-600 px-5 py-3 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                                            onClick={closeModal}
+                                        >
+                                            <FontAwesomeIcon icon={faXmark} color={'white'} />
+                                        </button>
+                                    </div>
                                     <div className="flex flex-col justify-between flex-grow pb-[15%]">
                                         <span className="text-amber-400 text-center text-2xl">Stairway Light</span>
                                         <div className="flex justify-center gap-0.5 mb-5">
@@ -100,10 +111,11 @@ const SmartHome = ({isOpen, setIsOpen}) => {
                                         </div>
 
                                         <div className="flex gap-2 items-center justify-center text-amber-400">
-                                            0
+                                            1
                                             <input
-                                                id="default-range"
                                                 type="range"
+                                                min={1}
+                                                max={100}
                                                 value={brightness}
                                                 className="w-1/2 h-2 bg-gray-200 text-amber-400 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
                                                 onChange={handleBrightness}
