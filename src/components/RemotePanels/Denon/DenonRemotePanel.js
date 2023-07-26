@@ -11,11 +11,11 @@ const remote = REMOTE.DENON
 
 function DenonRemote() {
 
-    const [denonState, updateDenonState, refreshDenonState] = useDenonContext();
+    const [denonState, updateDenonState, refreshDenonState] = useDenonContext()
 
     // On render, query the amp for its current state (some data from MainZone HTTP request, levels data over telnet)
     useEffect( () => {
-        refreshDenonState.all();
+        refreshDenonState.all()
     }, [])
 
 

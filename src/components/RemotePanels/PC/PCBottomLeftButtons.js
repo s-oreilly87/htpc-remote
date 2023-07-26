@@ -11,11 +11,13 @@ function PCBottomLeftButtons(props) {
     return (
             <div className="flex flex-col gap-2 w-full relative">
                 <div className="flex flex-col -translate-y-9">
-                    <FontAwesomeIcon className="text-slate-600 w-12 pb-1" icon={ faDesktop } />
                     <KeypressButton remote={ REMOTE.PC }
                                     className="w-10 h-10 bg-red-600 text-white rounded-full justify-center items-center translate-x-1"
-                                    value="powerButton">
-                        <FontAwesomeIcon icon={faPowerOff} />
+                                    value="powerButton"
+                    >
+                        <FontAwesomeIcon className="transform -translate-y-2" width={24} icon={faDesktop} />
+                        <FontAwesomeIcon className="transform -translate-y-4" width={14} icon={faPowerOff} />
+                        {/*<Image className="[filter: invert(100%)]" src={'/icons/monitor-power.png'} width={36} height={36} alt="monitor-power" />*/}
                     </KeypressButton>
                 </div>
                 <div className="flex flex-col gap-2 -translate-y-9">

@@ -5,7 +5,6 @@ export default function handleBrightness(req, res) {
     let { params } = req.query
     const light = params[0]
     const brightnessLevel = toNumber(params[1])
-    console.log(brightnessLevel)
     let ip;
     switch (light) {
         case 'basement': {
@@ -20,5 +19,6 @@ export default function handleBrightness(req, res) {
     client.getDevice({ host: ip }).then((device) => {
         device.dimmer.setBrightness(brightnessLevel).then(response => console.log(response))
     });
+
     res.send('TPLink command sent!')
 }
