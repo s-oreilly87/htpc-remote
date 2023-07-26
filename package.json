@@ -38,6 +38,8 @@
     "socket.io": "^4.6.1",
     "socket.io-client": "^4.6.1",
     "telnet-stream": "^1.1.0",
+    "tplink-lightbulb": "^1.7.10",
+    "tplink-smarthome-api": "^4.2.0",
     "typescript": "^5.0.4",
     "xml2js": "^0.4.23"
   },
