@@ -41,8 +41,12 @@ const SmartHomeModal = ({isOpen, setIsOpen}) => {
     }
 
     const handleChangeBasementBrightness = (event) => {
-        updateTplinkState({ basement: { powerState: tplinkState.basement.powerState, brightness: event.currentTarget.value } })
-        fetch(`api/tp-link/brightness/basement/${event.target.value}`)
+        const brightness = event.currentTarget.value
+        if (brightness < 1 || brightness > 100) {
+            return console.error('Invalid Brightness value')
+        }
+        updateTplinkState({ basement: { powerState: tplinkState.basement.powerState, brightness: brightness } })
+        fetch(`api/tp-link/brightness/basement/${brightness}`)
     }
 
     return (
