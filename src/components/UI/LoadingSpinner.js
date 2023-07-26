@@ -5,8 +5,6 @@ const LoadingSpinner = ({ color, size= 7 }) => {
 
     return (
         <div role="status">
-            <div id="size-classes" className="w-2 w-3 w-4 w-5 w-6 w-7 w-8 w-9 w-10 w-12 w-14 w-16 w-18 w-20 w-22 w-24 w-28 w-32 w-36 h-2 h-3 h-4 h-5 h-6 h-7 h-8 h-9 h-10 h-12 h-14 h-16 h-18 h-20 h-22 h-24 h-28 h-32 h-36"></div>
-            <div id="color-classes" className="fill-amber-400 fill-teal-500 fill-white fill-red-600"></div>
             <svg aria-hidden="true"
                  className={`inline w-${size} h-${size} mr-2 text-gray-200 animate-spin dark:text-slate-800 fill-${color}`}
                  viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">

@@ -88,8 +88,6 @@ const SmartHomeModal = ({isOpen, setIsOpen}) => {
                                             {Object.values(LIGHTSWITCHES).map(lightSwitch => (
                                                 <LightswitchToggle key={lightSwitch.id} lightSwitch={lightSwitch} handleToggle={handleToggle} />
                                             ))}
-                                            <div id="button-color-classes" className="bg-amber-100 bg-amber-200 bg-amber-300 bg-amber-400 bg-amber-500 bg-amber-600 bg-amber-700 bg-amber-800 bg-amber-900
-                                                text-amber-100 text-amber-200 text-amber-300 text-amber-400 text-amber-500 text-amber-600 text-amber-700 text-amber-800 text-amber-900"></div>
                                             <div className="flex justify-center gap-0.5 mb-2">
                                                 {brightnessButtons.map(button => (
                                                     <button key={button.label} className={`btn bg-${button.color} text-${button.textColor} rounded-full w-1/8"`} value={button.value} onClick={handleChangeBasementBrightness}>
