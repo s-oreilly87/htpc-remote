@@ -52,7 +52,7 @@ const QRCode = ({isOpen, setIsOpen}) => {
                                         </button>
                                     </div>
                                     <div className="w-full flex flex-col items-center justify-center gap-4">
-                                        <Image width="300" height="300" src="/Remote App QR Code.png" alt="QR Code" />
+                                        <Image width="300" height="300" src="/192-168-1-185.png" alt="QR Code" />
                                         <div className="w-75 text-white text-center">
                                             For best experience, open app in Chrome browser and install as App.
                                         </div>
