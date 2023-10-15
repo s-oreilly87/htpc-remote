@@ -92,16 +92,7 @@ const SmartHomeModal = ({isOpen, setIsOpen}) => {
                                             {Object.values(LIGHTSWITCHES).map(lightSwitch => (
                                                 <LightswitchToggle key={lightSwitch.id} lightSwitch={lightSwitch} handleToggle={handleToggle} />
                                             ))}
-                                            <div className="flex justify-center gap-0.5 mb-2">
-                                                {brightnessButtons.map(button => (
-                                                    <button key={button.label} className={`btn bg-${button.color} text-${button.textColor} rounded-full w-1/8"`} value={button.value} onClick={handleChangeBasementBrightness}>
-                                                        <span className="min-w-12">{button.label}</span>
-                                                    </button>
-                                                    ))
-                                                }
-                                            </div>
-
-                                            <div className="flex gap-2 items-center justify-center text-amber-400">
+                                            <div className="flex gap-2 items-center justify-center text-amber-400 mb-2">
                                                 1
                                                 <input
                                                     type="range"
@@ -112,6 +103,14 @@ const SmartHomeModal = ({isOpen, setIsOpen}) => {
                                                     onChange={handleChangeBasementBrightness}
                                                 />
                                                 100
+                                            </div>
+                                            <div className="flex justify-center gap-0.5">
+                                                {brightnessButtons.map(button => (
+                                                    <button key={button.label} className={`btn bg-${button.color} text-${button.textColor} rounded-full w-1/8"`} value={button.value} onClick={handleChangeBasementBrightness}>
+                                                        <span className="min-w-12">{button.label}</span>
+                                                    </button>
+                                                    ))
+                                                }
                                             </div>
                                         </div>
                                         )}

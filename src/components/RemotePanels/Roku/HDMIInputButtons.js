@@ -14,9 +14,9 @@ function HDMIInputs({ setPowerOn }) {
                 <KeypressButton remote={REMOTE.ROKU}
                                 id="computer"
                                 className="btn btn-primary-roku w-1/2 z-50"
-                                value={ROKU_APPS.HDMI.HDMI1.id}
+                                value={ROKU_APPS.HDMI.HDMI2.id}
                                 onClick={handleClick}>
-                    { ROKU_APPS.HDMI.HDMI1.label }
+                    { ROKU_APPS.HDMI.HDMI2.label }
                 </KeypressButton>
                 <KeypressButton remote={REMOTE.ROKU}
                                 id="receiver"

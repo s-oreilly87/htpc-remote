@@ -79,6 +79,10 @@ export function sendRokuLaunchCommand(button) {
     fetch(`api/roku/launch/${button.value}`, ROKU_POST_OPTIONS)
 }
 
+export function sendRokuSearchQuery(query) {
+    fetch(`api/roku/search/browse?${query}`, ROKU_POST_OPTIONS)
+}
+
 
 // ########   PC Control   ########
 export async function sendEventToEventGhost(button, payload = "") {

@@ -20,12 +20,12 @@ const presetToEffectsMap = {
     presetTV4K: {
         audioMode: AUDIO_MODES_FOR_SELECT.ATMOS,
         displayMode: DISPLAY_MODES_FOR_SELECT.TV4K,
-        rokuApp: ROKU_APPS.HDMI.HDMI1
+        rokuApp: ROKU_APPS.HDMI.HDMI2
     },
     presetTV1440: {
         audioMode: AUDIO_MODES_FOR_SELECT.ATMOS,
         displayMode: DISPLAY_MODES_FOR_SELECT.TV1440,
-        rokuApp: ROKU_APPS.HDMI.HDMI1
+        rokuApp: ROKU_APPS.HDMI.HDMI2
     }
 }
 

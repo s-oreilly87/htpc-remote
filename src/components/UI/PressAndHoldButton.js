@@ -129,6 +129,9 @@ const PressAndHoldButton = ({ remote, volumeButton = false, children, ...props }
                     break;
                 }
             }
+            if (!value) {
+                return console.error("Did not receive MasterVolume data in Denon response.")
+            }
 
             if (value.length === 3) {
                 value = parseFloat(value) / 10

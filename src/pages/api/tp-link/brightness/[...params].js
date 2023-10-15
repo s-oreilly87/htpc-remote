@@ -1,5 +1,6 @@
 import {Client} from 'tplink-smarthome-api'
 import {toNumber} from "lodash";
+import {LIGHTSWITCHES} from "@/utilities/constants.js";
 
 export default function handleBrightness(req, res) {
     let { params } = req.query
@@ -8,7 +9,7 @@ export default function handleBrightness(req, res) {
     let ip;
     switch (light) {
         case 'basement': {
-            ip = "192.168.1.24"
+            ip = LIGHTSWITCHES.BASEMENT.ip
             break
         }
         default: {
@@ -16,8 +17,9 @@ export default function handleBrightness(req, res) {
         }
     }
     const client = new Client()
+    client.on('error', (error) => console.log('ERROR! ERROR!'))
     client.getDevice({ host: ip }).then((device) => {
-        device.dimmer.setBrightness(brightnessLevel).then(response => console.log(response))
+        device.dimmer.setBrightness(brightnessLevel)
     });
 
     res.send('TPLink command sent!')

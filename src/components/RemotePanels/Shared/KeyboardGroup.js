@@ -5,9 +5,10 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faKeyboard, faMagnifyingGlass, faXmark} from '@fortawesome/free-solid-svg-icons'
 import {faWindows} from "@fortawesome/free-brands-svg-icons";
 import KeypressButton from "@/components/UI/KeypressButton";
-import {sendKeystrokeToNutJS, sendRokuKeypress} from "@/utilities/http";
+import {sendKeystrokeToNutJS, sendRokuKeypress, sendRokuSearchQuery} from "@/utilities/http";
 import {sleep} from "@/utilities/utils";
 import {throttle} from 'lodash'
+import {lowerCase} from "lodash/string.js";
 
 function KeyboardGroup({ remote }) {
     const [inputExpanded, setInputExpanded] = useState(false)
@@ -18,7 +19,11 @@ function KeyboardGroup({ remote }) {
 
     const startMenuOpen = useRef(false)
 
+    const [rokuSearchOpen, setRokuSearchOpen] = useState(false);
+
     const waitForSendInput = useRef(100)
+
+    const keyboardInput = useRef()
 
     useEffect(() => {
         if(!inputExpanded) {
@@ -55,7 +60,9 @@ function KeyboardGroup({ remote }) {
 
     const sendKey = (key) => {
         if (remote === REMOTE.ROKU) {
-            sendRokuKeypress({ value: key })
+            if (!rokuSearchOpen) {
+                sendRokuKeypress({ value: key })
+            }
         } else if (remote === REMOTE.PC) {
             if (key === KEYSTROKE.KEYS.BACKSPACE) {
                 key = KEYSTROKE[remote].BACKSPACE
@@ -76,7 +83,9 @@ function KeyboardGroup({ remote }) {
         }
 
         if (remote === REMOTE.ROKU) {
-            sendKey("Lit_" + char)
+            if (!rokuSearchOpen) {
+                sendKey("Lit_" + char)
+            }
         } else {
             sendKey(char)
         }
@@ -138,7 +147,6 @@ function KeyboardGroup({ remote }) {
 
         } else if (inputType === "insertFromPaste") {
             let pastedString = event.target.value.substring(inputSoFar.length)
-            console.log(pastedString)
             sendStringAsChars(pastedString)
             setInputSoFar(inputSoFar + pastedString)
         } else {
@@ -154,7 +162,9 @@ function KeyboardGroup({ remote }) {
         if (event.keyCode === 8 && event.target.value === "") {
             // handle backspace when input is empty
             if (remote === REMOTE.ROKU) {
-                sendRokuKeypress({ value: KEYSTROKE.ROKU.BACKSPACE });
+                if (!rokuSearchOpen) {
+                    sendRokuKeypress({ value: KEYSTROKE.ROKU.BACKSPACE });
+                }
             } else if (remote === REMOTE.PC) {
                 sendKeystrokeToNutJS(KEYSTROKE.PC.BACKSPACE);
             }
@@ -164,7 +174,12 @@ function KeyboardGroup({ remote }) {
 
     const handleSubmit = (event) => {
         event.preventDefault()
-        sendKey(KEYSTROKE.KEYS.ENTER)
+        if (rokuSearchOpen){
+            sendRokuSearchQuery(inputSoFar)
+        } else {
+            sendKey(KEYSTROKE.KEYS.ENTER)
+        }
+        setRokuSearchOpen(false)
         setInputExpanded(false)
     }
 
@@ -219,14 +234,18 @@ function KeyboardGroup({ remote }) {
                         </button>
                     }
                     { remote === REMOTE.ROKU &&
-                        <button id="keyboard"
+                        <button id="search"
                                 type="button"
                                 className={`btn h-full w-full flex justify-center items-center \
-                            ${ (inputExpanded ? "rounded-l-xl rounded-r-none bg-red-600" : "btn-secondary") } `}
-                                onClick={toggleInputExpanded}>
+                            ${ (inputExpanded ? "rounded-l-xl rounded-r-none bg-red-600" : "btn-primary-roku") } `}
+                                onClick={() => {
+                                    setRokuSearchOpen(!inputExpanded)
+                                    toggleInputExpanded()
+
+                                }}>
 
                             { !inputExpanded &&
-                                <FontAwesomeIcon icon={ faKeyboard } />
+                                <FontAwesomeIcon icon={ faMagnifyingGlass } />
                             }
                             { inputExpanded &&
                                 <FontAwesomeIcon icon={ faXmark } />
@@ -246,7 +265,8 @@ function KeyboardGroup({ remote }) {
                     className="flex">
                     <div className="w-full h-full">
                         <input id="keyboard-input"
-                               className={`h-full w-full px-3 py-1`}
+                               ref={keyboardInput}
+                               className={`h-full w-full px-3 py-1 z-50`}
                                type="text"
                                placeholder={ getInputPlaceholder() }
                                autoFocus
@@ -260,14 +280,15 @@ function KeyboardGroup({ remote }) {
                     <div className="w-14 flex justify-items-stretch">
                         <button id="keyboard-submit"
                                 type="submit"
-                                className={ `btn btn-primary-${ remote } rounded-r-xl rounded-l-none h-full w-full` }
-                                value={ KEYSTROKE[remote].ENTER }>
+                                className={ `btn btn-primary-${ lowerCase(remote) } rounded-r-xl rounded-l-none h-full w-full z-10` }
+                                value={ KEYSTROKE[remote].ENTER }
+                        >
                             <FontAwesomeIcon icon={ faMagnifyingGlass } className="h-1/2 w-1/2 mx-auto" />
                         </button>
                     </div>
                 </Transition>
             </form>
-            { remote === REMOTE.PC &&
+            { (remote === REMOTE.PC || remote === REMOTE.ROKU) &&
                 <KeypressButton id="toggle-keyboard"
                                 className="btn-secondary absolute bottom-0 left-14 w-10"
                                 onClick={toggleInputExpanded}>

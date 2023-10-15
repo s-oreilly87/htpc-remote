@@ -1,4 +1,5 @@
 import {Client} from 'tplink-smarthome-api'
+import {LIGHTSWITCHES} from '@/utilities/constants.js'
 
 export default function handleToggleSwitch(req, res) {
     let { params } = req.query
@@ -7,16 +8,16 @@ export default function handleToggleSwitch(req, res) {
 
     let ip;
     switch (light) {
-        case 'basement': {
-            ip = "192.168.1.24"
+        case LIGHTSWITCHES.BASEMENT.id: {
+            ip = LIGHTSWITCHES.BASEMENT.ip
             break
         }
-        case 'stairway': {
-            ip = "192.168.1.194"
+        case LIGHTSWITCHES.STAIRWAY.id: {
+            ip = LIGHTSWITCHES.STAIRWAY.ip
             break
         }
-        case 'bedroom': {
-            ip = "192.168.1.206"
+        case LIGHTSWITCHES.BEDROOM.id: {
+            ip = LIGHTSWITCHES.BEDROOM.ip
         }
     }
     const client = new Client()
