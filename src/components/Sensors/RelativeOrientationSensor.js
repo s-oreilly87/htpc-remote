@@ -13,7 +13,7 @@ const RelativeOrientationSensor = ({frequency, updateOrientation}) => {
             updateOrientation(relOrientation, prevRelOrientation.current)
             prevRelOrientation.current = relOrientation
         }
-    }, [relOrientation?.quaternion[0], relOrientation?.quaternion[1], relOrientation?.quaternion[2], relOrientation?.quaternion[3]])
+    }, [relOrientation, updateOrientation])
 
     return (
         <>

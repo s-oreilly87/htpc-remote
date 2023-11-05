@@ -33,7 +33,7 @@ const AirMouse = () => {
             }
         }
 
-    }, [enabled])
+    }, [enabled, isSupported, release, released, request, type])
 
     useEffect(() => {
         setHasRelOrientationSensor(hasRelativeOrientationSensor())
@@ -46,7 +46,7 @@ const AirMouse = () => {
         if (prevOrientation) {
             const deltaX = prevOrientation.quaternion[2] - orientation.quaternion[2]
             const deltaY = prevOrientation.quaternion[0] - orientation.quaternion[0]
-            if (Math.abs(deltaX) > 0.00025 || Math.abs(deltaY) > 0.00025) {
+            if (Math.abs(deltaX) > 0.0005 || Math.abs(deltaY) > 0.0005) {
                 socket.emit('orientation', { x: orientation.quaternion[2], y: orientation.quaternion[0] })
             }
         }
@@ -68,7 +68,8 @@ const AirMouse = () => {
     const handleEnable = (isEnabled) => {
         // Create websocket connection
         if (isEnabled) {
-            initializeSocket()
+            closeSocket()
+                .then(initializeSocket())
         } else {
             closeSocket()
             sendDisableCommandToNutJS()
@@ -102,7 +103,7 @@ const AirMouse = () => {
 
                 <>
                     { enabled &&
-                        <RelativeOrientationSensor frequency={ 60 }
+                        <RelativeOrientationSensor frequency={ 120 }
                                                    updateOrientation={ updateOrientation } />
                     }
 
@@ -112,15 +113,15 @@ const AirMouse = () => {
                                               handleSetBottomRight={ handleSetBottomRight }
                                               orientation={ currentOrientation }/>
 
-                    <div className={"flex gap-3 mx-auto self-end"}>
+                    <div className="flex gap-3 mx-auto self-end">
 
                         { enabled &&
-                            <button className={"btn px-10 py-6 bg-gray-500"} onClick={ handleLeftClick } onDoubleClick={handleDoubleClick}>L</button>
+                            <button className="btn px-10 py-6 bg-gray-500" onClick={ handleLeftClick } onDoubleClick={handleDoubleClick}>L</button>
                         }
 
-                        <div className={"flex flex-col items-center gap-2"}>
+                        <div className="flex flex-col items-center gap-2">
                             <Switch.Group>
-                                <div className={"flex flex-col items-center justify-center"}>
+                                <div className="flex flex-col items-center justify-center">
                                     <Switch.Label className={"text-white"}>Air Mouse</Switch.Label>
                                     <Switch
                                         checked={enabled}
@@ -141,7 +142,7 @@ const AirMouse = () => {
 
                             { enabled &&
                                 <button
-                                    className={"btn btn-primary-pc rounded-full aspect-square p-2 justify-center items-center h-full"}
+                                    className="btn btn-primary-pc rounded-full aspect-square p-2 justify-center items-center h-full"
                                     onClick={() => setShowCalibration(true)}>
                                     <FontAwesomeIcon icon={ faLocationCrosshairs }/>
                                 </button>
@@ -150,7 +151,7 @@ const AirMouse = () => {
                         </div>
 
                         { enabled &&
-                            <button className={"btn px-10 py-6 bg-gray-500"} onClick={ handleRightClick }>R</button>
+                            <button className="btn px-10 py-6 bg-gray-500" onClick={ handleRightClick }>R</button>
                         }
                     </div>
                 </>

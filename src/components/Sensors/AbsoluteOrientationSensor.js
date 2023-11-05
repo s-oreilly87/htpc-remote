@@ -5,7 +5,7 @@ import {useAbsoluteOrientationSensor} from "@/utilities/sensors";
 const AbsoluteOrientationSensor = ({frequency, updateOrientation}) => {
 
     // initialize relative orientation sensor
-    const absOrientation = useAbsoluteOrientationSensor({frequency: frequency})
+    const absOrientation = useAbsoluteOrientationSensor({ frequency: frequency })
     const prevAbsOrientation = useRef(null)
 
     useEffect(() => {
@@ -13,7 +13,7 @@ const AbsoluteOrientationSensor = ({frequency, updateOrientation}) => {
             updateOrientation(absOrientation, prevAbsOrientation.current)
             prevAbsOrientation.current = absOrientation
         }
-    }, [absOrientation?.quaternion[0], absOrientation?.quaternion[1], absOrientation?.quaternion[2], absOrientation?.quaternion[3]])
+    }, [absOrientation, updateOrientation])
 
     return (
         <>
