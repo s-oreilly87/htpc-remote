@@ -118,14 +118,20 @@ async function handleOrientation(orientation) {
 
     const newMousePos = await getNewMousePos(x, y)
 
-    await mouse.move(straightTo(new Point(newMousePos.x, newMousePos.y)))
+    const oldMousePos = await mouse.getPosition()
+
+    if (Math.sqrt(Math.pow(oldMousePos.x - newMousePos.x, 2) + Math.pow(oldMousePos.y - newMousePos.y, 2)) > 150) {
+        await mouse.setPosition(new Point(newMousePos.x, newMousePos.y))
+    } else {
+        await mouse.move(straightTo(new Point(newMousePos.x, newMousePos.y)))
+    }
+
     busy = false
     //res.send(`Mouse moved to x: ${newMousePos.x}, y: ${newMousePos.y}`)
 }
 
 export default function handleInitializeSocket(req, res) {
     if (res.socket.server.io) {
-        console.log('Socket is already running')
         res.send("Socket already running")
     } else {
         console.log('Socket is initializing . . .')
