@@ -1,15 +1,15 @@
 export const PLATFORM = process.env.NEXT_PUBLIC_PLATFORM
 export const SERVER_IP = process.env.SERVER_IP
-export const DENON_IP = '192.168.1.12'
+export const DENON_IP = '192.168.1.11'
 export const ROKU_URL = 'http://192.168.1.126:8060'
 export const EVENTGHOST_URL = `http://${SERVER_IP}:3005`
 export const DENON_HTTP_COMMAND_URL = 'goform/formiPhoneAppDirect.xml'
 export const DENON_HTTP_QUERY_URL = 'goform/formMainZone_MainZoneXml.xml'
 
 export const LIGHTSWITCHES = {
-    BEDROOM: { id: 'bedroom', ip: '192.168.1.207', label: 'Bedroom Light' },
+    BEDROOM: { id: 'bedroom', ip: '192.168.1.206', label: 'Bedroom Light' },
     STAIRWAY: {id: 'stairway', ip: '192.168.1.194', label: 'Stairway Light'},
-    BASEMENT: { id: 'basement', ip: '192.168.1.25', label: 'Basement Lights' },
+    BASEMENT: { id: 'basement', ip: '192.168.1.24', label: 'Basement Lights' },
 }
 
 export const ROKU_POST_OPTIONS = {
