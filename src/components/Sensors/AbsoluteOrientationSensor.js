@@ -1,24 +1,19 @@
-import {useEffect, useRef} from "react";
-import {useAbsoluteOrientationSensor} from "@/utilities/sensors";
+import { useEffect, useRef } from "react";
+import { useAbsoluteOrientationSensor } from "@/utilities/sensors";
 
+const AbsoluteOrientationSensor = ({ frequency, updateOrientation }) => {
+  // initialize relative orientation sensor
+  const absOrientation = useAbsoluteOrientationSensor({ frequency: frequency });
+  const prevAbsOrientation = useRef(null);
 
-const AbsoluteOrientationSensor = ({frequency, updateOrientation}) => {
+  useEffect(() => {
+    if (absOrientation) {
+      updateOrientation(absOrientation, prevAbsOrientation.current);
+      prevAbsOrientation.current = absOrientation;
+    }
+  }, [absOrientation, updateOrientation]);
 
-    // initialize relative orientation sensor
-    const absOrientation = useAbsoluteOrientationSensor({ frequency: frequency })
-    const prevAbsOrientation = useRef(null)
+  return <></>;
+};
 
-    useEffect(() => {
-        if (absOrientation) {
-            updateOrientation(absOrientation, prevAbsOrientation.current)
-            prevAbsOrientation.current = absOrientation
-        }
-    }, [absOrientation, updateOrientation])
-
-    return (
-        <>
-        </>
-    )
-}
-
-export default AbsoluteOrientationSensor
+export default AbsoluteOrientationSensor;

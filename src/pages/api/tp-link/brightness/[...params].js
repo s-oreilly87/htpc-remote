@@ -1,26 +1,26 @@
-import {Client} from 'tplink-smarthome-api'
-import {toNumber} from "lodash";
-import {LIGHTSWITCHES} from "@/utilities/constants.js";
+import { Client } from "tplink-smarthome-api";
+import { toNumber } from "lodash";
+import { LIGHTSWITCHES } from "@/utilities/constants.js";
 
 export default function handleBrightness(req, res) {
-    let { params } = req.query
-    const light = params[0]
-    const brightnessLevel = toNumber(params[1])
-    let ip;
-    switch (light) {
-        case 'basement': {
-            ip = LIGHTSWITCHES.BASEMENT.ip
-            break
-        }
-        default: {
-            return res.send('Error: Switch not dimmable!')
-        }
+  let { params } = req.query;
+  const light = params[0];
+  const brightnessLevel = toNumber(params[1]);
+  let ip;
+  switch (light) {
+    case "basement": {
+      ip = LIGHTSWITCHES.BASEMENT.ip;
+      break;
     }
-    const client = new Client()
-    client.on('error', (error) => console.log('ERROR! ERROR!'))
-    client.getDevice({ host: ip }).then((device) => {
-        device.dimmer.setBrightness(brightnessLevel)
-    });
+    default: {
+      return res.send("Error: Switch not dimmable!");
+    }
+  }
+  const client = new Client();
+  client.on("error", (error) => console.log("ERROR! ERROR!"));
+  client.getDevice({ host: ip }).then((device) => {
+    device.dimmer.setBrightness(brightnessLevel);
+  });
 
-    res.send('TPLink command sent!')
+  res.send("TPLink command sent!");
 }

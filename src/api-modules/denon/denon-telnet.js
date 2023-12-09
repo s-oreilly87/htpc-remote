@@ -10,291 +10,301 @@
 //      - nothing is done with EVENTS.
 //      - RESPONSES arent quite working because I cant remove listeners from the TelnetSocket . . . they just pile up
 
-import net from 'net'
-import {TelnetSocket} from 'telnet-stream'
-import DenonTelnetWrapper from './denon-telnet-wrapper.js'
-import {DENON_IP} from "@/utilities/constants.js";
+import net from "net";
+import { TelnetSocket } from "telnet-stream";
+import DenonTelnetWrapper from "./denon-telnet-wrapper.js";
+import { DENON_IP } from "@/utilities/constants.js";
 
-const DENON_PORT = 23
+const DENON_PORT = 23;
 
-const DenonTelnet = function(ip) {
-    this.params = {
-        port: DENON_PORT,
-        host: ip,
-        //keepAlive: true,
-        //keepAliveInitialDelay: true
-        //setNoDelay: true,
-        timeOut: 300000, // 5m timeout on inactive connection NOT response
-    }
-    this.connection = null
-    this.busy = false
-    this.cmdQueue = []
-    this.receivedData = []
-    this.timeoutWatcher = null
-    this.multipleDataTimeout = 100
-    this.responseTimeout = 3000
-    this.currentCmdHandler = null
+const DenonTelnet = function (ip) {
+  this.params = {
+    port: DENON_PORT,
+    host: ip,
+    //keepAlive: true,
+    //keepAliveInitialDelay: true
+    //setNoDelay: true,
+    timeOut: 300000, // 5m timeout on inactive connection NOT response
+  };
+  this.connection = null;
+  this.busy = false;
+  this.cmdQueue = [];
+  this.receivedData = [];
+  this.timeoutWatcher = null;
+  this.multipleDataTimeout = 100;
+  this.responseTimeout = 3000;
+  this.currentCmdHandler = null;
 };
 
-DenonTelnet.prototype.connect = function() {
-    // create a socket connection (And connects it!)
-    try {
-        const socket = net.createConnection(this.params, () => {
-            console.log('Telnet Socket created and connected!')
-            // once connected, go back and start working through the queue
-            this.sendNextTelnetQueueItem()
-        })
-        const telnetSocket = new TelnetSocket(socket)
-
-        // create listener to forward the 'data' event to wrapper
-        telnetSocket.on('data', (data) => {
-            this.connection.emit('data', data);
-        });
-
-        telnetSocket.on('close', () => {
-            console.log('TelNet connection closed!')
-        })
-
-        telnetSocket.on('error', (error) => {
-            console.log('TelNet Error!')
-            this.connect()
-        })
-
-        // Wrap telnetSocket to allow removing listeners / once (not available in 'telnet-stream')
-        this.connection = DenonTelnetWrapper(telnetSocket)
-    } catch (err) {
-        console.error('DENON-TELNET: Telnet Connection Error:');
-        console.error(err)
-    }
-}
-
-
-
-DenonTelnet.prototype.setDataHandlerCallback = function(callback) {
-    this.currentCmdHandler = (data) => {
-        clearTimeout(this.timeoutWatcher)
-        let cleanedData = data.toString().trim().split('\r')
-        this.receivedData.push(...cleanedData)
-
-        // Once theres a gap of this.multipleDataTimout, Response is complete
-        this.timeoutWatcher = setTimeout(() => {
-            this.connection.removeListener('data', this.currentCmdHandler)
-            this.currentCmdHandler = null
-
-            if (this.receivedData.length > 0) { // has to be, there was a data event
-                //console.log(`Received data: `);
-                //console.log(this.receivedData)
-                callback(null, this.receivedData)
-                this.receivedData = []
-            } else {
-                callback("Error")
-            }
-        }, this.multipleDataTimeout)
-    }
-
-    this.connection.on('data', this.currentCmdHandler)
-}
-
-DenonTelnet.prototype.sendNextTelnetQueueItem = function() {
-    if (this.cmdQueue.length > 0) {
-        if (!this.connection) {
-            this.connect()
-        } else {
-            const item = this.cmdQueue.shift();
-            this.setDataHandlerCallback(item.callback)
-            //console.log("Writing cmd: " + item.cmd)
-            this.connection.write(item.cmd + "\r")
-
-            // timeout for no response (will be cleared in data handler on data)
-            this.timeoutWatcher = setTimeout(() => {
-                this.connection.removeListener('data', this.currentCmdHandler)
-                item.callback("No response received from Command \"" + item.cmd + "\"")
-            }, this.responseTimeout)
-
-            //TODO: need to figure out a way to wait until prev res sent to send another command ... i think?
-            setTimeout(() => {  // Send the COMMAND in 50ms or more intervals.
-                this.sendNextTelnetQueueItem();
-            }, 50);
-        }
-    } else {
-        this.busy = false
-        //console.log("Queue empty - awaiting more commands!")
-    }
-};
-
-DenonTelnet.prototype.addCmdToQueue = function (cmd, waitfor = undefined, callback) {
-    this.cmdQueue.push({ cmd: cmd, callback: callback, waitfor: waitfor })
-    if (!this.busy) {
-        this.busy = true
-        this.sendNextTelnetQueueItem();
-    }
-};
-
-DenonTelnet.prototype.cmd = function(cmd, callback) {
-    this.addCmdToQueue(cmd, null, (error, data) => {
-        if (!error) {
-            callback(null, data);
-        } else {
-            callback(error);
-        }
+DenonTelnet.prototype.connect = function () {
+  // create a socket connection (And connects it!)
+  try {
+    const socket = net.createConnection(this.params, () => {
+      console.log("Telnet Socket created and connected!");
+      // once connected, go back and start working through the queue
+      this.sendNextTelnetQueueItem();
     });
+    const telnetSocket = new TelnetSocket(socket);
+
+    // create listener to forward the 'data' event to wrapper
+    telnetSocket.on("data", (data) => {
+      this.connection.emit("data", data);
+    });
+
+    telnetSocket.on("close", () => {
+      console.log("TelNet connection closed!");
+    });
+
+    telnetSocket.on("error", (error) => {
+      console.log("TelNet Error!");
+      this.connect();
+    });
+
+    // Wrap telnetSocket to allow removing listeners / once (not available in 'telnet-stream')
+    this.connection = DenonTelnetWrapper(telnetSocket);
+  } catch (err) {
+    console.error("DENON-TELNET: Telnet Connection Error:");
+    console.error(err);
+  }
 };
 
-DenonTelnet.prototype.parseSimpleResponse = function(data, regexp) {
-    let match
+DenonTelnet.prototype.setDataHandlerCallback = function (callback) {
+  this.currentCmdHandler = (data) => {
+    clearTimeout(this.timeoutWatcher);
+    let cleanedData = data.toString().trim().split("\r");
+    this.receivedData.push(...cleanedData);
 
-    for (const line of data) {
-        match = regexp.exec(line)
+    // Once theres a gap of this.multipleDataTimout, Response is complete
+    this.timeoutWatcher = setTimeout(() => {
+      this.connection.removeListener("data", this.currentCmdHandler);
+      this.currentCmdHandler = null;
 
-        if (match) {
-            return match[1];
-        }
+      if (this.receivedData.length > 0) {
+        // has to be, there was a data event
+        //console.log(`Received data: `);
+        //console.log(this.receivedData)
+        callback(null, this.receivedData);
+        this.receivedData = [];
+      } else {
+        callback("Error");
+      }
+    }, this.multipleDataTimeout);
+  };
+
+  this.connection.on("data", this.currentCmdHandler);
+};
+
+DenonTelnet.prototype.sendNextTelnetQueueItem = function () {
+  if (this.cmdQueue.length > 0) {
+    if (!this.connection) {
+      this.connect();
+    } else {
+      const item = this.cmdQueue.shift();
+      this.setDataHandlerCallback(item.callback);
+      //console.log("Writing cmd: " + item.cmd)
+      this.connection.write(item.cmd + "\r");
+
+      // timeout for no response (will be cleared in data handler on data)
+      this.timeoutWatcher = setTimeout(() => {
+        this.connection.removeListener("data", this.currentCmdHandler);
+        item.callback('No response received from Command "' + item.cmd + '"');
+      }, this.responseTimeout);
+
+      //TODO: need to figure out a way to wait until prev res sent to send another command ... i think?
+      setTimeout(() => {
+        // Send the COMMAND in 50ms or more intervals.
+        this.sendNextTelnetQueueItem();
+      }, 50);
     }
-    return null;
+  } else {
+    this.busy = false;
+    //console.log("Queue empty - awaiting more commands!")
+  }
+};
+
+DenonTelnet.prototype.addCmdToQueue = function (
+  cmd,
+  waitfor = undefined,
+  callback,
+) {
+  this.cmdQueue.push({ cmd: cmd, callback: callback, waitfor: waitfor });
+  if (!this.busy) {
+    this.busy = true;
+    this.sendNextTelnetQueueItem();
+  }
+};
+
+DenonTelnet.prototype.cmd = function (cmd, callback) {
+  this.addCmdToQueue(cmd, null, (error, data) => {
+    if (!error) {
+      callback(null, data);
+    } else {
+      callback(error);
+    }
+  });
+};
+
+DenonTelnet.prototype.parseSimpleResponse = function (data, regexp) {
+  let match;
+
+  for (const line of data) {
+    match = regexp.exec(line);
+
+    if (match) {
+      return match[1];
+    }
+  }
+  return null;
 };
 
 DenonTelnet.prototype.getInput = function (zone, callback) {
-    const commandPrefix = (!zone || (zone === 'ZM')) ? 'SI' : zone;
-    const regexp = RegExp('(?:^|[\r])' + commandPrefix + '([^O0-9]+[^NF]+)');
+  const commandPrefix = !zone || zone === "ZM" ? "SI" : zone;
+  const regexp = RegExp("(?:^|[\r])" + commandPrefix + "([^O0-9]+[^NF]+)");
 
-    this.addCmdToQueue(commandPrefix + '?', undefined, (error, data) => {
-        if (!error) {
-            const input = this.parseSimpleResponse(data, regexp)
-            if (input) {
-                callback(null, input);
-            } else {
-                callback('DENON-TELNET: Did not get INPUT RESPONSE in time.');
-            }
-        } else {
-            callback(error);
-        }
-    });
+  this.addCmdToQueue(commandPrefix + "?", undefined, (error, data) => {
+    if (!error) {
+      const input = this.parseSimpleResponse(data, regexp);
+      if (input) {
+        callback(null, input);
+      } else {
+        callback("DENON-TELNET: Did not get INPUT RESPONSE in time.");
+      }
+    } else {
+      callback(error);
+    }
+  });
 };
 
 DenonTelnet.prototype.setInput = function (input, zone, callback) {
-    const commandPrefix = (!zone || (zone === 'ZM')) ? 'SI' : zone;
+  const commandPrefix = !zone || zone === "ZM" ? "SI" : zone;
 
-    this.addCmdToQueue(commandPrefix + input, undefined, (error, data) => {
-        if (!error) {
-            callback(null, data);
-        } else {
-            callback(error);
-        }
-    });
+  this.addCmdToQueue(commandPrefix + input, undefined, (error, data) => {
+    if (!error) {
+      callback(null, data);
+    } else {
+      callback(error);
+    }
+  });
 };
 
 DenonTelnet.prototype.getMuteState = function (zone, callback) {
-    const commandPrefix = (!zone || (zone === 'ZM')) ? '' : zone;
-    const regexp = RegExp('(?:^|[\r])' + commandPrefix + 'MU(ON|OFF)');
+  const commandPrefix = !zone || zone === "ZM" ? "" : zone;
+  const regexp = RegExp("(?:^|[\r])" + commandPrefix + "MU(ON|OFF)");
 
-    this.addCmdToQueue(commandPrefix + 'MU?', regexp, (error, data) => {
-
-        if (!error) {
-            const muteState = this.parseSimpleResponse(data, regexp)
-            if (muteState) {
-                callback(null, (muteState === 'ON'));
-            } else {
-                callback('DENON-TELNET: Did not get MUTE RESPONSE in time.');
-            }
-        } else {
-            callback(error);
-        }
-    });
+  this.addCmdToQueue(commandPrefix + "MU?", regexp, (error, data) => {
+    if (!error) {
+      const muteState = this.parseSimpleResponse(data, regexp);
+      if (muteState) {
+        callback(null, muteState === "ON");
+      } else {
+        callback("DENON-TELNET: Did not get MUTE RESPONSE in time.");
+      }
+    } else {
+      callback(error);
+    }
+  });
 };
 
 DenonTelnet.prototype.setMuteState = function (muteState, zone, callback) {
-    const commandPrefix = (!zone || (zone === 'ZM')) ? '' : zone;
+  const commandPrefix = !zone || zone === "ZM" ? "" : zone;
 
-    this.addCmdToQueue(commandPrefix + 'MU' + (muteState ? 'ON' : 'OFF'), undefined, (error, data) => {
-        if (!error) {
-            callback(null, muteState);
-        } else {
-            callback(error);
-        }
-    });
+  this.addCmdToQueue(
+    commandPrefix + "MU" + (muteState ? "ON" : "OFF"),
+    undefined,
+    (error, data) => {
+      if (!error) {
+        callback(null, muteState);
+      } else {
+        callback(error);
+      }
+    },
+  );
 };
 
 DenonTelnet.prototype.getVolume = function (zone, callback) {
+  const commandPrefix = !zone || zone === "ZM" ? "MV" : zone;
+  const regexp = RegExp("(?:^|[\r])" + commandPrefix + "(\\d+)");
 
-    const commandPrefix = (!zone || (zone === 'ZM')) ? 'MV' : zone;
-    const regexp = RegExp('(?:^|[\r])' + commandPrefix + '(\\d+)');
-
-    this.addCmdToQueue(commandPrefix + '?', regexp, (error, data) => {
-
-        if (!error) {
-            const volume = this.parseSimpleResponse(data, regexp)
-            if (volume) {
-                callback(null, parseInt((volume + '0').slice(0, 3), 10) * 0.1);
-            } else {
-                callback('DENON-TELNET: Did not get VOLUME RESPONSE in time.');
-            }
-        } else {
-            callback(error);
-        }
-    });
+  this.addCmdToQueue(commandPrefix + "?", regexp, (error, data) => {
+    if (!error) {
+      const volume = this.parseSimpleResponse(data, regexp);
+      if (volume) {
+        callback(null, parseInt((volume + "0").slice(0, 3), 10) * 0.1);
+      } else {
+        callback("DENON-TELNET: Did not get VOLUME RESPONSE in time.");
+      }
+    } else {
+      callback(error);
+    }
+  });
 };
 
 DenonTelnet.prototype.setVolume = function (volume, zone, callback) {
-    const commandPrefix = (!zone || (zone === 'ZM')) ? 'MV' : zone;
-    let vol = (volume * 10).toFixed(0);  //volume fix
+  const commandPrefix = !zone || zone === "ZM" ? "MV" : zone;
+  let vol = (volume * 10).toFixed(0); //volume fix
 
-    if (vol < 100) {
-        vol = '0' + vol;
+  if (vol < 100) {
+    vol = "0" + vol;
+  } else {
+    vol = "" + vol;
+  }
+  this.addCmdToQueue(commandPrefix + vol, undefined, (error, data) => {
+    if (!error) {
+      callback(null, volume);
     } else {
-        vol = '' + vol;
+      callback(error);
     }
-    this.addCmdToQueue(commandPrefix + vol, undefined, (error, data) => {
-        if (!error) {
-            callback(null, volume);
-        } else {
-            callback(error);
-        }
-    });
+  });
 };
 
 DenonTelnet.prototype.getZonePowerState = function (zone, callback) {
-    const commandPrefix = (!zone || (zone === 'ZM')) ? 'ZM' : zone;
-    const regexp = RegExp('(?:^|[\r])' + commandPrefix + '(ON|OFF)');
+  const commandPrefix = !zone || zone === "ZM" ? "ZM" : zone;
+  const regexp = RegExp("(?:^|[\r])" + commandPrefix + "(ON|OFF)");
 
-    this.addCmdToQueue(commandPrefix + '?', regexp, (error, data) => {
-
-
-        if (!error) {
-            const powerState = this.parseSimpleResponse(data, regexp)
-            if (powerState) {
-                callback(null, (powerState === 'ON'));
-            } else {
-                callback('DENON-TELNET: Did not get POWER RESPONSE in time.');
-            }
-        } else {
-            callback(error);
-        }
-    });
+  this.addCmdToQueue(commandPrefix + "?", regexp, (error, data) => {
+    if (!error) {
+      const powerState = this.parseSimpleResponse(data, regexp);
+      if (powerState) {
+        callback(null, powerState === "ON");
+      } else {
+        callback("DENON-TELNET: Did not get POWER RESPONSE in time.");
+      }
+    } else {
+      callback(error);
+    }
+  });
 };
 
-DenonTelnet.prototype.setZonePowerState = function (powerState, zone, callback) {
-    const commandPrefix = (!zone || (zone === 'ZM')) ? 'ZM' : zone;
+DenonTelnet.prototype.setZonePowerState = function (
+  powerState,
+  zone,
+  callback,
+) {
+  const commandPrefix = !zone || zone === "ZM" ? "ZM" : zone;
 
-    this.addCmdToQueue(commandPrefix + (powerState ? 'ON' : 'OFF'), undefined, (error, data) => {
-        if (!error) {
-            callback(null, powerState);
-        } else {
-            callback(error);
-        }
-    });
+  this.addCmdToQueue(
+    commandPrefix + (powerState ? "ON" : "OFF"),
+    undefined,
+    (error, data) => {
+      if (!error) {
+        callback(null, powerState);
+      } else {
+        callback(error);
+      }
+    },
+  );
 };
 
 //export as singleton to share instance between next api endpoints
-let denonTelnetInstance
+let denonTelnetInstance;
 if (!global.denonTelnetInstance) {
-    global.denonTelnetInstance = new DenonTelnet(DENON_IP)
-    denonTelnetInstance = global.denonTelnetInstance
+  global.denonTelnetInstance = new DenonTelnet(DENON_IP);
+  denonTelnetInstance = global.denonTelnetInstance;
 } else {
-    denonTelnetInstance = global.denonTelnetInstance
+  denonTelnetInstance = global.denonTelnetInstance;
 }
 
-export default denonTelnetInstance
-
+export default denonTelnetInstance;
 
 //
 // /**
@@ -325,7 +335,6 @@ export default denonTelnetInstance
 //     }, regexp);
 // };
 
-
 //
 // /**
 //  Sets the power state of the AVR.
@@ -346,7 +355,6 @@ export default denonTelnetInstance
 //         }
 //     });
 // };
-
 
 //
 // /**
@@ -379,7 +387,6 @@ export default denonTelnetInstance
 //     }, regexp);
 // };
 
-
 //
 // /**
 //  Select the SMART SELECT of a zone.
@@ -403,7 +410,6 @@ export default denonTelnetInstance
 //         }
 //     });
 // };
-
 
 //
 // /**
@@ -485,9 +491,6 @@ export default denonTelnetInstance
 //
 //
 
-
-
-
 // /**
 //  Get all supported zones of the AVR.
 //  @param {defaultCallback} callback Function to be called when the command is run and data is returned
@@ -538,6 +541,3 @@ export default denonTelnetInstance
 //     this.addCmdToQueue('PW?', handleZoneIds);
 // };
 //
-
-
-

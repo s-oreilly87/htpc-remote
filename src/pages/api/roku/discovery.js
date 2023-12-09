@@ -1,34 +1,30 @@
-import ssdp from '@achingbrain/ssdp'
+import ssdp from "@achingbrain/ssdp";
 
 export default async function handleDiscovery(timeout) {
+  const bus = await ssdp();
 
-    const bus = await ssdp()
+  // print error messages to the console
+  bus.on("error", console.error);
 
-// print error messages to the console
-    bus.on('error', console.error)
+  // this is the unique service name we are interested in:
+  const usn = "roku:ecp";
 
+  for await (const service of bus.discover(usn)) {
+    // search for instances of a specific service
+  }
 
-// this is the unique service name we are interested in:
-    const usn = 'roku:ecp'
+  bus.on("service:discover", (service) => {
+    // receive a notification about discovery of a service
+    console.log(service);
+    return service;
+  });
 
-    for await (const service of bus.discover(usn)) {
-        // search for instances of a specific service
-    }
-
-    bus.on('service:discover', service => {
-        // receive a notification about discovery of a service
-        console.log(service)
-        return service
-    })
-
-    bus.on('service:update', service => {
-        // receive a notification when that service is updated - nb. this will only happen
-        // after the service max-age is reached and if the service's device description
-        // document has changed
-    })
-
+  bus.on("service:update", (service) => {
+    // receive a notification when that service is updated - nb. this will only happen
+    // after the service max-age is reached and if the service's device description
+    // document has changed
+  });
 }
-
 
 // import nodeSSDP from 'node-ssdp'
 // const nodeSSDPClient = nodeSSDP.Client

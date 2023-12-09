@@ -1,34 +1,40 @@
-import {useState} from "react";
-import {REMOTE} from "@/utilities/constants.js";
-import {sendDenonCommand, sendEventToEventGhost, sendKeystrokeToNutJS, sendRokuKeypress} from "@/utilities/http";
-import {buttonPress} from "@/utilities/utils";
+import { useState } from "react";
+import { REMOTE } from "@/utilities/constants.js";
+import {
+  sendDenonCommand,
+  sendEventToEventGhost,
+  sendKeystrokeToNutJS,
+  sendRokuKeypress,
+} from "@/utilities/http";
+import { buttonPress } from "@/utilities/utils";
 
-const RemoteButton = ({remote, children, ...props}) => {
+const RemoteButton = ({ remote, children, ...props }) => {
+  const [buttonPressTimer, setButtonPressTimer] = useState();
 
-    const [buttonPressTimer, setButtonPressTimer] = useState()
+  const handleClick = (event) => {
+    if (remote === REMOTE.ROKU) {
+      sendRokuKeypress(event.currentTarget);
+    } else if (remote === REMOTE.PC) {
+      if (event.currentTarget.value.startsWith("KEYSTROKE")) {
+        sendKeystrokeToNutJS(event.currentTarget.value);
+      } else {
+        sendEventToEventGhost(event.currentTarget);
+      }
+    } else if (remote === REMOTE.DENON) {
+      sendDenonCommand(event.currentTarget);
+    }
+    buttonPress(event.currentTarget, buttonPressTimer, setButtonPressTimer);
+  };
 
-    const handleClick = event => {
-        if (remote === REMOTE.ROKU) {
-            sendRokuKeypress(event.currentTarget)
-        } else if (remote === REMOTE.PC) {
-            if (event.currentTarget.value.startsWith("KEYSTROKE")) {
-                sendKeystrokeToNutJS(event.currentTarget.value)
-            } else {
-                sendEventToEventGhost(event.currentTarget)
-            }
-        } else if (remote === REMOTE.DENON) {
-            sendDenonCommand(event.currentTarget)
-        }
-        buttonPress(event.currentTarget, buttonPressTimer, setButtonPressTimer)
-    };
-
-    return (
-        <button onClick={handleClick}
-                {...props}   // order matters - overwrite click handler with prop,  but add className btn to prop
-                className={`btn ${props.className}`}>
-            { children }
-        </button>
-    );
+  return (
+    <button
+      onClick={handleClick}
+      {...props} // order matters - overwrite click handler with prop,  but add className btn to prop
+      className={`btn ${props.className}`}
+    >
+      {children}
+    </button>
+  );
 };
 
 export default RemoteButton;
