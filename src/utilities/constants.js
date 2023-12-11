@@ -186,11 +186,17 @@ export const AUDIO_MODES_FOR_SELECT = {
     value: "",
     disabled: true,
   },
+  PURE: {
+    key: "PURE",
+    label: "Pure Stereo 24/192 (no sub)",
+    value: "audioModeStereo",
+    denonCmd: "MSQUICK1",
+  },
   STEREO: {
     key: "STEREO",
-    label: "Stereo",
-    value: "audioModeStereo",
-    denonCmd: "MSQUICK4",
+    label: "Stereo (Atmos w/ sub)",
+    value: "audioModeStereoAtmosSub",
+    denonCmd: "MSQUICK2",
   },
   DOLBY_UPMIX: {
     key: "DOLBY_UPMIX",
