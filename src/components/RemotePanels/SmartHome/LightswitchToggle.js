@@ -1,14 +1,14 @@
-import { useTplinkContext } from "@/context/tplink.js";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faExclamationCircle } from "@fortawesome/free-solid-svg-icons";
+import {useTplinkContext} from "@/context/tplink.js";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faExclamationCircle} from "@fortawesome/free-solid-svg-icons";
 
 export default function LightswitchToggle({ lightSwitch, handleToggle }) {
   const [tplinkState] = useTplinkContext();
 
   return (
-    <>
+    <div className="flex flex-col w-[160px] min-w-[100px]">
       <div className="flex gap-2 justify-center items-center">
-        <span className="text-amber-400 text-center text-2xl">
+        <span className="text-amber-400 text-center text-xl">
           {lightSwitch.label}
         </span>
         {tplinkState[lightSwitch.id].error && (
@@ -24,7 +24,7 @@ export default function LightswitchToggle({ lightSwitch, handleToggle }) {
         </span>
       )}
       <div
-        className={`flex justify-center gap-0.5 mb-5 ${
+        className={`flex w-full justify-center gap-0.5 mb-5 ${
           tplinkState[lightSwitch.id].error ? "opacity-10" : ""
         }`}
       >
@@ -33,7 +33,7 @@ export default function LightswitchToggle({ lightSwitch, handleToggle }) {
             !tplinkState[lightSwitch.id].powerState
               ? "bg-red-900 text-red-500"
               : "btn-secondary text-gray-800"
-          } rounded-r-none rounded-l-2xl w-1/6`}
+          } rounded-r-none rounded-l-2xl w-1/2`}
           value={`${lightSwitch.id}/off`}
           onClick={handleToggle}
         >
@@ -44,13 +44,13 @@ export default function LightswitchToggle({ lightSwitch, handleToggle }) {
             tplinkState[lightSwitch.id].powerState
               ? "bg-green-700 text-yellow-200"
               : "btn-secondary text-gray-800"
-          } rounded-l-none rounded-r-2xl w-1/6`}
+          } rounded-l-none rounded-r-2xl w-1/2`}
           value={`${lightSwitch.id}/on`}
           onClick={handleToggle}
         >
           On
         </button>
       </div>
-    </>
+    </div>
   );
 }

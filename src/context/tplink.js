@@ -1,6 +1,12 @@
-import { createContext, useContext, useState } from "react";
+import {createContext, useContext, useState} from "react";
 
 const DEFAULT_STATE = {
+  patio: {
+    powerState: false,
+  },
+  backyard: {
+    powerState: false,
+  },
   basement: {
     powerState: false,
     brightness: 50,

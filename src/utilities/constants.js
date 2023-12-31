@@ -1,15 +1,31 @@
 export const PLATFORM = process.env.NEXT_PUBLIC_PLATFORM;
 export const SERVER_IP = process.env.SERVER_IP;
 export const DENON_IP = "192.168.1.11";
-export const ROKU_URL = "http://192.168.1.126:8060";
+export const ROKU_URL = "http://192.168.1.127:8060";
 export const EVENTGHOST_URL = `http://${SERVER_IP}:3005`;
 export const DENON_HTTP_COMMAND_URL = "goform/formiPhoneAppDirect.xml";
 export const DENON_HTTP_QUERY_URL = "goform/formMainZone_MainZoneXml.xml";
 
+export const PLUGS = {
+  BACKYARD: {
+    id: "backyard",
+    ip: "192.168.1.92",
+    childId: "80064F5AB2335073A704D002FDBECB8B21CA02D200", // not sure if this is going to change, may need to do a getDeviceInfo in API
+    label: "Yard" // label must match alias set in Kasa app
+  },
+  PATIO: {
+    id: "patio",
+    ip: "192.168.1.92",
+    childId: '80064F5AB2335073A704D002FDBECB8B21CA02D201',
+    label: "Patio"
+  }
+}
+
 export const LIGHTSWITCHES = {
-  BEDROOM: { id: "bedroom", ip: "192.168.1.206", label: "Bedroom Light" },
-  STAIRWAY: { id: "stairway", ip: "192.168.1.194", label: "Stairway Light" },
-  BASEMENT: { id: "basement", ip: "192.168.1.24", label: "Basement Lights" },
+
+  BEDROOM: { id: "bedroom", ip: "192.168.1.207", label: "Bedroom" },
+  STAIRWAY: { id: "stairway", ip: "192.168.1.194", label: "Stairway" },
+  BASEMENT: { id: "basement", ip: "192.168.1.24", label: "Basement" },
 };
 
 export const ROKU_POST_OPTIONS = {

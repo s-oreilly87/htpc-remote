@@ -1,5 +1,5 @@
-import { Client } from "tplink-smarthome-api";
-import { LIGHTSWITCHES } from "@/utilities/constants.js";
+import {Client} from "tplink-smarthome-api";
+import {LIGHTSWITCHES, PLUGS} from "@/utilities/constants.js";
 
 export default function handleToggleSwitch(req, res) {
   let { params } = req.query;
@@ -7,7 +7,18 @@ export default function handleToggleSwitch(req, res) {
   const powerState = params[1] === "on";
 
   let ip;
+  let childId;
   switch (light) {
+    case PLUGS.PATIO.id: {
+      ip = PLUGS.PATIO.ip;
+      childId = PLUGS.PATIO.childId
+      break;
+    }
+    case PLUGS.BACKYARD.id: {
+      ip = PLUGS.BACKYARD.ip;
+      childId = PLUGS.BACKYARD.childId
+      break;
+    }
     case LIGHTSWITCHES.BASEMENT.id: {
       ip = LIGHTSWITCHES.BASEMENT.ip;
       break;
@@ -21,7 +32,7 @@ export default function handleToggleSwitch(req, res) {
     }
   }
   const client = new Client();
-  client.getDevice({ host: ip }).then((device) => {
+  client.getDevice({ host: ip, childId: childId }).then((device) => {
     device.setPowerState(powerState);
   });
   res.send("TPLink command sent!");

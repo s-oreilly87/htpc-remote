@@ -1,9 +1,9 @@
-import { Dialog, Transition } from "@headlessui/react";
-import { Fragment, useEffect } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faXmark } from "@fortawesome/free-solid-svg-icons";
-import { useTplinkContext } from "@/context/tplink.js";
-import { LIGHTSWITCHES } from "@/utilities/constants.js";
+import {Dialog, Transition} from "@headlessui/react";
+import {Fragment, useEffect} from "react";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faXmark} from "@fortawesome/free-solid-svg-icons";
+import {useTplinkContext} from "@/context/tplink.js";
+import {LIGHTSWITCHES, PLUGS} from "@/utilities/constants.js";
 import LightswitchToggle from "@/components/RemotePanels/SmartHome/LightswitchToggle.js";
 import LoadingSpinner from "@/components/UI/LoadingSpinner.js";
 
@@ -96,44 +96,67 @@ const SmartHomeModal = ({ isOpen, setIsOpen }) => {
                       <FontAwesomeIcon icon={faXmark} color={"white"} />
                     </button>
                   </div>
-
                   {!tplinkState.loading && (
-                    <div className="flex flex-col justify-between flex-grow pb-[15%]">
-                      {Object.values(LIGHTSWITCHES).map((lightSwitch) => (
-                        <LightswitchToggle
-                          key={lightSwitch.id}
-                          lightSwitch={lightSwitch}
-                          handleToggle={handleToggle}
-                        />
-                      ))}
-                      <div className="flex gap-2 items-center justify-center text-amber-400 mb-2">
-                        1
-                        <input
-                          type="range"
-                          min={1}
-                          max={100}
-                          value={tplinkState.basement.brightness}
-                          className="w-1/2 h-2 bg-gray-200 accent-amber-400 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
-                          onChange={handleChangeBasementBrightness}
-                        />
-                        100
+                      <div className="flex flex-col gap-3 flex-grow pb-[10%] items-center">
+                        <span className="mb-2 text-2xl text-center text-amber-400">Smart Light Control</span>
+                        <div className="flex w-full space-x-6 items-center justify-center">
+                          {Object.values(PLUGS).map((plug) => (
+                              <LightswitchToggle
+                                  key={plug.id}
+                                  lightSwitch={plug}
+                                  handleToggle={handleToggle}
+                              />
+                          ))}
+                        </div>
+
+                        <div className="flex w-full space-x-6 items-center justify-center">
+                          {Object.values(LIGHTSWITCHES).map((lightSwitch) => {
+                                if (lightSwitch.id !== 'basement') {
+                                  return (
+                                      <LightswitchToggle
+                                          key={lightSwitch.id}
+                                          lightSwitch={lightSwitch}
+                                          handleToggle={handleToggle}
+                                      />
+                                  );
+                                }
+                              }
+                          )}
+                        </div>
+                        <div id="basement-controls" className="flex flex-col items-center">
+                          <LightswitchToggle
+                              lightSwitch={LIGHTSWITCHES.BASEMENT}
+                              handleToggle={handleToggle}
+                          />
+                          <div className="flex gap-2 items-center justify-center text-amber-400 mb-2">
+                            1
+                            <input
+                                type="range"
+                                min={1}
+                                max={100}
+                                value={tplinkState.basement.brightness}
+                                className="w-full h-2 bg-gray-200 accent-amber-400 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+                                onChange={handleChangeBasementBrightness}
+                            />
+                            100
+                          </div>
+                          {/*<div className="flex justify-center gap-0.5">*/}
+                          {/*  {brightnessButtons.map((button) => (*/}
+                          {/*    <button*/}
+                          {/*      key={button.label}*/}
+                          {/*      className={`btn bg-${button.color} text-${button.textColor} rounded-full w-1/8"`}*/}
+                          {/*      value={button.value}*/}
+                          {/*      onClick={handleChangeBasementBrightness}*/}
+                          {/*    >*/}
+                          {/*      <span className="min-w-12">{button.label}</span>*/}
+                          {/*    </button>*/}
+                          {/*  ))}*/}
+                          {/*</div>*/}
+                        </div>
                       </div>
-                      <div className="flex justify-center gap-0.5">
-                        {brightnessButtons.map((button) => (
-                          <button
-                            key={button.label}
-                            className={`btn bg-${button.color} text-${button.textColor} rounded-full w-1/8"`}
-                            value={button.value}
-                            onClick={handleChangeBasementBrightness}
-                          >
-                            <span className="min-w-12">{button.label}</span>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
                   )}
                   {tplinkState.loading && (
-                    <div className="flex flex-col justify-center items-center text-amber-400 h-[425px] gap-3">
+                      <div className="flex flex-col justify-center items-center text-amber-400 h-[425px] gap-3">
                       Connecting to lights . . .
                       <LoadingSpinner color="amber-400" size={32} />
                     </div>
