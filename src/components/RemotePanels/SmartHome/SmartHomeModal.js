@@ -6,6 +6,7 @@ import {useTplinkContext} from "@/context/tplink.js";
 import {LIGHTSWITCHES, PLUGS} from "@/utilities/constants.js";
 import LightswitchToggle from "@/components/RemotePanels/SmartHome/LightswitchToggle.js";
 import LoadingSpinner from "@/components/UI/LoadingSpinner.js";
+import {useThrottleFn} from "react-use";
 
 const brightnessButtons = [
   { value: 1, label: " 1%", color: "amber-800", textColor: "amber-400" },
@@ -50,14 +51,20 @@ const SmartHomeModal = ({ isOpen, setIsOpen }) => {
     if (brightness < 1 || brightness > 100) {
       return console.error("Invalid Brightness value");
     }
+
+    // Just need to update the state immediately, request will get sent by useThrottleFn
     updateTplinkState({
       basement: {
         powerState: tplinkState.basement.powerState,
         brightness: brightness,
       },
     });
+  };
+
+  const sendSetBrightness = (brightness) => {
     fetch(`api/tp-link/brightness/basement/${brightness}`);
   };
+  useThrottleFn(sendSetBrightness, 100, [tplinkState.basement.brightness]);
 
   return (
     <>

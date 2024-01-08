@@ -1,6 +1,6 @@
-import { Client } from "tplink-smarthome-api";
-import { toNumber } from "lodash";
-import { LIGHTSWITCHES } from "@/utilities/constants.js";
+import client from '@/api-modules/tplink/tplink-client'
+import {toNumber} from "lodash";
+import {LIGHTSWITCHES} from "@/utilities/constants.js";
 
 export default function handleBrightness(req, res) {
   let { params } = req.query;
@@ -16,7 +16,7 @@ export default function handleBrightness(req, res) {
       return res.send("Error: Switch not dimmable!");
     }
   }
-  const client = new Client();
+
   client.on("error", (error) => console.log("ERROR! ERROR!"));
   client.getDevice({ host: ip }).then((device) => {
     device.dimmer.setBrightness(brightnessLevel);

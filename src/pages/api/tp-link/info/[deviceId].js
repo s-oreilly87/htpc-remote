@@ -1,12 +1,8 @@
-import {Client} from "tplink-smarthome-api";
+import client from '@/api-modules/tplink/tplink-client'
 import {LIGHTSWITCHES, PLUGS} from "@/utilities/constants.js";
 
 export default async function handleInfo(req, res) {
   let { deviceId } = req.query;
-
-  const client = new Client();
-  // client.on('error', (e) => {console.log(e)})
-
   let responseObject = {};
 
   async function getDeviceInfo(deviceId) {

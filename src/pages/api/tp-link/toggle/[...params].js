@@ -1,4 +1,4 @@
-import {Client} from "tplink-smarthome-api";
+import client from '@/api-modules/tplink/tplink-client'
 import {LIGHTSWITCHES, PLUGS} from "@/utilities/constants.js";
 
 export default function handleToggleSwitch(req, res) {
@@ -31,7 +31,7 @@ export default function handleToggleSwitch(req, res) {
       ip = LIGHTSWITCHES.BEDROOM.ip;
     }
   }
-  const client = new Client();
+
   client.getDevice({ host: ip, childId: childId }).then((device) => {
     device.setPowerState(powerState);
   });
