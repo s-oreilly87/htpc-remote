@@ -22,7 +22,7 @@ export default function handleBrightness(req, res) {
     }
   }
 
-  client.on("error", (error) => console.log("ERROR! ERROR!"));
+  client.on("error", (error) => console.log(error));
   client.getDevice({ host: ip }).then((device) => {
     device.dimmer.setBrightness(brightnessLevel);
   });
