@@ -25,7 +25,7 @@ const SmartHomeModal = ({ isOpen, setIsOpen }) => {
     if (isOpen) {
       refreshSwitchInfo("all");
     }
-  }, [isOpen]);
+  }, [isOpen, refreshSwitchInfo]);
 
   function closeModal() {
     setIsOpen(false);
@@ -48,7 +48,7 @@ const SmartHomeModal = ({ isOpen, setIsOpen }) => {
 
   const handleChangeBasementBrightness = (event) => {
     const brightness = event.currentTarget.value;
-    if (brightness < 1 || brightness > 100) {
+    if (!(brightness >= 0 && brightness <= 100)) {
       return console.error("Invalid Brightness value");
     }
 
