@@ -1,6 +1,7 @@
-import { useEffect, useRef } from "react";
+import {useEffect, useRef} from "react";
 
-const SwipeDetector = ({ onSwipe }) => {
+const SwipeDetector = ({ children, onSwipe }) => {
+  const childRef = useRef(null);
   const startXRef = useRef(null);
 
   function handleTouchStart(event) {
@@ -12,7 +13,6 @@ const SwipeDetector = ({ onSwipe }) => {
       const endX = event.changedTouches[0].clientX;
       const distance = endX - startXRef.current;
       if (Math.abs(distance) > 75) {
-        // Only trigger if the distance is more than 75 pixels
         onSwipe(distance > 0 ? "right" : "left");
       }
       startXRef.current = null;
@@ -20,16 +20,19 @@ const SwipeDetector = ({ onSwipe }) => {
   }
 
   useEffect(() => {
-    document.addEventListener("touchstart", handleTouchStart);
-    document.addEventListener("touchend", handleTouchEnd);
+    const currentChild = childRef.current;
+    if (currentChild) {
+      currentChild.addEventListener("touchstart", handleTouchStart);
+      currentChild.addEventListener("touchend", handleTouchEnd);
 
-    return () => {
-      document.removeEventListener("touchstart", handleTouchStart);
-      document.removeEventListener("touchend", handleTouchEnd);
-    };
-  });
+      return () => {
+        currentChild.removeEventListener("touchstart", handleTouchStart);
+        currentChild.removeEventListener("touchend", handleTouchEnd);
+      };
+    }
+  }, []);
 
-  return <></>;
+  return <div ref={childRef}>{children}</div>;
 };
 
 export default SwipeDetector;
