@@ -6,6 +6,11 @@ export default function handleBrightness(req, res) {
   let { params } = req.query;
   const light = params[0];
   const brightnessLevel = toNumber(params[1]);
+
+  if (!(brightnessLevel >= 1 && brightnessLevel <= 100)) {
+    return res.send("Error: No brightness value received!");
+  }
+
   let ip;
   switch (light) {
     case "basement": {
