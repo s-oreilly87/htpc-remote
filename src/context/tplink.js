@@ -9,7 +9,7 @@ const DEFAULT_STATE = {
   },
   basement: {
     powerState: false,
-    brightness: 50,
+    brightness: undefined,
   },
   bedroom: {
     powerState: false,
