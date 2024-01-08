@@ -67,7 +67,7 @@ const SmartHomeModal = ({ isOpen, setIsOpen }) => {
   const sendSetBrightness = (brightness) => {
     fetch(`api/tp-link/brightness/basement/${brightness}`);
   };
-  useThrottleFn(sendSetBrightness, 100, [tplinkState.basement.brightness]);
+  useThrottleFn(sendSetBrightness, 500, [tplinkState.basement.brightness]);
 
   return (
     <>
