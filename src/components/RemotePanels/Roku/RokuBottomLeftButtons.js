@@ -1,8 +1,8 @@
 import Constants from "@/utilities/constants.js";
 import KeyboardGroup from "../Shared/KeyboardGroup";
-import { faPowerOff } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { fetchRokuDeviceInfo, sendRokuKeypress } from "@/utilities/http";
+import {faPowerOff} from "@fortawesome/free-solid-svg-icons";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {fetchRokuDeviceInfo, sendRokuKeypress} from "@/utilities/http";
 
 function RokuBottomLeftButtons({ rokuPowerOn, setRokuPowerOn }) {
   const handleClickPower = () => {
@@ -23,7 +23,7 @@ function RokuBottomLeftButtons({ rokuPowerOn, setRokuPowerOn }) {
   return (
     <div className="relative z-50">
       <button
-        className="w-12 h-12 p-3 bg-red-600 text-white rounded-full aspect-square flex justify-center items-center z-50"
+        className="w-12 h-12 p-3 bg-red-600 text-white rounded-full aspect-square flex justify-center items-center z-50 shadow-inner shadow-red-500"
         value="powerButton"
         onClick={handleClickPower}
       >

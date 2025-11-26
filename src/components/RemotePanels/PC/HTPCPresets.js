@@ -1,40 +1,67 @@
-import {
-  AUDIO_MODES_FOR_SELECT,
-  DISPLAY_MODES_FOR_SELECT,
-  REMOTE,
-  ROKU_APPS,
-} from "@/utilities/constants.js";
+import {AUDIO_MODES_FOR_SELECT, DISPLAY_MODES_FOR_SELECT, REMOTE, ROKU_APPS,} from "@/utilities/constants.js";
 import KeypressButton from "@/components/UI/KeypressButton";
 import CustomModesCollapse from "./CustomModesCollapse";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faDesktop, faTv } from "@fortawesome/free-solid-svg-icons";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faGamepad, faMusic, faTv} from "@fortawesome/free-solid-svg-icons";
 import {
-  sendDenonCommand,
-  sendEventToEventGhost,
-  sendRokuLaunchCommand,
+    sendDenonCommand,
+    sendEventToGameStreamEventGhost,
+    sendEventToHTPCEventGhost,
+    sendRokuLaunchCommand,
 } from "@/utilities/http";
-import { useState } from "react";
+import {useState} from "react";
+import {openPlexampAndroidApp} from "@/utilities/utils.js";
 
 const remote = REMOTE.PC;
 
 const presetToEffectsMap = {
-  presetPCStereo: {
+  // presetPCStereo: {
+  //   audioMode: AUDIO_MODES_FOR_SELECT.STEREO,
+  //   displayMode: DISPLAY_MODES_FOR_SELECT.PC,
+  // },
+  // presetPCSurround: {
+  //   audioMode: AUDIO_MODES_FOR_SELECT.DOLBY_UPMIX,
+  //   displayMode: DISPLAY_MODES_FOR_SELECT.PC,
+  // },
+  // presetTV4K: {
+  //   audioMode: AUDIO_MODES_FOR_SELECT.ATMOS,
+  //   displayMode: DISPLAY_MODES_FOR_SELECT.TV4K,
+  //   rokuApp: ROKU_APPS.HDMI.HDMI2,
+  // },
+  // presetTV1440: {
+  //   audioMode: AUDIO_MODES_FOR_SELECT.ATMOS,
+  //   displayMode: DISPLAY_MODES_FOR_SELECT.TV1440,
+  //   rokuApp: ROKU_APPS.HDMI.HDMI2,
+  // },
+  presetGamestream4K60: {
+    audioMode: AUDIO_MODES_FOR_SELECT.ATMOS,
+    displayModeHTPC: DISPLAY_MODES_FOR_SELECT.HTPC_4K60,
+    displayModeGamestreamEventGhost: 'displayDummy4K60',
+    rokuApp: ROKU_APPS.HDMI.HDMI4,
+    // launchApp: 'launchMoonlight'
+  },
+  presetGamestream1440p120: {
+    audioMode: AUDIO_MODES_FOR_SELECT.ATMOS,
+    displayModeHTPC: DISPLAY_MODES_FOR_SELECT.HTPC_1440p120,
+    displayModeGamestreamEventGhost: 'displayDummy1440p120',
+    rokuApp: ROKU_APPS.HDMI.HDMI4,
+    // launchApp: 'launchMoonlight'
+  },
+  presetWatchPlex: {
+    audioMode: AUDIO_MODES_FOR_SELECT.ATMOS,
+    displayModeHTPC: DISPLAY_MODES_FOR_SELECT.HTPC_4K60,
+    rokuApp: ROKU_APPS.HDMI.HDMI4,
+    launchApp: 'launchPlex'
+  },
+  presetPlexampStereo: {
     audioMode: AUDIO_MODES_FOR_SELECT.STEREO,
-    displayMode: DISPLAY_MODES_FOR_SELECT.PC,
+    launchApp: 'launchPlexamp',
+    androidApp: 'plexamp'
   },
-  presetPCSurround: {
+  presetPlexampUpmix: {
     audioMode: AUDIO_MODES_FOR_SELECT.DOLBY_UPMIX,
-    displayMode: DISPLAY_MODES_FOR_SELECT.PC,
-  },
-  presetTV4K: {
-    audioMode: AUDIO_MODES_FOR_SELECT.ATMOS,
-    displayMode: DISPLAY_MODES_FOR_SELECT.TV4K,
-    rokuApp: ROKU_APPS.HDMI.HDMI2,
-  },
-  presetTV1440: {
-    audioMode: AUDIO_MODES_FOR_SELECT.ATMOS,
-    displayMode: DISPLAY_MODES_FOR_SELECT.TV1440,
-    rokuApp: ROKU_APPS.HDMI.HDMI2,
+    launchApp: 'launchPlexamp',
+    androidApp: 'plexamp'
   },
 };
 
@@ -47,19 +74,39 @@ function AudioVideoPresets() {
   );
 
   const handleClick = async (event) => {
-    const preset = presetToEffectsMap[event.currentTarget.value];
+    const htpcEventGhostCommand = event.currentTarget.value;
+    const preset = presetToEffectsMap[htpcEventGhostCommand];
 
     if (preset.rokuApp) {
       sendRokuLaunchCommand({ value: preset.rokuApp.id });
     }
 
-    setSelectedAudioMode(preset.audioMode);
-    setSelectedDisplayMode(preset.displayMode);
-    sendEventToEventGhost(event.currentTarget).then(() => {
+    if (preset.displayModeGamestreamEventGhost) {
+      await sendEventToGameStreamEventGhost({ value: preset.displayModeGamestreamEventGhost });
+    }
+
+    if (preset.displayModeHTPC) {
+      setSelectedDisplayMode(preset.displayModeHTPC);
+    }
+    sendEventToHTPCEventGhost({ value: htpcEventGhostCommand }).then(() => {
       setTimeout(() => {
         sendDenonCommand({ value: preset.audioMode.denonCmd });
-      }, 3000);
+      }, 2000);
     });
+
+    setSelectedAudioMode(preset.audioMode);
+
+    if (preset.launchApp) {
+      await sendEventToHTPCEventGhost({ value: preset.launchApp });
+    }
+
+    if (preset.androidApp) {
+      try {
+        openPlexampAndroidApp();
+      } catch (e) {
+        console.log(e)
+      }
+    }
   };
 
   return (
@@ -67,51 +114,63 @@ function AudioVideoPresets() {
       <div className="flex justify-around gap-2">
         <KeypressButton
           remote={remote}
-          id="preset-pc-stereo"
+          id="preset-gamestream-4K60"
           className="btn btn-primary-pc w-1/4 flex flex-col justify-center items-center"
-          value="presetPCStereo"
+          value="presetGamestream4K60"
           onClick={handleClick}
         >
-          <FontAwesomeIcon icon={faDesktop} className="h-6 w-6" />
-          PC
+          <FontAwesomeIcon icon={faGamepad} className="h-6 w-6" />
+          Game
           <br />
-          Stereo
-        </KeypressButton>
-        <KeypressButton
-          remote={remote}
-          id="preset-pc-surround"
-          className="btn btn-primary-pc w-1/4 flex flex-col justify-center items-center"
-          value="presetPCSurround"
-          onClick={handleClick}
-        >
-          <FontAwesomeIcon icon={faDesktop} className="h-6 w-6" />
-          PC
-          <br />
-          Dolby
-        </KeypressButton>
-        <KeypressButton
-          remote={remote}
-          id="preset-tv-4k"
-          className="btn btn-primary-pc w-1/4 flex flex-col justify-center items-center"
-          value="presetTV4K"
-          onClick={handleClick}
-        >
-          <FontAwesomeIcon icon={faTv} className="h-8 w-8" />
           4K60
-          <br />
-          Atmos
         </KeypressButton>
         <KeypressButton
           remote={remote}
-          id="preset-tv-1440"
+          id="preset-gamestream-1440p120"
           className="btn btn-primary-pc w-1/4 flex flex-col justify-center items-center"
-          value="presetTV1440"
+          value="presetGamestream1440p120"
+          onClick={handleClick}
+        >
+          <FontAwesomeIcon icon={faGamepad} className="h-6 w-6" />
+          Game
+          <br />
+          1440p120
+        </KeypressButton>
+        <KeypressButton
+          remote={remote}
+          id="preset-watch-plex"
+          className="btn btn-primary-pc w-1/4 flex flex-col justify-center items-center"
+          value="presetWatchPlex"
           onClick={handleClick}
         >
           <FontAwesomeIcon icon={faTv} className="h-8 w-8" />
-          1440p120
+          Watch
           <br />
-          Atmos
+          Plex
+        </KeypressButton>
+        <KeypressButton
+          remote={remote}
+          id="preset-plexamp-stereo"
+          className="btn btn-primary-pc w-1/4 flex flex-col justify-center items-center"
+          value="presetPlexampStereo"
+          onClick={handleClick}
+        >
+          <FontAwesomeIcon icon={faMusic} className="h-8 w-8" />
+          Plexamp
+          <br />
+          (Stereo)
+        </KeypressButton>
+        <KeypressButton
+            remote={remote}
+            id="preset-plexamp-upmix"
+            className="btn btn-primary-pc w-1/4 flex flex-col justify-center items-center"
+            value="presetPlexampUpmix"
+            onClick={handleClick}
+        >
+          <FontAwesomeIcon icon={faMusic} className="h-8 w-8" />
+          Plexamp
+          <br />
+          (Upmix)
         </KeypressButton>
       </div>
       <CustomModesCollapse

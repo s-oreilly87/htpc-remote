@@ -1,17 +1,14 @@
-import { useEffect, useRef, useState } from "react";
-import { Switch } from "@headlessui/react";
-import { useWakeLock } from "react-screen-wake-lock";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faLocationCrosshairs } from "@fortawesome/free-solid-svg-icons";
-import { hasRelativeOrientationSensor } from "@/utilities/sensors";
+import {useEffect, useRef, useState} from "react";
+import {Switch} from "@headlessui/react";
+import {useWakeLock} from "react-screen-wake-lock";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faLocationCrosshairs} from "@fortawesome/free-solid-svg-icons";
+import {hasRelativeOrientationSensor} from "@/utilities/sensors";
 import AirMouseCalibrationModal from "@/components/RemotePanels/PC/AirMouseCalibrationModal";
 import RelativeOrientationSensor from "@/components/Sensors/RelativeOrientationSensor";
 import io from "socket.io-client";
-import {
-  sendClickToNutJS,
-  sendDisableCommandToNutJS,
-} from "@/utilities/http.js";
-import { CLICK_TYPE } from "@/utilities/constants.js";
+import {sendClickToNutJS, sendDisableCommandToNutJS,} from "@/utilities/http.js";
+import {CLICK_TYPE} from "@/utilities/constants.js";
 
 const AirMouse = () => {
   const [socket, setSocket] = useState(io);
@@ -58,7 +55,7 @@ const AirMouse = () => {
   };
 
   const initializeSocket = async () => {
-    await fetch("/api/nutjs/initializeSocket");
+    await fetch(`api/nutjs/initializeSocket`);
     const newSocket = io();
     socket.on("connect", () => {
       console.log("Socket connected");

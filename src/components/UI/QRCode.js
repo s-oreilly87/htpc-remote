@@ -1,8 +1,8 @@
 import Image from "next/image";
-import { Dialog, Transition } from "@headlessui/react";
-import { Fragment } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faXmark } from "@fortawesome/free-solid-svg-icons";
+import {Dialog, Transition} from "@headlessui/react";
+import {Fragment} from "react";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faXmark} from "@fortawesome/free-solid-svg-icons";
 
 const QRCode = ({ isOpen, setIsOpen }) => {
   function closeModal() {
@@ -54,7 +54,7 @@ const QRCode = ({ isOpen, setIsOpen }) => {
                     <Image
                       width="300"
                       height="300"
-                      src="/192-168-1-185.png"
+                      src="/192-168-1-245.png"
                       alt="QR Code"
                     />
                     <div className="w-75 text-white text-center">

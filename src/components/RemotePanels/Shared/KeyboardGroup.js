@@ -1,27 +1,14 @@
-import {
-  KEYSTROKE,
-  PLATFORM,
-  REMOTE,
-  URL_ENCODED_SYMBOLS,
-} from "@/utilities/constants.js";
-import { useEffect, useRef, useState } from "react";
-import { Transition } from "@headlessui/react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faKeyboard,
-  faMagnifyingGlass,
-  faXmark,
-} from "@fortawesome/free-solid-svg-icons";
-import { faWindows } from "@fortawesome/free-brands-svg-icons";
+import {KEYSTROKE, PLATFORM, REMOTE, URL_ENCODED_SYMBOLS,} from "@/utilities/constants.js";
+import {useEffect, useRef, useState} from "react";
+import {Transition} from "@headlessui/react";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faKeyboard, faMagnifyingGlass, faXmark,} from "@fortawesome/free-solid-svg-icons";
+import {faWindows} from "@fortawesome/free-brands-svg-icons";
 import KeypressButton from "@/components/UI/KeypressButton";
-import {
-  sendKeystrokeToNutJS,
-  sendRokuKeypress,
-  sendRokuSearchQuery,
-} from "@/utilities/http";
-import { sleep } from "@/utilities/utils";
-import { throttle } from "lodash";
-import { lowerCase } from "lodash/string.js";
+import {sendKeystrokeToNutJS, sendRokuKeypress, sendRokuSearchQuery,} from "@/utilities/http";
+import {sleep} from "@/utilities/utils";
+import {throttle} from "lodash";
+import {lowerCase} from "lodash/string.js";
 
 function KeyboardGroup({ remote }) {
   const [inputExpanded, setInputExpanded] = useState(false);
@@ -239,11 +226,11 @@ function KeyboardGroup({ remote }) {
             <button
               id="win-key"
               type="button"
-              className={`btn h-full w-full flex justify-center items-center\
+              className={`btn h-full w-full flex justify-center items-center shadow-inner \
                             ${
                               inputExpanded
-                                ? "rounded-l-xl rounded-r-none bg-red-600"
-                                : "bg-green-700"
+                                ? "rounded-l-xl rounded-r-none bg-red-600 shadow-red-500"
+                                : "bg-green-700 shadow-green-500"
                             } `}
               onClick={toggleInputExpanded}
               value={KEYSTROKE.PC.WIN_KEY}

@@ -1,9 +1,9 @@
 import Constants from "@/utilities/constants.js";
 import KeypressButton from "@/components/UI/KeypressButton";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPowerOff } from "@fortawesome/free-solid-svg-icons";
-import { sendDenonCommand } from "@/utilities/http";
-import { useDenonContext } from "@/context/denon.js";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faPowerOff} from "@fortawesome/free-solid-svg-icons";
+import {sendDenonCommand} from "@/utilities/http";
+import {useDenonContext} from "@/context/denon.js";
 
 const remote = Constants.REMOTE.DENON;
 const KEYSTROKE = Constants.KEYSTROKE;
@@ -33,7 +33,7 @@ function DenonBottomLeftButtons({}) {
     <div className="flex flex-col menu-buttons justify-between w-5/6">
       <KeypressButton
         remote={remote}
-        className="btn bg-red-600 rounded-full aspect-square z-50"
+        className="btn bg-red-600 rounded-full aspect-square z-50 shadow-inner shadow-red-500"
         value={KEYSTROKE.DENON.POWER}
         onClick={handleClickPowerButton}
       >

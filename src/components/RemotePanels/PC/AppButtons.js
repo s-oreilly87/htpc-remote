@@ -1,11 +1,7 @@
 import Constants from "@/utilities/constants.js";
 import KeypressButton from "@/components/UI/KeypressButton";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faClapperboard,
-  faGamepad,
-  faMusic,
-} from "@fortawesome/free-solid-svg-icons";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faClapperboard, faGamepad, faMusic,} from "@fortawesome/free-solid-svg-icons";
 
 const AppButtons = (props) => {
   return (
@@ -14,26 +10,26 @@ const AppButtons = (props) => {
         <KeypressButton
           remote={Constants.REMOTE.PC}
           className="btn btn-primary-pc w-1/4 flex flex-col items-center justify-center gap-1"
-          value="launchPlaynite"
-        >
-          <FontAwesomeIcon icon={faGamepad} className="w-1/3 mx-auto" />
-          Playnite
-        </KeypressButton>
-        <KeypressButton
-          remote={Constants.REMOTE.PC}
-          className="btn btn-primary-pc w-1/4 flex flex-col items-center justify-center gap-1"
-          value="launchKodi"
+          value="launchPlex"
         >
           <FontAwesomeIcon icon={faClapperboard} className="w-1/3 mx-auto" />
-          Kodi
+          Plex
         </KeypressButton>
         <KeypressButton
           remote={Constants.REMOTE.PC}
           className="btn btn-primary-pc w-1/4 flex flex-col items-center justify-center gap-1"
-          value="launchQobuz"
+          value="launchMoonlight"
+        >
+          <FontAwesomeIcon icon={faGamepad} className="w-1/3 mx-auto" />
+          Moonlight
+        </KeypressButton>
+        <KeypressButton
+          remote={Constants.REMOTE.PC}
+          className="btn btn-primary-pc w-1/4 flex flex-col items-center justify-center gap-1"
+          value="launchPlexamp"
         >
           <FontAwesomeIcon icon={faMusic} className="w-1/3 mx-auto" />
-          Qobuz
+          Plexamp
         </KeypressButton>
       </div>
     </div>

@@ -1,14 +1,10 @@
 import KeypressButton from "@/components/UI/KeypressButton";
 import PressAndHoldButton from "@/components/UI/PressAndHoldButton";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faVolumeHigh,
-  faVolumeLow,
-  faVolumeXmark,
-} from "@fortawesome/free-solid-svg-icons";
-import { KEYSTROKE, REMOTE } from "@/utilities/constants.js";
-import { dot_matrix } from "@/styles/fonts.js";
-import { useDenonContext } from "@/context/denon.js";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faVolumeHigh, faVolumeLow, faVolumeXmark,} from "@fortawesome/free-solid-svg-icons";
+import {KEYSTROKE, REMOTE} from "@/utilities/constants.js";
+import {dot_matrix} from "@/styles/fonts.js";
+import {useDenonContext} from "@/context/denon.js";
 
 function VolumeControls({ remote }) {
   const [denonState, updateDenonState, refreshDenonState] = useDenonContext();
@@ -59,7 +55,7 @@ function VolumeControls({ remote }) {
         <div className="h-1/4 flex place-content-center align-bottom">
           <KeypressButton
             remote={remote}
-            className="btn bg-red-600 rounded-full aspect-square flex w-5/6 h-2/3 justify-center items-center"
+            className="btn bg-red-600 shadow-inner shadow-red-500 rounded-full aspect-square flex w-5/6 h-2/3 justify-center items-center"
             value={KEYSTROKE[remote].MUTE}
           >
             <FontAwesomeIcon icon={faVolumeXmark} />

@@ -1,10 +1,11 @@
-import { Key, keyboard } from "@nut-tree/nut-js";
-import { KEYSTROKE, PLATFORM } from "@/utilities/constants.js";
+import {Key, keyboard} from "@nut-tree/nut-js";
+import {KEYSTROKE, PLATFORM} from "@/utilities/constants.js";
 
 const nutKeyMap = {
   [KEYSTROKE.PC.ENTER]: Key.Enter,
   [KEYSTROKE.PC.BACKSPACE]: Key.Backspace,
   [KEYSTROKE.PC.WIN_KEY]: Key.LeftWin,
+  [KEYSTROKE.PC.ALT_TAB]: [Key.LeftAlt, Key.Tab],
   [KEYSTROKE.PC.ESCAPE]: Key.Escape,
   [KEYSTROKE.PC.TAB]: Key.Tab,
   [KEYSTROKE.PC.UP]: Key.Up,
@@ -25,6 +26,8 @@ if (PLATFORM === "MACOS") {
   nutKeyMap[KEYSTROKE.PC.WIN_KEY] = [Key.LeftSuper, Key.Space];
 }
 
+let keyTimeouts = {};
+
 keyboard.config.autoDelayMs = 50;
 
 export default async function handleKeystroke(req, res) {
@@ -41,12 +44,28 @@ export default async function handleKeystroke(req, res) {
   if (Array.isArray(key)) {
     // nutJS pressKey(key[]) isnt working so doing it manually
     for (const each of key) {
+      if (each === Key.LeftAlt && keyTimeouts[each]) {
+        continue;
+      }
+
       await keyboard.pressKey(each);
     }
     for (const each of key) {
-      await keyboard.releaseKey(each);
+      if (key === nutKeyMap[KEYSTROKE.PC.ALT_TAB] && each === Key.LeftAlt) {
+        if (keyTimeouts[each]) {
+          clearTimeout(keyTimeouts[each]);
+        }
+
+        keyTimeouts[each] = setTimeout(async function(){
+          await keyboard.releaseKey(each);
+          delete keyTimeouts[each]
+        }, 1500);
+      } else {
+        await keyboard.releaseKey(each);
+      }
     }
   } else {
+
     await keyboard.type(key);
   }
 

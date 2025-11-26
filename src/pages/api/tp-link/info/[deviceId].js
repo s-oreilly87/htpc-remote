@@ -18,8 +18,10 @@ export default async function handleInfo(req, res) {
       );
       const { sysInfo } = await clientDevice.getInfo();
       if (sysInfo.children) {
+        // sysInfo will have children for devices with multiple plugs
         sysInfo.children.forEach((child) => {
-          const object = Object.values(allDeviceObjects).find((object) => `${object.label} Lights` === child.alias)
+          // This is matching on the label set in the KASA app
+          const object = Object.values(allDeviceObjects).find((object) => `${object.label}` === child.alias)
           responseObject[object.id] = {
             powerState: child.state === 1
           }
@@ -33,12 +35,12 @@ export default async function handleInfo(req, res) {
 
     } catch (e) {
       responseObject[device.id] = { error: "could-not-connect" };
-      console.log("Device not found");
+      console.log(e + "Device not found");
     }
   }
 
-  if (deviceId === PLUGS.PATIO.id || PLUGS.BACKYARD.id || deviceId === "all") {
-    await getDeviceInfo(PLUGS.PATIO.id);
+  if (deviceId === PLUGS.YARD_DINING.id || PLUGS.YARD_FENCE.id || deviceId === "all") {
+    await getDeviceInfo(PLUGS.YARD_DINING.id);
   }
 
   if (deviceId === LIGHTSWITCHES.BEDROOM.id || deviceId === "all") {
@@ -49,14 +51,9 @@ export default async function handleInfo(req, res) {
     await getDeviceInfo(LIGHTSWITCHES.STAIRWAY.id);
   }
 
-
   if (deviceId === LIGHTSWITCHES.BASEMENT.id || deviceId === "all") {
     await getDeviceInfo(LIGHTSWITCHES.BASEMENT.id);
   }
-
-
-
-
 
   res.send(responseObject);
 }

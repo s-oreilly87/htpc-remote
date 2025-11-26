@@ -1,13 +1,13 @@
-import Constants, { DENON_SOUND_MODES } from "@/utilities/constants.js";
+import Constants, {DENON_SOUND_MODES} from "@/utilities/constants.js";
 import KeypressButton from "@/components/UI/KeypressButton";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faMinus, faPlus } from "@fortawesome/free-solid-svg-icons";
-import { useState } from "react";
-import { sendDenonCommand } from "@/utilities/http";
-import { buttonPress } from "@/utilities/utils.js";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faMinus, faPlus} from "@fortawesome/free-solid-svg-icons";
+import {useState} from "react";
+import {sendDenonCommand} from "@/utilities/http";
+import {buttonPress} from "@/utilities/utils.js";
 import Toggle from "@/components/UI/Toggle.js";
-import { dot_matrix } from "@/styles/fonts.js";
-import { useDenonContext } from "@/context/denon.js";
+import {dot_matrix} from "@/styles/fonts.js";
+import {useDenonContext} from "@/context/denon.js";
 
 const remote = Constants.REMOTE.DENON;
 
@@ -23,6 +23,7 @@ const AdvancedVolumeControl = ({}) => {
 
   const parseAndSetDialogueAdjustLevel = (responseValue) => {
     // 0.5 steps come in without the decimal
+    console.log(responseValue);
     if (responseValue.length === 3) {
       responseValue = parseFloat(responseValue) / 10;
     } else {
@@ -44,15 +45,17 @@ const AdvancedVolumeControl = ({}) => {
     }
 
     // Update denonState based on the response
-    // PSDIL comes in as an array of [PSDIL ON/OFF, PSDIL LEVEL]
+    // PSDIL comes in as an array of [PSDIL ON/OFF, PSDIL LEVEL]   BUT we get 4 of each!??
     for (const line of response.data) {
       const splitData = line.split(" ");
 
       if (splitData[0] === "PSDIL" && ["ON", "OFF"].includes(splitData[1])) {
         updateDenonState({ psDilOn: splitData[1] === "ON" });
       } else if (splitData[0] === "PSDIL") {
+        console.log('partsing psdil');
         // PSDIL LEVEL needs to be parsed
         parseAndSetDialogueAdjustLevel(splitData[1]);
+        break;  // break after finding first PSDIL LEVEL
       } else if (denonState.hasOwnProperty(splitData[0])) {
         updateDenonState({ [splitData[0]]: splitData[1] });
       }

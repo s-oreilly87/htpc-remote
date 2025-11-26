@@ -1,16 +1,16 @@
-import { REMOTE } from "@/utilities/constants.js";
-import { useState } from "react";
+import {REMOTE} from "@/utilities/constants.js";
+import {useState} from "react";
 import {
-  sendDenonCommand,
-  sendDenonQuery,
-  sendEventToEventGhost,
-  sendKeystrokeToNutJS,
-  sendRokuKeydown,
-  sendRokuKeypress,
-  sendRokuKeyup,
+    sendDenonCommand,
+    sendDenonQuery,
+    sendEventToHTPCEventGhost,
+    sendKeystrokeToNutJS,
+    sendRokuKeydown,
+    sendRokuKeypress,
+    sendRokuKeyup,
 } from "@/utilities/http";
-import { buttonPress } from "@/utilities/utils";
-import { useDenonContext } from "@/context/denon.js";
+import {buttonPress} from "@/utilities/utils";
+import {useDenonContext} from "@/context/denon.js";
 
 const PressAndHoldButton = ({
   remote,
@@ -38,7 +38,7 @@ const PressAndHoldButton = ({
     if (button.value.startsWith("KEYSTROKE")) {
       sendKeystrokeToNutJS(button.value);
     } else {
-      sendEventToEventGhost(REMOTE.PC, button);
+      sendEventToHTPCEventGhost(REMOTE.PC, button);
     }
 
     buttonPress(button, buttonPressTimer, setButtonPressTimer);
@@ -60,7 +60,7 @@ const PressAndHoldButton = ({
 
   //  Send keydown payload to EG to trigger actual keydown/keyup events - NOT USING
   function pcPressAndHoldStart(button) {
-    sendEventToEventGhost(button, "-keydown");
+    sendEventToHTPCEventGhost(button, "-keydown");
     setTouchTimer(
       setTimeout(() => {
         setIsHeld(true);
@@ -72,7 +72,7 @@ const PressAndHoldButton = ({
   function pcPressAndHoldEnd(button) {
     clearTimeout(touchTimer);
     if (isHeld) {
-      sendEventToEventGhost(button, "-keyup");
+      sendEventToHTPCEventGhost(button, "-keyup");
       clearInterval(vibrateInterval);
       setIsHeld(false);
     }

@@ -1,12 +1,7 @@
-import { useState } from "react";
-import { REMOTE } from "@/utilities/constants.js";
-import {
-  sendDenonCommand,
-  sendEventToEventGhost,
-  sendKeystrokeToNutJS,
-  sendRokuKeypress,
-} from "@/utilities/http";
-import { buttonPress } from "@/utilities/utils";
+import {useState} from "react";
+import {REMOTE} from "@/utilities/constants.js";
+import {sendDenonCommand, sendEventToHTPCEventGhost, sendKeystrokeToNutJS, sendRokuKeypress,} from "@/utilities/http";
+import {buttonPress, openPlexampAndroidApp} from "@/utilities/utils";
 
 const RemoteButton = ({ remote, children, ...props }) => {
   const [buttonPressTimer, setButtonPressTimer] = useState();
@@ -18,7 +13,10 @@ const RemoteButton = ({ remote, children, ...props }) => {
       if (event.currentTarget.value.startsWith("KEYSTROKE")) {
         sendKeystrokeToNutJS(event.currentTarget.value);
       } else {
-        sendEventToEventGhost(event.currentTarget);
+        sendEventToHTPCEventGhost(event.currentTarget);
+        if (event.currentTarget.value === 'launchPlexamp') {
+          openPlexampAndroidApp()
+        }
       }
     } else if (remote === REMOTE.DENON) {
       sendDenonCommand(event.currentTarget);

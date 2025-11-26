@@ -1,31 +1,34 @@
 export const PLATFORM = process.env.NEXT_PUBLIC_PLATFORM;
-export const SERVER_IP = process.env.SERVER_IP;
-export const DENON_IP = "192.168.1.11";
-export const ROKU_URL = "http://192.168.1.127:8060";
-export const EVENTGHOST_URL = `http://${SERVER_IP}:3005`;
+export const SERVER_IP = process.env.NEXT_PUBLIC_SERVER_IP;
+export const GAMESTREAM_IP = process.env.NEXT_PUBLIC_GAMESTREAM_IP
+export const DENON_IP = "192.168.1.252";
+export const ROKU_URL = "http://192.168.1.222:8060";
+export const HTPC_EVENTGHOST_URL = `http://${SERVER_IP}:3005`;
+export const GAMESTREAM_EVENTGHOST_URL = `http://${GAMESTREAM_IP}:3006`;
+
 export const DENON_HTTP_COMMAND_URL = "goform/formiPhoneAppDirect.xml";
 export const DENON_HTTP_QUERY_URL = "goform/formMainZone_MainZoneXml.xml";
 
 export const PLUGS = {
-  BACKYARD: {
-    id: "backyard",
-    ip: "192.168.1.92",
-    childId: "80064F5AB2335073A704D002FDBECB8B21CA02D200", // not sure if this is going to change, may need to do a getDeviceInfo in API
-    label: "Yard" // label must match alias set in Kasa app
+  YARD_FENCE: {
+    id: "yard-fence",
+    ip: "192.168.1.248",
+    childId: "80064F5AB2335073A704D002FDBECB8B21CA02D200", // hardware ID, doesnt change - even after reconnecting/firmware update
+    label: "Yard (fence)" // label must match alias set in Kasa app
   },
-  PATIO: {
-    id: "patio",
-    ip: "192.168.1.92",
+  YARD_DINING: {
+    id: "yard-dining",
+    ip: "192.168.1.248",
     childId: '80064F5AB2335073A704D002FDBECB8B21CA02D201',
-    label: "Patio"
+    label: "Yard (dining)"
   }
 }
 
 export const LIGHTSWITCHES = {
 
-  BEDROOM: { id: "bedroom", ip: "192.168.1.207", label: "Bedroom" },
-  STAIRWAY: { id: "stairway", ip: "192.168.1.194", label: "Stairway" },
-  BASEMENT: { id: "basement", ip: "192.168.1.24", label: "Basement" },
+  BEDROOM: { id: "bedroom", ip: "192.168.1.200", label: "Bedroom" },
+  STAIRWAY: { id: "stairway", ip: "192.168.1.201", label: "Stairway" },
+  BASEMENT: { id: "basement", ip: "192.168.1.202", label: "Basement" },
 };
 
 export const ROKU_POST_OPTIONS = {
@@ -70,6 +73,7 @@ export const KEYSTROKE = {
     ENTER: "KEYSTROKE_ENTER",
     BACKSPACE: "KEYSTROKE_BACKSPACE",
     WIN_KEY: "KEYSTROKE_WIN_KEY",
+    ALT_TAB: "KEYSTROKE_ALT_TAB",
     ESCAPE: "KEYSTROKE_ESCAPE",
     TAB: "KEYSTROKE_TAB",
     UP: "KEYSTROKE_UP",
@@ -142,38 +146,19 @@ export const CLICK_TYPE = {
 
 export const ROKU_APPS = {
   CHANNELS: {
-    NETFLIX: {
-      id: "12",
-      label: "Netflix",
-    },
-    DISNEY: {
-      id: "291097",
-      label: "Disney+",
-    },
-    HBO: {
-      id: "61322",
-      label: "HBOMax",
-    },
-    PRIME: {
-      id: "13",
-      label: "Prime",
-    },
-    APPLE_TV: {
-      id: "551012",
-      label: "AppleTV",
-    },
-    HULU: {
-      id: "2285",
-      label: "Hulu",
-    },
-    ROKU: {
-      id: "151908",
-      label: "Roku",
-    },
-    // YOUTUBE: {
-    //     id: "837",
-    //     label: "Youtube"
-    // },
+    PLEX: {id: '13535', label: 'Plex - Free Movies & TV'},
+    NETFLIX: {id: "12", label: "Netflix",},
+    PEACOCK: {id: '593099', label: 'Peacock TV'},
+    FOX_SPORTS: {id: '95307', label: 'FOX Sports'},
+    // ESPN: {id: '34376', label: 'ESPN'},
+    // PLUTO: {id: '74519', label: "Pluto TV - It's Free TV"},
+    // DISNEY: {id: "291097", label: "Disney+",},
+    HBO: {id: "61322", label: "HBOMax",},
+    PRIME: {id: "13", label: "Prime",},
+    APPLE_TV: {id: "551012", label: "AppleTV",},
+    // HULU: {id: "2285", label: "Hulu",},
+    // ROKU: {id: "151908", label: "Roku",},
+    // YOUTUBE: {id: "837", label: "Youtube"},
   },
   HDMI: {
     HDMI1: {
@@ -182,7 +167,7 @@ export const ROKU_APPS = {
     },
     HDMI2: {
       id: `tvinput${URL_ENCODED_SYMBOLS["."]}hdmi2`,
-      label: "HDMI2: PC",
+      label: "HDMI2",
     },
     HDMI3: {
       id: `tvinput${URL_ENCODED_SYMBOLS["."]}hdmi3`,
@@ -190,7 +175,7 @@ export const ROKU_APPS = {
     },
     HDMI4: {
       id: `tvinput${URL_ENCODED_SYMBOLS["."]}hdmi4`,
-      label: "HDMI4: AVR",
+      label: "HDMI4: HTPC",
     },
   },
 };
@@ -232,6 +217,12 @@ export const AUDIO_MODES_FOR_SELECT = {
     value: "audioModeAtmos",
     denonCmd: "MSQUICK4",
   },
+  DTS_X: {
+    key: "DTS_X",
+    label: "DTS:X",
+    value: "audioModeDtsX",
+    denonCmd: "MSQUICK4",
+  },
 };
 
 export const DISPLAY_MODES_FOR_SELECT = {
@@ -241,30 +232,36 @@ export const DISPLAY_MODES_FOR_SELECT = {
     label: "Select Display Mode",
     disabled: true,
   },
-  PC: {
-    key: "PC",
-    value: "displayModePC",
-    label: "PC Monitor",
+  // PC: {
+  //   key: "PC",
+  //   value: "displayModePC",
+  //   label: "PC Monitor",
+  // },
+  HTPC_4K60: {
+    key: "HTPC_4K60",
+    value: "displayModeHTPC4K60",
+    label: "HTPC (4K60)",
+    rokuChannel: ROKU_APPS.HDMI.HDMI4,
   },
-  TV4K: {
-    key: "TV4K",
-    value: "displayModeTV4K60",
-    label: "TV (4K60)",
-    rokuChannel: ROKU_APPS.HDMI.HDMI1,
+  HTPC_1440p120: {
+    key: "HTPC_1440p120",
+    value: "displayModeHTPC1440p120",
+    label: "HTPC (1440p120)",
+    rokuChannel: ROKU_APPS.HDMI.HDMI4,
   },
-  TV1440: {
-    key: "TV1440",
-    value: "displayModeTV2K120",
-    label: "TV (1440p120)",
-    rokuChannel: ROKU_APPS.HDMI.HDMI1,
+  HTPC_1080p120: {
+    key: "HTPC_1080p120",
+    value: "displayModeHTPC1080p120",
+    label: "HTPC (1080p120)",
+    rokuChannel: ROKU_APPS.HDMI.HDMI4,
   },
 };
 
 export const DENON_INPUTS = {
   PC: {
-    label: "PC",
+    label: "HTPC",
     value: "SIGAME",
-    inputFuncSelect: ["PCIN"],
+    inputFuncSelect: ["HTPC"],
   },
   PHONO: {
     label: "Turntable",
@@ -317,6 +314,7 @@ export const DOLBY_MODES = [
   "DOLBY_DIGITAL",
   "DOLBY_ATMOS",
   "DOLBY_D_+_+DOLBY_SURROUND",
+  "DOLBY_HD_+_DOLBY_SURROUND"
 ];
 export const DTS_MODES = [
   "DTS_NEURAL:X",
@@ -324,6 +322,7 @@ export const DTS_MODES = [
   "NEURAL:X",
   "DOLBY_DIGITAL_+_+_NEURAL:X",
   "DTS:X_MSTR",
+  "DTS-HD_MSTR"
 ];
 
 export const DENON_SOUND_MODES = {
@@ -335,7 +334,7 @@ export const DENON_SOUND_MODES = {
   STEREO: { label: "Stereo", value: "MSSTEREO", selectSurround: ["STEREO"] },
   DOLBY: {
     label: "Dolby Surround",
-    value: "MSDOLBY DIGITAL",
+    value: "MSDOLBY DIGITAL_+_DOLBY_SURROUND",
     selectSurround: DOLBY_MODES,
   },
   DTS: {
@@ -347,6 +346,11 @@ export const DENON_SOUND_MODES = {
     label: "Multi-Ch Stereo",
     value: "MSMCH STEREO",
     selectSurround: ["MULTI_CH_STEREO"],
+  },
+  MULTI_CH_IN: {
+    label: "Multi-Ch In (5.1)",
+    value: "MSSTANDARD",
+    selectSurround: ["MULTI_CH_IN", "MULTI_IN_+_DOLBY_SURROUND"],
   },
   ROCK_ARENA: {
     label: "Rock Arena",
@@ -399,7 +403,7 @@ export const DENON_HTTP_COMMANDS = [
 ];
 
 const Constants = {
-  EVENTGHOST_URL,
+  EVENTGHOST_URL: HTPC_EVENTGHOST_URL,
   ROKU_URL,
   DENON_IP,
   DENON_HTTP_URL: DENON_HTTP_COMMAND_URL,

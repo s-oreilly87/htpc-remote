@@ -8,7 +8,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "proxy": "npx local-ssl-proxy --key ./certificates/remote-app-key.pem --cert ./certificates/remote-app-cert.pem --source 4000 --target 3000"
+    "proxy": "npx local-ssl-proxy --key ./certificates/remote-app-htpc-key.pem --cert ./certificates/remote-app-htpc-cert.pem --source 4000 --target 3000",
+    "go": "concurrently \"npm run start\" \"npm run proxy\""
   },
   "dependencies": {
     "@achingbrain/ssdp": "^4.0.1",
@@ -47,6 +48,7 @@
   },
   "devDependencies": {
     "autoprefixer": "^10.4.13",
+    "concurrently": "^8.2.2",
     "postcss": "^8.4.21",
     "tailwindcss": "^3.2.7"
   }

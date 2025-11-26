@@ -1,11 +1,17 @@
-import { REMOTE, ROKU_APPS } from "@/utilities/constants.js";
+import {REMOTE, ROKU_APPS} from "@/utilities/constants.js";
 import KeypressButton from "@/components/UI/KeypressButton";
-import { sendRokuLaunchCommand } from "@/utilities/http";
+import {sendRokuLaunchCommand} from "@/utilities/http";
 
-function HDMIInputs({ setPowerOn }) {
+function HDMIInputs({ setPowerOn, setSelectedRemote }) {
   const handleClick = (event) => {
     sendRokuLaunchCommand(event.currentTarget);
     setPowerOn(true);
+  };
+
+  const handleClickWithRemoteChange = (event, remote) => {
+    sendRokuLaunchCommand(event.currentTarget);
+    setPowerOn(true);
+    setSelectedRemote(remote);
   };
 
   return (
@@ -18,14 +24,14 @@ function HDMIInputs({ setPowerOn }) {
           value={ROKU_APPS.HDMI.HDMI2.id}
           onClick={handleClick}
         >
-          {ROKU_APPS.HDMI.HDMI2.label}: PC
+          {ROKU_APPS.HDMI.HDMI2.label}
         </KeypressButton>
         <KeypressButton
           remote={REMOTE.ROKU}
           id="receiver"
           className="btn btn-primary-roku w-1/2 z-50"
           value={ROKU_APPS.HDMI.HDMI4.id}
-          onClick={handleClick}
+          onClick={(e) => handleClickWithRemoteChange(e, REMOTE.PC)}
         >
           {ROKU_APPS.HDMI.HDMI4.label}
         </KeypressButton>

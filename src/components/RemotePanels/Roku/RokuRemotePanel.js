@@ -4,12 +4,12 @@ import HDMIInputButtons from "./HDMIInputButtons";
 import MediaButtons from "../Shared//MediaButtons";
 import BackHomeOption from "./BackHomeOption";
 import BottomSection from "../Shared/BottomSection";
-import { useEffect } from "react";
-import { fetchRokuDeviceInfo } from "@/utilities/http.js";
+import {useEffect} from "react";
+import {fetchRokuDeviceInfo} from "@/utilities/http.js";
 import Overlay from "@/components/UI/Overlay.js";
 
 const remote = Constants.REMOTE.ROKU;
-function RokuRemote({ rokuState, setRokuState }) {
+function RokuRemote({ rokuState, setRokuState, setSelectedRemote }) {
   useEffect(() => {
     async function fetchPowerState() {
       const response = await fetchRokuDeviceInfo();
@@ -46,7 +46,7 @@ function RokuRemote({ rokuState, setRokuState }) {
         <div className="flex flex-col flex-grow pb-[10%] gap-4 justify-between">
           <div className="flex flex-col gap-3">
             <ChannelButtons setPowerOn={setRokuPowerOn} />
-            <HDMIInputButtons setPowerOn={setRokuPowerOn} />
+            <HDMIInputButtons setPowerOn={setRokuPowerOn} setSelectedRemote={setSelectedRemote}/>
           </div>
           <div className="flex flex-col flex-grow gap-3 justify-center">
             <MediaButtons remote={remote} />

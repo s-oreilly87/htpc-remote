@@ -1,22 +1,22 @@
 import {createContext, useContext, useState} from "react";
 
 const DEFAULT_STATE = {
-  patio: {
+  'yard-fence': {
     powerState: false,
   },
-  backyard: {
+  'yard-dining': {
     powerState: false,
   },
-  basement: {
-    powerState: false,
-    brightness: undefined,
-  },
-  bedroom: {
-    powerState: false,
-  },
-  stairway: {
-    powerState: false,
-  },
+  // basement: {
+  //   powerState: false,
+  //   brightness: undefined,
+  // },
+  // bedroom: {
+  //   powerState: false,
+  // },
+  // stairway: {
+  //   powerState: false,
+  // },
   loading: false,
 };
 

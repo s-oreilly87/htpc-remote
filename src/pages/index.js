@@ -103,6 +103,7 @@ const App = () => {
                 <RemotePanelSlideScroll
                   className="mx-auto min-w-[330px] max-w-[550px] place-content-center w-full mt-16"
                   selectedRemote={selectedRemote}
+                  setSelectedRemote={setSelectedRemote}
                   prevRemote={prevRemote}
                   rokuState={rokuState}
                   setRokuState={setRokuState}

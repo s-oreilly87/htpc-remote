@@ -9,14 +9,14 @@ export default function handleToggleSwitch(req, res) {
   let ip;
   let childId;
   switch (light) {
-    case PLUGS.PATIO.id: {
-      ip = PLUGS.PATIO.ip;
-      childId = PLUGS.PATIO.childId
+    case PLUGS.YARD_DINING.id: {
+      ip = PLUGS.YARD_DINING.ip;
+      childId = PLUGS.YARD_DINING.childId
       break;
     }
-    case PLUGS.BACKYARD.id: {
-      ip = PLUGS.BACKYARD.ip;
-      childId = PLUGS.BACKYARD.childId
+    case PLUGS.YARD_FENCE.id: {
+      ip = PLUGS.YARD_FENCE.ip;
+      childId = PLUGS.YARD_FENCE.childId
       break;
     }
     case LIGHTSWITCHES.BASEMENT.id: {

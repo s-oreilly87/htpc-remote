@@ -1,4 +1,9 @@
-import { useEffect, useRef } from "react";
+import {useEffect, useRef} from "react";
+
+
+export function openPlexampAndroidApp() {
+window.location.href = window.location.href = 'intent://home#Intent;scheme=plexamp-auth;package=tv.plex.labs.plexamp;end;';
+}
 
 export function useHasChanged(val) {
   const prevVal = usePrevious(val);

@@ -1,10 +1,10 @@
 import Image from "next/image";
-import { REMOTE } from "@/utilities/constants.js";
-import { useState } from "react";
-import { buttonPress } from "@/utilities/utils.js";
+import {REMOTE} from "@/utilities/constants.js";
+import {useState} from "react";
+import {buttonPress} from "@/utilities/utils.js";
 import QRCode from "@/components/UI/QRCode.js";
 import SmartHomeModal from "@/components/RemotePanels/SmartHome/SmartHomeModal.js";
-import { TplinkProvider } from "@/context/tplink.js";
+import {TplinkProvider} from "@/context/tplink.js";
 
 function Navbar({ className, selectedRemote, onClickHandler }) {
   const [buttonPressTimer, setButtonPressTimer] = useState();
@@ -46,50 +46,50 @@ function Navbar({ className, selectedRemote, onClickHandler }) {
               onClick={handleIconClick}
             />
           </div>
-          <div className="py-1 absolute right-2 top-3 z-20 hover:cursor-pointer">
-            <Image
-              src={"/icons/lightbulb.png"}
-              alt="Lightbulb"
-              width={50}
-              height={50}
-              onClick={handleLightClick}
-            />
-          </div>
           <div className="flex w-3/4 max-w-[550px] min-w-[270px] justify-center">
             <div className="w-full flex items-end">
               <button
-                onClick={handleClick}
-                className={
-                  selectedRemote === REMOTE.DENON
-                    ? "nav-tab-active btn-primary-denon"
-                    : "nav-tab-inactive"
-                }
-                value={REMOTE.DENON}
+                  onClick={handleClick}
+                  className={
+                    selectedRemote === REMOTE.DENON
+                        ? "nav-tab-active btn-primary-denon"
+                        : "nav-tab-inactive"
+                  }
+                  value={REMOTE.DENON}
               >
                 Denon
               </button>
               <button
-                onClick={handleClick}
-                className={
-                  selectedRemote === REMOTE.ROKU
-                    ? "nav-tab-active btn-primary-roku"
-                    : "nav-tab-inactive"
-                }
-                value={REMOTE.ROKU}
+                  onClick={handleClick}
+                  className={
+                    selectedRemote === REMOTE.ROKU
+                        ? "nav-tab-active btn-primary-roku"
+                        : "nav-tab-inactive"
+                  }
+                  value={REMOTE.ROKU}
               >
                 Roku
               </button>
               <button
-                onClick={handleClick}
-                className={
-                  selectedRemote === REMOTE.PC
-                    ? "nav-tab-active btn-primary-pc"
-                    : "nav-tab-inactive"
-                }
-                value={REMOTE.PC}
+                  onClick={handleClick}
+                  className={
+                    selectedRemote === REMOTE.PC
+                        ? "nav-tab-active btn-primary-pc"
+                        : "nav-tab-inactive"
+                  }
+                  value={REMOTE.PC}
               >
                 HTPC
               </button>
+            </div>
+            <div className="py-1 absolute right-2 top-3 z-20 hover:cursor-pointer">
+              <Image
+                  src={"/icons/lightbulb.png"}
+                  alt="Lightbulb"
+                  width={50}
+                  height={50}
+                  onClick={handleLightClick}
+              />
             </div>
           </div>
         </div>

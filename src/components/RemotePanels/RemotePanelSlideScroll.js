@@ -1,14 +1,15 @@
-import { REMOTE, REMOTE_INDEX } from "@/utilities/constants.js";
-import { KeepAlive } from "react-fiber-keep-alive";
+import {REMOTE, REMOTE_INDEX} from "@/utilities/constants.js";
+import {KeepAlive} from "react-fiber-keep-alive";
 import PCRemotePanel from "@/components/RemotePanels/PC/PCRemotePanel";
 import RokuRemotePanel from "@/components/RemotePanels/Roku/RokuRemotePanel";
 import DenonRemotePanel from "@/components/RemotePanels/Denon/DenonRemotePanel";
 import SlideScrollTransition from "@/components/UI/SlideScrollTransition";
-import { DenonProvider } from "@/context/denon.js";
+import {DenonProvider} from "@/context/denon.js";
 
 function RemotePanel({
   className,
   selectedRemote,
+  setSelectedRemote,
   prevRemote,
   rokuState,
   setRokuState,
@@ -37,6 +38,7 @@ function RemotePanel({
             <RokuRemotePanel
               rokuState={rokuState}
               setRokuState={setRokuState}
+              setSelectedRemote={setSelectedRemote}
             />
           </KeepAlive>
         </SlideScrollTransition>

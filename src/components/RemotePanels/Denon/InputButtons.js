@@ -1,7 +1,7 @@
-import { DENON_INPUTS, REMOTE } from "@/utilities/constants.js";
+import {DENON_INPUTS, REMOTE} from "@/utilities/constants.js";
 import KeypressButton from "@/components/UI/KeypressButton";
-import { sendDenonCommand } from "@/utilities/http";
-import { useDenonContext } from "@/context/denon.js";
+import {sendDenonCommand} from "@/utilities/http";
+import {useDenonContext} from "@/context/denon.js";
 
 const InputButtons = ({}) => {
   const [denonState, updateDenonState, refreshDenonState] = useDenonContext();
@@ -34,7 +34,7 @@ const InputButtons = ({}) => {
             remote={REMOTE.DENON}
             key={input.value}
             className={`btn z-50 ${
-              denonState.input.value === input.value
+              denonState.input?.value === input.value
                 ? "btn-primary-denon"
                 : "btn-secondary"
             }`}

@@ -1,15 +1,15 @@
-import { REMOTE } from "@/utilities/constants.js";
+import {REMOTE} from "@/utilities/constants.js";
 import RokuBottomLeftButtons from "../Roku/RokuBottomLeftButtons.js";
-import PCBottomLeftButtons from "../PC/PCBottomLeftButtons.js";
 import DenonBottomLeftButtons from "../Denon/DenonBottomLeftButtons.js";
 import Dpad from "./Dpad";
 import VolumeControls from "./VolumeControls";
+import PlexBottomLeftButtons from "@/components/RemotePanels/PC/PlexBottomLeftButtons.js";
 
 function BottomSection({ remote, rokuState, setRokuPowerOn }) {
   return (
     <div id="bottom-section" className="w-full h-full flex">
       <div className="flex w-1/6">
-        {remote === REMOTE.PC && <PCBottomLeftButtons />}
+        {remote === REMOTE.PC && <PlexBottomLeftButtons />}
         {remote === REMOTE.ROKU && (
           <RokuBottomLeftButtons
             rokuPowerOn={rokuState.powerOn}

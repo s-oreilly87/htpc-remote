@@ -1,10 +1,7 @@
-import {
-  DENON_HTTP_COMMANDS,
-  ROKU_POST_OPTIONS,
-} from "@/utilities/constants.js";
+import {DENON_HTTP_COMMANDS, ROKU_POST_OPTIONS,} from "@/utilities/constants.js";
 
-import { parseString } from "xml2js";
-import { convertKebabToCamel } from "@/utilities/utils.js";
+import {parseString} from "xml2js";
+import {convertKebabToCamel} from "@/utilities/utils.js";
 
 // ########   Roku Control   ########
 export async function sendRokuQuery(query) {
@@ -90,8 +87,12 @@ export function sendRokuSearchQuery(query) {
 }
 
 // ########   PC Control   ########
-export async function sendEventToEventGhost(button, payload = "") {
-  await fetch(`api/eventghost/${button.value}${payload ? `&${payload}` : ""}`);
+export async function sendEventToHTPCEventGhost(button, payload = "") {
+  await fetch(`api/eventghost/htpc/${button.value}${payload ? `&${payload}` : ""}`);
+}
+
+export async function sendEventToGameStreamEventGhost(button, payload = "") {
+  await fetch(`api/eventghost/gamestream/${button.value}${payload ? `&${payload}` : ""}`);
 }
 
 export function sendClickToNutJS(type) {

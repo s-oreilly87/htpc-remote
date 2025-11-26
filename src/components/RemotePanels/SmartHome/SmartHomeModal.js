@@ -3,10 +3,9 @@ import {Fragment, useEffect} from "react";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faXmark} from "@fortawesome/free-solid-svg-icons";
 import {useTplinkContext} from "@/context/tplink.js";
-import {LIGHTSWITCHES, PLUGS} from "@/utilities/constants.js";
+import {PLUGS} from "@/utilities/constants.js";
 import LightswitchToggle from "@/components/RemotePanels/SmartHome/LightswitchToggle.js";
 import LoadingSpinner from "@/components/UI/LoadingSpinner.js";
-import {useThrottleFn} from "react-use";
 
 const brightnessButtons = [
   { value: 1, label: " 1%", color: "amber-800", textColor: "amber-400" },
@@ -23,7 +22,7 @@ const SmartHomeModal = ({ isOpen, setIsOpen }) => {
 
   useEffect(() => {
     if (isOpen) {
-      refreshSwitchInfo("all");
+      refreshSwitchInfo("yard-dining"); // not "all" right now
     }
   }, [isOpen]);
 
@@ -64,10 +63,10 @@ const SmartHomeModal = ({ isOpen, setIsOpen }) => {
     });
   };
 
-  const sendSetBrightness = (brightness) => {
-    fetch(`api/tp-link/brightness/basement/${brightness}`);
-  };
-  useThrottleFn(sendSetBrightness, 500, [tplinkState.basement.brightness]);
+  // const sendSetBrightness = (brightness) => {
+  //   fetch(`api/tp-link/brightness/basement/${brightness}`);
+  // };
+  // useThrottleFn(sendSetBrightness, 500, [tplinkState.basement.brightness]);
 
   return (
     <>
@@ -119,50 +118,50 @@ const SmartHomeModal = ({ isOpen, setIsOpen }) => {
                           ))}
                         </div>
 
-                        <div className="flex w-full space-x-6 items-center justify-center">
-                          {Object.values(LIGHTSWITCHES).map((lightSwitch) => {
-                                if (lightSwitch.id !== 'basement') {
-                                  return (
-                                      <LightswitchToggle
-                                          key={lightSwitch.id}
-                                          lightSwitch={lightSwitch}
-                                          handleToggle={handleToggle}
-                                      />
-                                  );
-                                }
-                              }
-                          )}
-                        </div>
-                        <div id="basement-controls" className="flex flex-col items-center">
-                          <LightswitchToggle
-                              lightSwitch={LIGHTSWITCHES.BASEMENT}
-                              handleToggle={handleToggle}
-                          />
-                          <div className="flex gap-2 items-center justify-center text-amber-400 mb-2">
-                            1
-                            <input
-                                type="range"
-                                min={1}
-                                max={100}
-                                value={tplinkState.basement.brightness}
-                                className="w-full h-2 bg-gray-200 accent-amber-400 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
-                                onChange={handleChangeBasementBrightness}
-                            />
-                            100
-                          </div>
-                          {/*<div className="flex justify-center gap-0.5">*/}
-                          {/*  {brightnessButtons.map((button) => (*/}
-                          {/*    <button*/}
-                          {/*      key={button.label}*/}
-                          {/*      className={`btn bg-${button.color} text-${button.textColor} rounded-full w-1/8"`}*/}
-                          {/*      value={button.value}*/}
-                          {/*      onClick={handleChangeBasementBrightness}*/}
-                          {/*    >*/}
-                          {/*      <span className="min-w-12">{button.label}</span>*/}
-                          {/*    </button>*/}
-                          {/*  ))}*/}
-                          {/*</div>*/}
-                        </div>
+                        {/*<div className="flex w-full space-x-6 items-center justify-center">*/}
+                        {/*  {Object.values(LIGHTSWITCHES).map((lightSwitch) => {*/}
+                        {/*        if (lightSwitch.id !== 'basement') {*/}
+                        {/*          return (*/}
+                        {/*              <LightswitchToggle*/}
+                        {/*                  key={lightSwitch.id}*/}
+                        {/*                  lightSwitch={lightSwitch}*/}
+                        {/*                  handleToggle={handleToggle}*/}
+                        {/*              />*/}
+                        {/*          );*/}
+                        {/*        }*/}
+                        {/*      }*/}
+                        {/*  )}*/}
+                        {/*</div>*/}
+                        {/*<div id="basement-controls" className="flex flex-col items-center">*/}
+                        {/*  <LightswitchToggle*/}
+                        {/*      lightSwitch={LIGHTSWITCHES.BASEMENT}*/}
+                        {/*      handleToggle={handleToggle}*/}
+                        {/*  />*/}
+                        {/*  <div className="flex gap-2 items-center justify-center text-amber-400 mb-2">*/}
+                        {/*    1*/}
+                        {/*    <input*/}
+                        {/*        type="range"*/}
+                        {/*        min={1}*/}
+                        {/*        max={100}*/}
+                        {/*        value={tplinkState.basement.brightness}*/}
+                        {/*        className="w-full h-2 bg-gray-200 accent-amber-400 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"*/}
+                        {/*        onChange={handleChangeBasementBrightness}*/}
+                        {/*    />*/}
+                        {/*    100*/}
+                        {/*  </div>*/}
+                        {/*  /!*<div className="flex justify-center gap-0.5">*!/*/}
+                        {/*  /!*  {brightnessButtons.map((button) => (*!/*/}
+                        {/*  /!*    <button*!/*/}
+                        {/*  /!*      key={button.label}*!/*/}
+                        {/*  /!*      className={`btn bg-${button.color} text-${button.textColor} rounded-full w-1/8"`}*!/*/}
+                        {/*  /!*      value={button.value}*!/*/}
+                        {/*  /!*      onClick={handleChangeBasementBrightness}*!/*/}
+                        {/*  /!*    >*!/*/}
+                        {/*  /!*      <span className="min-w-12">{button.label}</span>*!/*/}
+                        {/*  /!*    </button>*!/*/}
+                        {/*  /!*  ))}*!/*/}
+                        {/*  /!*</div>*!/*/}
+                        {/*</div>*/}
                       </div>
                   )}
                   {tplinkState.loading && (

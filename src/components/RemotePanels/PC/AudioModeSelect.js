@@ -1,14 +1,14 @@
-import { sendDenonCommand, sendEventToEventGhost } from "@/utilities/http";
-import { Listbox, Transition } from "@headlessui/react";
-import { Fragment } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCheck, faChevronDown } from "@fortawesome/free-solid-svg-icons";
-import { AUDIO_MODES_FOR_SELECT } from "@/utilities/constants.js";
+import {sendDenonCommand, sendEventToHTPCEventGhost} from "@/utilities/http";
+import {Listbox, Transition} from "@headlessui/react";
+import {Fragment} from "react";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faCheck, faChevronDown} from "@fortawesome/free-solid-svg-icons";
+import {AUDIO_MODES_FOR_SELECT} from "@/utilities/constants.js";
 
 function AudioModeSelect({ selectedAudioMode, setSelectedAudioMode }) {
   const handleSelect = (selectedAudioMode) => {
     setSelectedAudioMode(selectedAudioMode);
-    sendEventToEventGhost({ value: selectedAudioMode.value });
+    sendEventToHTPCEventGhost({ value: selectedAudioMode.value });
     sendDenonCommand({ value: selectedAudioMode.denonCmd });
   };
 
@@ -35,44 +35,46 @@ function AudioModeSelect({ selectedAudioMode, setSelectedAudioMode }) {
             leaveTo="opacity-0"
           >
             <Listbox.Options className="fixed z-40 mt-1 max-h-100 left-[12%] right-[12%] max-w-[440px] overflow-auto rounded-md bg-gray-700 py-1 text-base text-center shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-              {Object.values(AUDIO_MODES_FOR_SELECT).map((mode) => (
-                <Listbox.Option
-                  key={mode.key}
-                  value={mode}
-                  disabled={mode.disabled}
-                  className={({
-                    active,
-                  }) => `relative w-full cursor-default select-none py-2 pl-10 pr-4 
-                                    ${
-                                      active
-                                        ? "bg-blue-600 text-white"
-                                        : mode.disabled
-                                          ? "text-gray-400"
-                                          : "text-blue-300"
-                                    }`}
-                >
-                  {({ selected }) => (
-                    <>
-                      <span
-                        className={`block truncate ${
-                          selected ? "font-medium" : "font-normal"
-                        }`}
-                      >
-                        {mode.label}
-                      </span>
-                      {selected ? (
-                        <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-blue-900">
-                          <FontAwesomeIcon
-                            icon={faCheck}
-                            className="h-5 w-5"
-                            aria-hidden="true"
-                          />
+              {Object.values(AUDIO_MODES_FOR_SELECT).map(
+                (mode) => mode.value !== null ? (
+                  <Listbox.Option
+                    key={mode.key}
+                    value={mode}
+                    disabled={mode.disabled}
+                    className={({
+                      active,
+                    }) => `relative w-full cursor-default select-none py-2 pl-10 pr-4 
+                                      ${
+                                        active
+                                          ? "bg-blue-600 text-white"
+                                          : mode.disabled
+                                            ? "text-gray-400"
+                                            : "text-blue-300"
+                                      }`}
+                  >
+                    {({ selected }) => (
+                      <>
+                        <span
+                          className={`block truncate ${
+                            selected ? "font-medium" : "font-normal"
+                          }`}
+                        >
+                          {mode.label}
                         </span>
-                      ) : null}
-                    </>
-                  )}
-                </Listbox.Option>
-              ))}
+                        {selected ? (
+                          <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-blue-900">
+                            <FontAwesomeIcon
+                              icon={faCheck}
+                              className="h-5 w-5"
+                              aria-hidden="true"
+                            />
+                          </span>
+                        ) : null}
+                      </>
+                    )}
+                  </Listbox.Option>
+                ) : null)
+              }
             </Listbox.Options>
           </Transition>
         </div>

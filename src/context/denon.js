@@ -1,10 +1,6 @@
-import { createContext, useContext, useState } from "react";
-import {
-  DENON_INPUTS,
-  DENON_SOUND_MODES,
-  DENON_STATE_DEFAULTS,
-} from "@/utilities/constants.js";
-import { fetchMainZoneData, sendDenonQuery } from "@/utilities/http.js";
+import {createContext, useContext, useState} from "react";
+import {DENON_INPUTS, DENON_SOUND_MODES, DENON_STATE_DEFAULTS,} from "@/utilities/constants.js";
+import {fetchMainZoneData, sendDenonQuery} from "@/utilities/http.js";
 
 const Context = createContext();
 
@@ -41,6 +37,8 @@ export function DenonProvider({ children }) {
     let soundMode = Object.values(DENON_SOUND_MODES).find((mode) =>
       mode.selectSurround.includes(data.selectSurround),
     );
+    console.log(data);
+    console.log(data.selectSurround);
     if (!soundMode) {
       console.info(`Unknown selectSurround: ${data.selectSurround}`);
       if (data.selectSurround.includes("DOLBY_SURROUND")) {
@@ -134,16 +132,24 @@ export function DenonProvider({ children }) {
   };
 
   const fetchDialogueAdjust = async () => {
+    console.log('fetchDialogueAdjust');
     const dialogueAdjustResponse = await sendDenonQuery("PSDIL");
     // dialogueAdjustResponse[0] = ON/OFF, [1] = LEVEL
     if (dialogueAdjustResponse.error) {
       console.error(dialogueAdjustResponse.error);
     } else {
+      // for some reason each dialogueResponseELement comes back 4X.
       const psDilOn = dialogueAdjustResponse.data[0].split(" ")[1] === "ON";
       let PSDIL = 0;
-      if (dialogueAdjustResponse.data[1]) {
+
+      let levelIndex = 1;
+      while (dialogueAdjustResponse.data[levelIndex] === dialogueAdjustResponse.data[0] && levelIndex < 8) {
+        levelIndex++;
+      }
+
+      if (dialogueAdjustResponse.data[levelIndex]) {
         PSDIL = parseDialogueAdjustLevel(
-          dialogueAdjustResponse.data[1].split(" ")[1],
+          dialogueAdjustResponse.data[levelIndex].split(" ")[1],
         );
       } else {
         console.error(

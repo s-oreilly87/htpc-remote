@@ -1,14 +1,14 @@
-import { sendEventToEventGhost, sendRokuLaunchCommand } from "@/utilities/http";
-import { Listbox, Transition } from "@headlessui/react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCheck, faChevronDown } from "@fortawesome/free-solid-svg-icons";
-import { Fragment } from "react";
-import { DISPLAY_MODES_FOR_SELECT } from "@/utilities/constants.js";
+import {sendEventToHTPCEventGhost, sendRokuLaunchCommand} from "@/utilities/http";
+import {Listbox, Transition} from "@headlessui/react";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faCheck, faChevronDown} from "@fortawesome/free-solid-svg-icons";
+import {Fragment} from "react";
+import {DISPLAY_MODES_FOR_SELECT} from "@/utilities/constants.js";
 
 function DisplayModeSelect({ selectedDisplayMode, setSelectedDisplayMode }) {
   const handleSelect = (selectedDisplayMode) => {
     setSelectedDisplayMode(selectedDisplayMode);
-    sendEventToEventGhost({ value: selectedDisplayMode.value });
+    sendEventToHTPCEventGhost({ value: selectedDisplayMode.value });
     if (selectedDisplayMode.rokuChannel) {
       sendRokuLaunchCommand(selectedDisplayMode.rokuChannel);
     }
