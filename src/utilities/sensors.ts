@@ -1,7 +1,86 @@
 import { useEffect, useState } from "react";
 
-export function useAbsoluteOrientationSensor({ frequency } = {}, callback) {
-  const [absOrientation, setAbsOrientation] = useState(null);
+export type Quaternion = [number, number, number, number] | Float32Array;
+
+export interface SensorConfig {
+  frequency?: number;
+}
+
+interface SensorErrorEvent extends Event {
+  error: DOMException;
+}
+
+interface OrientationSensor extends EventTarget {
+  quaternion: Quaternion;
+  start: () => void;
+  stop: () => void;
+  addEventListener(
+    type: "reading",
+    listener: () => void,
+    options?: boolean | AddEventListenerOptions,
+  ): void;
+  addEventListener(
+    type: "error",
+    listener: (event: SensorErrorEvent) => void,
+    options?: boolean | AddEventListenerOptions,
+  ): void;
+}
+
+interface AccelerometerSensor extends EventTarget {
+  x: number;
+  y: number;
+  z: number;
+  acceleration?: {
+    x: number;
+    y: number;
+    z: number;
+  };
+  start: () => void;
+  stop: () => void;
+  addEventListener(
+    type: "reading",
+    listener: () => void,
+    options?: boolean | AddEventListenerOptions,
+  ): void;
+  addEventListener(
+    type: "error",
+    listener: (event: SensorErrorEvent) => void,
+    options?: boolean | AddEventListenerOptions,
+  ): void;
+}
+
+declare global {
+  interface Window {
+    AbsoluteOrientationSensor: new (config?: SensorConfig) => OrientationSensor;
+    RelativeOrientationSensor: new (config?: SensorConfig) => OrientationSensor;
+    Accelerometer: new (config?: SensorConfig) => AccelerometerSensor;
+    Gyroscope: new (config?: SensorConfig) => OrientationSensor;
+  }
+}
+
+export interface OrientationReading {
+  quaternion: Quaternion;
+}
+
+interface RotationReading {
+  x: number;
+  y: number;
+  z: number;
+}
+
+interface AccelerationReading {
+  x: number;
+  y: number;
+  z: number;
+}
+
+export function useAbsoluteOrientationSensor(
+  { frequency }: SensorConfig = {},
+  callback?: (quaternion: Quaternion) => void,
+) {
+  const [absOrientation, setAbsOrientation] = useState<OrientationReading | null>(
+    null,
+  );
 
   useEffect(() => {
     if ("AbsoluteOrientationSensor" in window) {
@@ -33,10 +112,15 @@ export function useAbsoluteOrientationSensor({ frequency } = {}, callback) {
   return absOrientation;
 }
 
-export function useRelativeOrientationSensor({ frequency } = {}, callback) {
-  const [relOrientation, setRelOrientation] = useState({
-    quaternion: [0, 0, 0, 0],
-  });
+export function useRelativeOrientationSensor(
+  { frequency }: SensorConfig = {},
+  callback?: (sensor: OrientationSensor) => void,
+) {
+  const [relOrientation, setRelOrientation] = useState<OrientationReading | null>(
+    {
+      quaternion: [0, 0, 0, 0],
+    },
+  );
 
   useEffect(() => {
     if ("RelativeOrientationSensor" in window) {
@@ -68,8 +152,13 @@ export function useRelativeOrientationSensor({ frequency } = {}, callback) {
   return relOrientation;
 }
 
-export function useAccelerometer({ frequency } = {}, callback) {
-  const [acceleration, setAcceleration] = useState(null);
+export function useAccelerometer(
+  { frequency }: SensorConfig = {},
+  callback?: (acceleration?: AccelerationReading) => void,
+) {
+  const [acceleration, setAcceleration] = useState<AccelerationReading | null>(
+    null,
+  );
 
   useEffect(() => {
     if ("Accelerometer" in window) {
@@ -105,8 +194,11 @@ export function useAccelerometer({ frequency } = {}, callback) {
   return acceleration;
 }
 
-export function useGyroscope({ frequency } = {}, callback) {
-  const [rotation, setRotation] = useState(null);
+export function useGyroscope(
+  { frequency }: SensorConfig = {},
+  callback?: (quaternion: Quaternion) => void,
+) {
+  const [rotation, setRotation] = useState<RotationReading | null>(null);
 
   useEffect(() => {
     if ("Gyroscope" in window) {
@@ -143,10 +235,12 @@ export function useGyroscope({ frequency } = {}, callback) {
 }
 
 export function hasRelativeOrientationSensor() {
-  let relOrientationSensor = null;
+  let relOrientationSensor: OrientationSensor | null = null;
   try {
-    relOrientationSensor = new RelativeOrientationSensor({ frequency: 10 });
-    relOrientationSensor.onerror = (event) => {
+    relOrientationSensor = new window.RelativeOrientationSensor({
+      frequency: 10,
+    });
+    relOrientationSensor.addEventListener("error", (event: SensorErrorEvent) => {
       // Handle runtime errors.
       if (event.error.name === "NotAllowedError") {
         console.log("Permission to access sensor was denied.");
@@ -154,18 +248,18 @@ export function hasRelativeOrientationSensor() {
         console.log("Cannot connect to the sensor.");
       }
       return false;
-    };
-    relOrientationSensor.onreading = (e) => {
-      console.log(e);
-    };
+    });
+    relOrientationSensor.addEventListener("reading", (event) => {
+      console.log(event);
+    });
     relOrientationSensor.start();
     relOrientationSensor.stop();
     return true;
   } catch (error) {
     // Handle construction errors.
-    if (error.name === "SecurityError") {
+    if (error instanceof DOMException && error.name === "SecurityError") {
       console.log("Sensor construction was blocked by the Permissions Policy.");
-    } else if (error.name === "ReferenceError") {
+    } else if (error instanceof ReferenceError) {
       console.log("Sensor is not supported by the User Agent.");
     } else {
       throw error;
@@ -175,7 +269,7 @@ export function hasRelativeOrientationSensor() {
 }
 
 export function hasAWorkingRelativeOrientationSensor() {
-  let relOrientation;
+  let relOrientation: OrientationReading | null;
   if ("RelativeOrientationSensor" in window) {
     const sensor = new window.RelativeOrientationSensor({
       frequency: 5,
