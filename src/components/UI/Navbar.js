@@ -7,7 +7,7 @@ import SmartHomeModal from "@/components/RemotePanels/SmartHome/SmartHomeModal.j
 import {TplinkProvider} from "@/context/tplink.js";
 
 function Navbar({ className, selectedRemote, onClickHandler }) {
-  const [buttonPressTimer, setButtonPressTimer] = useState();
+  const [buttonPressTimerId, setButtonPressTimerId] = useState();
 
   const [qrModalOpen, setQrModalOpen] = useState(false);
 
@@ -15,7 +15,7 @@ function Navbar({ className, selectedRemote, onClickHandler }) {
 
   const handleClick = (event) => {
     onClickHandler(event);
-    buttonPress(event.currentTarget, buttonPressTimer, setButtonPressTimer);
+    buttonPress(event.currentTarget, buttonPressTimerId, setButtonPressTimerId);
   };
 
   const handleIconClick = () => {

@@ -11,7 +11,7 @@ export function useHasChanged<T>(val: T) {
 }
 
 export function usePrevious<T>(value: T) {
-  const ref = useRef<T>();
+  const ref = useRef<T>(null);
   useEffect(() => {
     ref.current = value;
   });
@@ -38,15 +38,15 @@ export function sleep(ms: number) {
 
 export function buttonPress(
   button: HTMLButtonElement | null,
-  buttonPressTimer: NodeJS.Timeout | null,
-  setButtonPressTimer: (timer: NodeJS.Timeout) => void,
+  buttonPressTimerId: number | null,
+  setButtonPressTimer: (timerId: number) => void,
 ) {
   if (!(button instanceof HTMLButtonElement)) {
     return; // not a real button, just made a dummy object to send a request
   }
 
-  if (buttonPressTimer) {
-    clearTimeout(buttonPressTimer);
+  if (buttonPressTimerId) {
+    clearTimeout(buttonPressTimerId);
   }
 
   navigator.vibrate(5);

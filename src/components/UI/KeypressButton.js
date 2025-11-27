@@ -4,7 +4,7 @@ import {sendDenonCommand, sendEventToHTPCEventGhost, sendKeystrokeToNutJS, sendR
 import {buttonPress, openPlexampAndroidApp} from "@/utilities/utils";
 
 const RemoteButton = ({ remote, children, ...props }) => {
-  const [buttonPressTimer, setButtonPressTimer] = useState();
+  const [buttonPressTimerId, setButtonPressTimerId] = useState();
 
   const handleClick = (event) => {
     if (remote === REMOTE.ROKU) {
@@ -21,7 +21,7 @@ const RemoteButton = ({ remote, children, ...props }) => {
     } else if (remote === REMOTE.DENON) {
       sendDenonCommand(event.currentTarget);
     }
-    buttonPress(event.currentTarget, buttonPressTimer, setButtonPressTimer);
+    buttonPress(event.currentTarget, buttonPressTimerId, setButtonPressTimerId);
   };
 
   return (

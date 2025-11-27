@@ -29,7 +29,7 @@ const App = () => {
     setIsClient(true);
   }, []);
 
-  const currentlySelectedRemote = useRef<RemoteType>();
+  const currentlySelectedRemote = useRef<RemoteType>(null);
   const prevRemote = usePrevious(selectedRemote);
 
   useEffect(() => {
@@ -46,7 +46,7 @@ const App = () => {
     if (direction === "right") {
       if (REMOTE_INDEX[currentlySelectedRemote.current] > 0) {
         setSelectedRemote((prevSelectedRemote) =>
-          getKeyByValue(REMOTE_INDEX, REMOTE_INDEX[prevSelectedRemote] - 1) ?? prevSelectedRemote,
+            (getKeyByValue(REMOTE_INDEX, REMOTE_INDEX[prevSelectedRemote] - 1) ?? prevSelectedRemote) as RemoteType,
         );
       }
     } else {
@@ -55,7 +55,7 @@ const App = () => {
         Object.keys(REMOTE_INDEX).length - 1
       ) {
         setSelectedRemote((prevSelectedRemote) =>
-          getKeyByValue(REMOTE_INDEX, REMOTE_INDEX[prevSelectedRemote] + 1) ?? prevSelectedRemote,
+            (getKeyByValue(REMOTE_INDEX, REMOTE_INDEX[prevSelectedRemote] + 1) ?? prevSelectedRemote) as RemoteType
         );
       }
     }
@@ -64,7 +64,7 @@ const App = () => {
   return (
     <>
       {isClient && (
-        <KeepAlive.Provider value="root">
+        <KeepAlive.Provider value={document.querySelector('root')}>
           {/* this div is so tailwind can find classes that don't exist until runtime */}
           <div
             id="dynamically-named-classes"

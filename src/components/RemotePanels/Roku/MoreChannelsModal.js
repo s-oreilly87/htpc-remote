@@ -13,7 +13,7 @@ export default function MoreChannelsModal({
   setPowerOn,
 }) {
   const [iconsLoaded, setIconsLoaded] = useState(false);
-  const [buttonPressTimer, setButtonPressTimer] = useState();
+  const [buttonPressTimerId, setButtonPressTimerId] = useState();
 
   function closeModal() {
     setIsOpen(false);
@@ -26,7 +26,7 @@ export default function MoreChannelsModal({
   const handleClick = (event) => {
     sendRokuLaunchCommand(event.currentTarget);
     setPowerOn(true);
-    buttonPress(event.currentTarget, buttonPressTimer, setButtonPressTimer);
+    buttonPress(event.currentTarget, buttonPressTimerId, setButtonPressTimerId);
     closeModal();
   };
 

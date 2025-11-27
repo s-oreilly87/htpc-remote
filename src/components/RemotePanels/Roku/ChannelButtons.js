@@ -14,7 +14,7 @@ function RokuChannels({ setPowerOn }) {
   const [iconsLoaded, setIconsLoaded] = useState(false);
   const [moreChannels, setMoreChannels] = useState({});
   const [moreChannelsModalOpen, setMoreChannelsModalOpen] = useState(false);
-  const [buttonPressTimer, setButtonPressTimer] = useState();
+  const [buttonPressTimerId, setButtonPressTimerId] = useState();
 
   const fetchIcon = async (button) => {
     const channelId = button.value;
@@ -90,7 +90,7 @@ function RokuChannels({ setPowerOn }) {
   const handleClick = (event) => {
     sendRokuLaunchCommand(event.currentTarget);
     setPowerOn(true);
-    buttonPress(event.currentTarget, buttonPressTimer, setButtonPressTimer);
+    buttonPress(event.currentTarget, buttonPressTimerId, setButtonPressTimerId);
   };
 
   const handleClickMore = (event) => {

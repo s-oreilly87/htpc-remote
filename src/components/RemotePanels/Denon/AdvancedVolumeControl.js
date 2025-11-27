@@ -19,7 +19,7 @@ const DIALOGUE_ADJUST_DISABLED_MODES = [
 const AdvancedVolumeControl = ({}) => {
   const [denonState, updateDenonState, refreshDenonState] = useDenonContext();
 
-  const [buttonPressTimer, setButtonPressTimer] = useState();
+  const [buttonPressTimerId, setButtonPressTimerId] = useState();
 
   const parseAndSetDialogueAdjustLevel = (responseValue) => {
     // 0.5 steps come in without the decimal
@@ -37,7 +37,7 @@ const AdvancedVolumeControl = ({}) => {
 
   const handleClick = async (event) => {
     const button = event.currentTarget;
-    buttonPress(button, buttonPressTimer, setButtonPressTimer);
+    buttonPress(button, buttonPressTimerId, setButtonPressTimerId);
 
     const response = await sendDenonCommand(button, "command");
     if (response.error) {
