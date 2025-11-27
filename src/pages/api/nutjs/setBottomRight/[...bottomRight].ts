@@ -1,28 +1,34 @@
 //TODO: get locals into here
+import type { NextApiRequest, NextApiResponse } from "next";
 import { getNutState, setNutState } from "@/api-modules/nutjs/nut-state";
 
-export default async function handleSetBottomRight(req, res) {
+export default async function handleSetBottomRight(
+  req: NextApiRequest,
+  res: NextApiResponse,
+) {
   const { bottomRight } = req.query; //.toUpperCase() //probably unnecessary with constants refactor
   const x = parseFloat(bottomRight[0]);
   const y = parseFloat(bottomRight[1]);
 
-  setNutState({ calibrationRange: { xMax: x, yMax: y } });
+  const nutState = getNutState();
+  const calibrationRange = { ...nutState.calibrationRange, xMax: x, yMax: y };
+
+  setNutState({ calibrationRange });
 
   console.log(`NUTJS: Bottom Right Orientation Set:  x: ${x}, y: ${y}`);
-  const nutState = getNutState();
-  setNutState({
-    scaleFactor: {
-      x:
-        nutState.screenSize.width /
-        (nutState.calibrationRange.xMax - nutState.calibrationRange.xMin),
-      y:
-        nutState.screenSize.height /
-        (nutState.calibrationRange.yMax - nutState.calibrationRange.yMin),
-    },
-  });
+  const scaleFactor = {
+    x:
+      nutState.screenSize.width /
+      ((calibrationRange.xMax ?? 0) - (calibrationRange.xMin ?? 0)),
+    y:
+      nutState.screenSize.height /
+      ((calibrationRange.yMax ?? 0) - (calibrationRange.yMin ?? 0)),
+  };
+
+  setNutState({ scaleFactor });
 
   console.log(
-    `NUTJS: Set scaleFactor to { x: ${nutState.scaleFactor.x}, y: ${nutState.scaleFactor.y} }`,
+    `NUTJS: Set scaleFactor to { x: ${scaleFactor.x}, y: ${scaleFactor.y} }`,
   );
   res.send("Bottom Right set and scaling adjusted");
 }

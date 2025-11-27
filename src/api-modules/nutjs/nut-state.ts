@@ -1,6 +1,6 @@
 export interface NutState {
   isInitialized: boolean;
-  screenSize: { x: number; y: number };
+  screenSize: { width: number; height: number };
   defaultRawOrientation: { x: number | null; y: number | null };
   centeredPosition: { x: number | null; y: number | null };
   scaleFactor: { x: number | null; y: number | null };
@@ -10,7 +10,7 @@ export interface NutState {
 
 const defaultState: NutState = {
   isInitialized: false,
-  screenSize: { x: 1920, y: 1080 },
+  screenSize: { width: 1920, height: 1080 },
   defaultRawOrientation: { x: null, y: null },
   centeredPosition: { x: null, y: null },
   scaleFactor: { x: null, y: null },

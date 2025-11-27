@@ -1,9 +1,26 @@
 import { Server } from "socket.io";
+import type { NextApiRequest, NextApiResponse } from "next";
 import { mouse, Point, screen, straightTo } from "@nut-tree/nut-js";
-import { getNutState, setNutState } from "@/api-modules/nutjs/nut-state";
+import { getNutState, setNutState, type NutState } from "@/api-modules/nutjs/nut-state";
+
+interface OrientationPayload {
+  x: number | string;
+  y: number | string;
+}
+
+type OrientationVector = {
+  x: number;
+  y: number;
+};
+
+type SocketServer = NextApiResponse["socket"] & {
+  server: NextApiResponse["socket"]["server"] & { io?: Server };
+};
+
+type NextApiResponseWithSocket = NextApiResponse & { socket: SocketServer };
 
 let busy = false;
-async function initializeAirmouse(x, y) {
+async function initializeAirmouse(x: number, y: number) {
   const screenSize = await getDisplaySize();
   const centeredPosition = {
     x: Math.floor(screenSize.width / 2),
@@ -29,18 +46,20 @@ async function initializeAirmouse(x, y) {
   );
 }
 
-async function getDisplaySize() {
+async function getDisplaySize(): Promise<NutState["screenSize"]> {
   const width = await screen.width();
   const height = await screen.height();
   return { width: width, height: height };
 }
 
-async function lerpAndFlipOrientation(orientation) {
+async function lerpAndFlipOrientation(orientation: OrientationVector) {
   const nutState = getNutState();
+  const defaultRawX = nutState.defaultRawOrientation.x ?? 0;
+  const defaultRawY = nutState.defaultRawOrientation.y ?? 0;
 
   // offset from default
-  let x = orientation.x - nutState.defaultRawOrientation.x;
-  let y = orientation.y - nutState.defaultRawOrientation.y;
+  let x = orientation.x - defaultRawX;
+  let y = orientation.y - defaultRawY;
 
   // Calculate the lerped x value between -1 and 1
   let lerpedX = (x / (Math.PI / 3)) * 0.75; // Assumes a range of 60 degrees (Math.PI/3 radians) and a lerping range of -0.5 to 0.5
@@ -64,13 +83,13 @@ async function lerpAndFlipOrientation(orientation) {
   return { x: lerpedX, y: lerpedY };
 }
 
-async function getNewMousePos(x, y) {
+async function getNewMousePos(x: number, y: number) {
   const nutState = getNutState();
   const lerped = await lerpAndFlipOrientation({ x: x, y: y });
 
   let newMousePos = {
-    x: nutState.centeredPosition.x + lerped.x * nutState.scaleFactor.x,
-    y: nutState.centeredPosition.y + lerped.y * nutState.scaleFactor.y,
+    x: (nutState.centeredPosition.x ?? 0) + lerped.x * (nutState.scaleFactor.x ?? 0),
+    y: (nutState.centeredPosition.y ?? 0) + lerped.y * (nutState.scaleFactor.y ?? 0),
   };
 
   if (newMousePos.x > nutState.screenSize.width - 1) {
@@ -88,7 +107,7 @@ async function getNewMousePos(x, y) {
   return newMousePos;
 }
 
-async function handleOrientation(orientation) {
+async function handleOrientation(orientation: OrientationPayload) {
   if (busy) {
     return;
   }
@@ -99,8 +118,8 @@ async function handleOrientation(orientation) {
     return; //res.status(500).send('not an orientation')
   }
 
-  const x = parseFloat(orientation.x);
-  const y = parseFloat(orientation.y);
+  const x = Number(orientation.x);
+  const y = Number(orientation.y);
   const nutState = getNutState();
   // if its the first request, initialize (set default position, and move cursor to centre)
   if (!nutState.isInitialized) {
@@ -115,7 +134,7 @@ async function handleOrientation(orientation) {
     return; //res.send("Initialization Complete")
   }
 
-  if (!x || !y) {
+  if (Number.isNaN(x) || Number.isNaN(y)) {
     return; //res.send("Bad orientation. Use '/api/nutjs/orientation/x :float/y :float'")
   }
 
@@ -138,7 +157,10 @@ async function handleOrientation(orientation) {
   //res.send(`Mouse moved to x: ${newMousePos.x}, y: ${newMousePos.y}`)
 }
 
-export default function handleInitializeSocket(req, res) {
+export default function handleInitializeSocket(
+  req: NextApiRequest,
+  res: NextApiResponseWithSocket,
+) {
   if (res.socket.server.io) {
     res.send("Socket already running");
   } else {
@@ -148,8 +170,8 @@ export default function handleInitializeSocket(req, res) {
 
     io.on("connection", (socket) => {
       console.log("socket connected!");
-      socket.on("orientation", (orientation) => {
-        handleOrientation(orientation);
+      socket.on("orientation", (orientation: OrientationPayload) => {
+        void handleOrientation(orientation);
       });
     });
 
