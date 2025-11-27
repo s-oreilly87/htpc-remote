@@ -1,6 +1,7 @@
 import client from '@/api-modules/tplink/tplink-client'
 import {toNumber} from "lodash";
 import {LIGHTSWITCHES} from "@/utilities/constants";
+import {Plug} from "tplink-smarthome-api";
 
 export default function handleBrightness(req, res) {
   let { params } = req.query;
@@ -24,7 +25,9 @@ export default function handleBrightness(req, res) {
 
   client.on("error", (error) => console.log(error));
   client.getDevice({ host: ip }).then((device) => {
-    device.dimmer.setBrightness(brightnessLevel);
+          if (device instanceof Plug) {
+              device.dimmer.setBrightness(brightnessLevel);
+          }
   });
 
   res.send("TPLink command sent!");

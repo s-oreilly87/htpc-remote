@@ -15,7 +15,7 @@ interface SensorWithControls extends EventTarget {
   stop: () => void;
   addEventListener(
     type: "reading",
-    listener: () => void,
+    listener: (event: any) => void,
     options?: boolean | AddEventListenerOptions,
   ): void;
   addEventListener(

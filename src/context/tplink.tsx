@@ -3,13 +3,15 @@ import { createContext, useContext, useState, ReactNode } from "react";
 export interface TplinkDeviceState {
   powerState: boolean;
   brightness?: number;
+  error?: string;
 }
 
 export interface TplinkState {
   "yard-fence": TplinkDeviceState;
   "yard-dining": TplinkDeviceState;
+  basement?: TplinkDeviceState;
   loading: boolean;
-  [key: string]: TplinkDeviceState | boolean;
+  // [key: string]: TplinkDeviceState;
 }
 
 export type TplinkContextValue = [

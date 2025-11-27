@@ -243,7 +243,7 @@ DenonTelnet.prototype.setVolume = function (volume, zone, callback) {
   const commandPrefix = !zone || zone === "ZM" ? "MV" : zone;
   let vol = (volume * 10).toFixed(0); //volume fix
 
-  if (vol < 100) {
+  if (parseFloat(vol) < 100) {
     vol = "0" + vol;
   } else {
     vol = "" + vol;
