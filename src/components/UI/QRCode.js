@@ -54,7 +54,7 @@ const QRCode = ({ isOpen, setIsOpen }) => {
                     <Image
                       width="300"
                       height="300"
-                      src="/192-168-1-245.png"
+                      src="/QR-remote-sean-home.png"
                       alt="QR Code"
                     />
                     <div className="w-75 text-white text-center">
