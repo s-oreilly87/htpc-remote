@@ -37,8 +37,6 @@
 #COPY --from=builder /app/package.json ./package.json
 #
 ## Set environment variables
-#ARG SERVER_IP
-#ENV SERVER_IP=${SERVER_IP}
 #ARG NEXT_PUBLIC_PLATFORM
 #ENV NEXT_PUBLIC_PLATFORM=${NEXT_PUBLIC_PLATFORM}
 #

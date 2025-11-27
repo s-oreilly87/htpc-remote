@@ -39,7 +39,6 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        SERVER_IP: 192.168.1.100
         NEXT_PUBLIC_PLATFORM: PC
     privileged: true
     restart: always
@@ -76,7 +75,6 @@ networks:
 #      context: .
 #      dockerfile: Dockerfile
 #      args:
-#        SERVER_IP: 192.168.1.100
 #        NEXT_PUBLIC_PLATFORM: PC
 #    privileged: true
 #    restart: always

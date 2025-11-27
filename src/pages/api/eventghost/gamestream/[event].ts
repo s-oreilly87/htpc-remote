@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 
-const gamestreamIp = process.env.GAMESTREAM_IP ?? process.env.NEXT_PUBLIC_GAMESTREAM_IP ?? "";
+const gamestreamIp = process.env.NEXT_PUBLIC_GAMESTREAM_IP ?? "";
 const GAMESTREAM_EVENTGHOST_URL =
   process.env.GAMESTREAM_EVENTGHOST_URL ??
   (gamestreamIp ? `http://${gamestreamIp}:3006` : "");

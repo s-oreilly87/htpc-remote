@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 
-const serverIp = process.env.SERVER_IP ?? process.env.NEXT_PUBLIC_SERVER_IP ?? "";
+const serverIp = process.env.NEXT_PUBLIC_SERVER_IP ?? "";
 const HTPC_EVENTGHOST_URL =
   process.env.HTPC_EVENTGHOST_URL ?? (serverIp ? `http://${serverIp}:3005` : "");
 
