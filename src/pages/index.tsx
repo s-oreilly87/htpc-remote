@@ -1,19 +1,21 @@
-import React, {useEffect, useRef, useState} from "react";
+import React, { useEffect, useRef, useState } from "react";
 import KeepAlive from "react-fiber-keep-alive";
-import {REMOTE, REMOTE_INDEX, ROKU_STATE_DEFAULTS,} from "@/utilities/constants.js";
-import {getKeyByValue, usePrevious} from "@/utilities/utils";
 import Head from "next/head";
-import SwipeDetector from "@/components/UI/SwipeDetector";
+
+import RemotePanelSlideScroll from "@/components/RemotePanels/RemotePanelSlideScroll";
 import Navbar from "@/components/UI/Navbar";
-import RemotePanelSlideScroll from "@/components/RemotePanels/RemotePanelSlideScroll.js";
-import {archivo_narrow} from "@/styles/fonts.js";
+import SwipeDetector from "@/components/UI/SwipeDetector";
+import { ROKU_STATE_DEFAULTS } from "@/components/RemotePanels/Roku/rokuConstants";
+import { RemoteType, REMOTE_INDEX } from "@/constants/remotes";
+import { archivo_narrow } from "@/styles/fonts";
+import { getKeyByValue, usePrevious } from "@/utilities/utils";
 
 const App = () => {
-  const [selectedRemote, setSelectedRemote] = useState(REMOTE.ROKU);
+  const [selectedRemote, setSelectedRemote] = useState<RemoteType>(RemoteType.ROKU);
   const [rokuState, setRokuState] = useState(ROKU_STATE_DEFAULTS);
-  const [pcState, setPcState] = useState();
+  const [pcState, setPcState] = useState<Record<string, unknown> | undefined>();
   const resetDocHeight = () => {
-    let vh = window.innerHeight * 0.01;
+    const vh = window.innerHeight * 0.01;
     document.documentElement.style.setProperty("--vh", `${vh}px`);
   };
 
@@ -27,24 +29,24 @@ const App = () => {
     setIsClient(true);
   }, []);
 
-  let currentlySelectedRemote = useRef();
+  const currentlySelectedRemote = useRef<RemoteType>(null);
   const prevRemote = usePrevious(selectedRemote);
 
-  // No idea what im doing here
   useEffect(() => {
     currentlySelectedRemote.current = selectedRemote;
   }, [selectedRemote]);
 
-  const handleSelectRemote = (event) => {
-    setSelectedRemote(event.currentTarget.value);
+  const handleSelectRemote = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setSelectedRemote(event.currentTarget.value as RemoteType);
   };
 
-  const handleSwipe = (direction) => {
+  const handleSwipe = (direction: "left" | "right") => {
+    if (!currentlySelectedRemote.current) return;
+
     if (direction === "right") {
       if (REMOTE_INDEX[currentlySelectedRemote.current] > 0) {
-        // This is somehow forcing a re-render or something - so the state actual updates right away
         setSelectedRemote((prevSelectedRemote) =>
-          getKeyByValue(REMOTE_INDEX, REMOTE_INDEX[prevSelectedRemote] - 1),
+            (getKeyByValue(REMOTE_INDEX, REMOTE_INDEX[prevSelectedRemote] - 1) ?? prevSelectedRemote) as RemoteType,
         );
       }
     } else {
@@ -53,7 +55,7 @@ const App = () => {
         Object.keys(REMOTE_INDEX).length - 1
       ) {
         setSelectedRemote((prevSelectedRemote) =>
-          getKeyByValue(REMOTE_INDEX, REMOTE_INDEX[prevSelectedRemote] + 1),
+            (getKeyByValue(REMOTE_INDEX, REMOTE_INDEX[prevSelectedRemote] + 1) ?? prevSelectedRemote) as RemoteType
         );
       }
     }
@@ -62,7 +64,7 @@ const App = () => {
   return (
     <>
       {isClient && (
-        <KeepAlive.Provider value="root">
+        <KeepAlive.Provider value={document.querySelector('root')}>
           {/* this div is so tailwind can find classes that don't exist until runtime */}
           <div
             id="dynamically-named-classes"
@@ -78,8 +80,7 @@ const App = () => {
           ></div>
           <div
             id="button-color-classes"
-            className="hidden bg-amber-100 bg-amber-200 bg-amber-300 bg-amber-400 bg-amber-500 bg-amber-600 bg-amber-700 bg-amber-800 bg-amber-900
-                       text-amber-100 text-amber-200 text-amber-300 text-amber-400 text-amber-500 text-amber-600 text-amber-700 text-amber-800 text-amber-900"
+            className="hidden bg-amber-100 bg-amber-200 bg-amber-300 bg-amber-400 bg-amber-500 bg-amber-600 bg-amber-700 bg-amber-800 bg-amber-900 text-amber-100 text-amber-200 text-amber-300 text-amber-400 text-amber-500 text-amber-600 text-amber-700 text-amber-800 text-amber-900"
           ></div>
           <div
             id="root"
@@ -87,10 +88,7 @@ const App = () => {
           >
             <Head>
               <title>HTPC Remote</title>
-              <meta
-                name="viewport"
-                content="width=device-width, initial-scale=1"
-              />
+              <meta name="viewport" content="width=device-width, initial-scale=1" />
               <link rel="icon" href="/favicon.ico" />
             </Head>
             <div className="flex flex-col">

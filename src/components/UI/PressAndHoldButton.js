@@ -1,4 +1,4 @@
-import {REMOTE} from "@/utilities/constants.js";
+import {REMOTE} from "@/utilities/constants";
 import {useState} from "react";
 import {
     sendDenonCommand,
@@ -10,7 +10,7 @@ import {
     sendRokuKeyup,
 } from "@/utilities/http";
 import {buttonPress} from "@/utilities/utils";
-import {useDenonContext} from "@/context/denon.js";
+import {useDenonContext} from "@/context/denon";
 
 const PressAndHoldButton = ({
   remote,
@@ -22,7 +22,7 @@ const PressAndHoldButton = ({
   const [touchTimer, setTouchTimer] = useState(null);
   const [vibrateInterval, setVibrateInterval] = useState(null);
   const [sendKeyInterval, setSendKeyInterval] = useState(null);
-  const [buttonPressTimer, setButtonPressTimer] = useState(null);
+  const [buttonPressTimerId, setButtonPressTimerId] = useState(null);
 
   const [denonState, updateDenonState, refreshDenonState, setDenonState] =
     useDenonContext();
@@ -41,7 +41,7 @@ const PressAndHoldButton = ({
       sendEventToHTPCEventGhost(REMOTE.PC, button);
     }
 
-    buttonPress(button, buttonPressTimer, setButtonPressTimer);
+    buttonPress(button, buttonPressTimerId, setButtonPressTimerId);
     setTouchTimer(
       setTimeout(() => {
         pressAndHoldVibration();
@@ -81,7 +81,7 @@ const PressAndHoldButton = ({
   // ########   FOR ROKU  ########
   function rokuPressAndHoldStart(button) {
     sendRokuKeypress(button);
-    buttonPress(button, buttonPressTimer, setButtonPressTimer);
+    buttonPress(button, buttonPressTimerId, setButtonPressTimerId);
     setTouchTimer(
       setTimeout(() => {
         setIsHeld(true);
@@ -118,7 +118,7 @@ const PressAndHoldButton = ({
 
     sendDenonCommand(button);
     maybeChangeVolDisplay(button);
-    buttonPress(button, buttonPressTimer, setButtonPressTimer);
+    buttonPress(button, buttonPressTimerId, setButtonPressTimerId);
   };
 
   const maybeChangeVolDisplay = (button) => {

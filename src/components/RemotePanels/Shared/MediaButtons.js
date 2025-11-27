@@ -8,7 +8,7 @@ import {
   faPause,
   faPlay,
 } from "@fortawesome/free-solid-svg-icons";
-import { KEYSTROKE, REMOTE } from "@/utilities/constants.js";
+import { KEYSTROKE, REMOTE } from "@/utilities/constants";
 import PressAndHoldButton from "@/components/UI/PressAndHoldButton";
 
 function MediaButtons({ remote }) {

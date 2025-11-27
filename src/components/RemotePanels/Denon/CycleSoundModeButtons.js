@@ -3,10 +3,10 @@ import {
   DOLBY_MODES,
   DTS_MODES,
   REMOTE,
-} from "@/utilities/constants.js";
+} from "@/utilities/constants";
 import KeypressButton from "@/components/UI/KeypressButton";
 import { sendDenonCommand, sendDenonQuery } from "@/utilities/http";
-import { useDenonContext } from "@/context/denon.js";
+import { useDenonContext } from "@/context/denon";
 
 const CYCLE_TIMEOUT = 5000;
 const RESPONSE_TIMEOUT = 2000;

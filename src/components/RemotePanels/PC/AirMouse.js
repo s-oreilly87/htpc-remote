@@ -7,8 +7,8 @@ import {hasRelativeOrientationSensor} from "@/utilities/sensors";
 import AirMouseCalibrationModal from "@/components/RemotePanels/PC/AirMouseCalibrationModal";
 import RelativeOrientationSensor from "@/components/Sensors/RelativeOrientationSensor";
 import io from "socket.io-client";
-import {sendClickToNutJS, sendDisableCommandToNutJS,} from "@/utilities/http.js";
-import {CLICK_TYPE} from "@/utilities/constants.js";
+import {sendClickToNutJS, sendDisableCommandToNutJS,} from "@/utilities/http";
+import {CLICK_TYPE} from "@/utilities/constants";
 
 const AirMouse = () => {
   const [socket, setSocket] = useState(io);

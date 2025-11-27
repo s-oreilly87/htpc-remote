@@ -1,4 +1,4 @@
-import Constants from "@/utilities/constants.js";
+import Constants from "@/utilities/constants";
 import KeyboardGroup from "../Shared/KeyboardGroup";
 import {faPowerOff} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";

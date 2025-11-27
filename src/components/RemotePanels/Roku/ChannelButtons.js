@@ -1,11 +1,11 @@
-import { ROKU_APPS } from "@/utilities/constants.js";
+import { ROKU_APPS } from "@/utilities/constants";
 import { useEffect, useState } from "react";
 import {
   fetchRokuChannels,
   sendRokuLaunchCommand,
   sendRokuQuery,
 } from "@/utilities/http";
-import { buttonPress } from "@/utilities/utils.js";
+import { buttonPress } from "@/utilities/utils";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import MoreChannelsModal from "@/components/RemotePanels/Roku/MoreChannelsModal.js";
@@ -14,7 +14,7 @@ function RokuChannels({ setPowerOn }) {
   const [iconsLoaded, setIconsLoaded] = useState(false);
   const [moreChannels, setMoreChannels] = useState({});
   const [moreChannelsModalOpen, setMoreChannelsModalOpen] = useState(false);
-  const [buttonPressTimer, setButtonPressTimer] = useState();
+  const [buttonPressTimerId, setButtonPressTimerId] = useState();
 
   const fetchIcon = async (button) => {
     const channelId = button.value;
@@ -90,7 +90,7 @@ function RokuChannels({ setPowerOn }) {
   const handleClick = (event) => {
     sendRokuLaunchCommand(event.currentTarget);
     setPowerOn(true);
-    buttonPress(event.currentTarget, buttonPressTimer, setButtonPressTimer);
+    buttonPress(event.currentTarget, buttonPressTimerId, setButtonPressTimerId);
   };
 
   const handleClickMore = (event) => {

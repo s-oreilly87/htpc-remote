@@ -1,6 +1,6 @@
 import client from '@/api-modules/tplink/tplink-client'
 import {toNumber} from "lodash";
-import {LIGHTSWITCHES} from "@/utilities/constants.js";
+import {LIGHTSWITCHES} from "@/utilities/constants";
 
 export default function handleBrightness(req, res) {
   let { params } = req.query;

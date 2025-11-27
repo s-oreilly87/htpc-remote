@@ -1,13 +1,13 @@
 import Image from "next/image";
-import {REMOTE} from "@/utilities/constants.js";
+import {REMOTE} from "@/utilities/constants";
 import {useState} from "react";
-import {buttonPress} from "@/utilities/utils.js";
+import {buttonPress} from "@/utilities/utils";
 import QRCode from "@/components/UI/QRCode.js";
 import SmartHomeModal from "@/components/RemotePanels/SmartHome/SmartHomeModal.js";
 import {TplinkProvider} from "@/context/tplink.js";
 
 function Navbar({ className, selectedRemote, onClickHandler }) {
-  const [buttonPressTimer, setButtonPressTimer] = useState();
+  const [buttonPressTimerId, setButtonPressTimerId] = useState();
 
   const [qrModalOpen, setQrModalOpen] = useState(false);
 
@@ -15,7 +15,7 @@ function Navbar({ className, selectedRemote, onClickHandler }) {
 
   const handleClick = (event) => {
     onClickHandler(event);
-    buttonPress(event.currentTarget, buttonPressTimer, setButtonPressTimer);
+    buttonPress(event.currentTarget, buttonPressTimerId, setButtonPressTimerId);
   };
 
   const handleIconClick = () => {

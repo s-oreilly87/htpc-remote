@@ -1,7 +1,7 @@
-import {DENON_INPUTS, REMOTE} from "@/utilities/constants.js";
+import {DENON_INPUTS, REMOTE} from "@/utilities/constants";
 import KeypressButton from "@/components/UI/KeypressButton";
 import {sendDenonCommand} from "@/utilities/http";
-import {useDenonContext} from "@/context/denon.js";
+import {useDenonContext} from "@/context/denon";
 
 const InputButtons = ({}) => {
   const [denonState, updateDenonState, refreshDenonState] = useDenonContext();

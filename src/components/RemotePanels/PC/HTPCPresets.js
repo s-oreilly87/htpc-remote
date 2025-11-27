@@ -1,4 +1,4 @@
-import {AUDIO_MODES_FOR_SELECT, DISPLAY_MODES_FOR_SELECT, REMOTE, ROKU_APPS,} from "@/utilities/constants.js";
+import {AUDIO_MODES_FOR_SELECT, DISPLAY_MODES_FOR_SELECT, REMOTE, ROKU_APPS,} from "@/utilities/constants";
 import KeypressButton from "@/components/UI/KeypressButton";
 import CustomModesCollapse from "./CustomModesCollapse";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
@@ -10,7 +10,7 @@ import {
     sendRokuLaunchCommand,
 } from "@/utilities/http";
 import {useState} from "react";
-import {openPlexampAndroidApp} from "@/utilities/utils.js";
+import {openPlexampAndroidApp} from "@/utilities/utils";
 
 const remote = REMOTE.PC;
 

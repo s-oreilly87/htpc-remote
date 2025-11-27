@@ -3,7 +3,7 @@ import {Listbox, Transition} from "@headlessui/react";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faCheck, faChevronDown} from "@fortawesome/free-solid-svg-icons";
 import {Fragment} from "react";
-import {DISPLAY_MODES_FOR_SELECT} from "@/utilities/constants.js";
+import {DISPLAY_MODES_FOR_SELECT} from "@/utilities/constants";
 
 function DisplayModeSelect({ selectedDisplayMode, setSelectedDisplayMode }) {
   const handleSelect = (selectedDisplayMode) => {

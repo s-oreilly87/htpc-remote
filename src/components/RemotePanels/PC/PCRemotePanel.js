@@ -1,4 +1,4 @@
-import Constants from "@/utilities/constants.js";
+import Constants from "@/utilities/constants";
 import HTPCPresets from "./HTPCPresets";
 import AppButtons from "./AppButtons";
 import MediaButtons from "../Shared/MediaButtons";

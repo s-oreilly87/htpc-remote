@@ -1,4 +1,4 @@
-import {KEYSTROKE, PLATFORM, REMOTE, URL_ENCODED_SYMBOLS,} from "@/utilities/constants.js";
+import {KEYSTROKE, PLATFORM, REMOTE, URL_ENCODED_SYMBOLS,} from "@/utilities/constants";
 import {useEffect, useRef, useState} from "react";
 import {Transition} from "@headlessui/react";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";

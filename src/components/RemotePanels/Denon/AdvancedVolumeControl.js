@@ -1,13 +1,13 @@
-import Constants, {DENON_SOUND_MODES} from "@/utilities/constants.js";
+import Constants, {DENON_SOUND_MODES} from "@/utilities/constants";
 import KeypressButton from "@/components/UI/KeypressButton";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faMinus, faPlus} from "@fortawesome/free-solid-svg-icons";
 import {useState} from "react";
 import {sendDenonCommand} from "@/utilities/http";
-import {buttonPress} from "@/utilities/utils.js";
+import {buttonPress} from "@/utilities/utils";
 import Toggle from "@/components/UI/Toggle.js";
 import {dot_matrix} from "@/styles/fonts.js";
-import {useDenonContext} from "@/context/denon.js";
+import {useDenonContext} from "@/context/denon";
 
 const remote = Constants.REMOTE.DENON;
 
@@ -19,7 +19,7 @@ const DIALOGUE_ADJUST_DISABLED_MODES = [
 const AdvancedVolumeControl = ({}) => {
   const [denonState, updateDenonState, refreshDenonState] = useDenonContext();
 
-  const [buttonPressTimer, setButtonPressTimer] = useState();
+  const [buttonPressTimerId, setButtonPressTimerId] = useState();
 
   const parseAndSetDialogueAdjustLevel = (responseValue) => {
     // 0.5 steps come in without the decimal
@@ -37,7 +37,7 @@ const AdvancedVolumeControl = ({}) => {
 
   const handleClick = async (event) => {
     const button = event.currentTarget;
-    buttonPress(button, buttonPressTimer, setButtonPressTimer);
+    buttonPress(button, buttonPressTimerId, setButtonPressTimerId);
 
     const response = await sendDenonCommand(button, "command");
     if (response.error) {

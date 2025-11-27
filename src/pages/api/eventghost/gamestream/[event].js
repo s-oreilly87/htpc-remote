@@ -1,4 +1,4 @@
-import {GAMESTREAM_EVENTGHOST_URL} from "@/utilities/constants.js";
+import {GAMESTREAM_EVENTGHOST_URL} from "@/utilities/constants";
 
 export default async function eventghostEventHandler(req, res) {
   const { event } = req.query;

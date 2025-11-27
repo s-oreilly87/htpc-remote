@@ -1,6 +1,11 @@
 /** @type {import('next').NextConfig} */
 // next.config.js
-import {DENON_HTTP_COMMAND_URL, DENON_HTTP_QUERY_URL, DENON_IP, ROKU_URL} from "./src/utilities/constants.js"
+import {
+  DENON_HTTP_COMMAND_URL,
+  DENON_HTTP_QUERY_URL,
+  DENON_IP,
+  ROKU_URL,
+} from "./src/constants/environment.js"
 import withPWA from 'next-pwa'
 
 

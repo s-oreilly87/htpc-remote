@@ -1,21 +1,33 @@
-import {DENON_HTTP_COMMANDS, ROKU_POST_OPTIONS,} from "@/utilities/constants.js";
+import { DENON_HTTP_COMMANDS, ROKU_POST_OPTIONS } from "@/utilities/constants";
+import { parseString } from "xml2js";
+import { convertKebabToCamel } from "@/utilities/utils";
 
-import {parseString} from "xml2js";
-import {convertKebabToCamel} from "@/utilities/utils.js";
-
-// ########   Roku Control   ########
-export async function sendRokuQuery(query) {
-  return await fetch(`api/roku/query/${query}`);
+export interface ValueButton {
+  value: string;
 }
 
-export async function fetchRokuChannels() {
+export interface FetchResult<T> {
+  data?: T;
+  error?: unknown;
+  msg?: string;
+}
+
+// ########   Roku Control   ########
+export async function sendRokuQuery(query: string): Promise<Response> {
+  return fetch(`api/roku/query/${query}`);
+}
+
+export async function fetchRokuChannels(): Promise<FetchResult<{
+  id: string;
+  label: string;
+}[]>> {
   const response = await fetch("api/roku/query/apps");
 
-  if (200 !== response.status) {
-    return { error: response.error };
+  if (response.status !== 200) {
+    return { error: response.statusText };
   }
   const xmlText = await response.text();
-  let channels;
+  let channels: { id: string; label: string }[] | undefined;
   parseString(
     xmlText,
     {
@@ -27,9 +39,7 @@ export async function fetchRokuChannels() {
       if (error) {
         console.error("Error parsing xml response from Roku");
       }
-      channels = {};
-
-      let apps = [...results.apps.app];
+      const apps = [...results.apps.app];
 
       channels = Object.values(apps).map((app) => {
         return { id: app.$.id, label: app._ };
@@ -38,11 +48,12 @@ export async function fetchRokuChannels() {
   );
   return channels ? { data: channels } : { error: "Parse error" };
 }
-export async function fetchRokuDeviceInfo() {
-  let data;
+
+export async function fetchRokuDeviceInfo(): Promise<FetchResult<Record<string, string>>> {
+  let data: Record<string, string> | undefined;
   const response = await fetch(`api/roku/query/device-info`);
-  if (200 !== response.status) {
-    return { error: response.error };
+  if (response.status !== 200) {
+    return { error: response.statusText };
   }
   const xmlText = await response.text();
   parseString(
@@ -59,87 +70,90 @@ export async function fetchRokuDeviceInfo() {
       data = {};
       Object.keys(results["device-info"]).forEach((key) => {
         const newKey = convertKebabToCamel(key);
-        data[newKey] = results["device-info"][key] || null;
+        data![newKey] = results["device-info"][key] || null;
       });
     },
   );
-  return data ? { data: data } : { error: "Parse error" };
+  return data ? { data } : { error: "Parse error" };
 }
 
-export function sendRokuKeypress(button) {
+export function sendRokuKeypress(button: ValueButton): void {
   fetch(`api/roku/keypress/${button.value}`, ROKU_POST_OPTIONS);
 }
 
-export function sendRokuKeydown(button) {
+export function sendRokuKeydown(button: ValueButton): void {
   fetch(`api/roku/keydown/${button.value}`, ROKU_POST_OPTIONS);
 }
 
-export function sendRokuKeyup(button) {
+export function sendRokuKeyup(button: ValueButton): void {
   fetch(`api/roku/keyup/${button.value}`, ROKU_POST_OPTIONS);
 }
 
-export function sendRokuLaunchCommand(button) {
+export function sendRokuLaunchCommand(button: ValueButton): void {
   fetch(`api/roku/launch/${button.value}`, ROKU_POST_OPTIONS);
 }
 
-export function sendRokuSearchQuery(query) {
+export function sendRokuSearchQuery(query: string): void {
   fetch(`api/roku/search/browse?${query}`, ROKU_POST_OPTIONS);
 }
 
 // ########   PC Control   ########
-export async function sendEventToHTPCEventGhost(button, payload = "") {
+export async function sendEventToHTPCEventGhost(
+  button: ValueButton,
+  payload = "",
+): Promise<void> {
   await fetch(`api/eventghost/htpc/${button.value}${payload ? `&${payload}` : ""}`);
 }
 
-export async function sendEventToGameStreamEventGhost(button, payload = "") {
+export async function sendEventToGameStreamEventGhost(
+  button: ValueButton,
+  payload = "",
+): Promise<void> {
   await fetch(`api/eventghost/gamestream/${button.value}${payload ? `&${payload}` : ""}`);
 }
 
-export function sendClickToNutJS(type) {
+export function sendClickToNutJS(type: string): void {
   fetch(`api/nutjs/click/${type}`, { mode: "no-cors" });
 }
 
-export function sendKeystrokeToNutJS(key) {
+export function sendKeystrokeToNutJS(key: string): void {
   fetch(`api/nutjs/keystroke/${key}`, { mode: "no-cors" });
 }
 
-export function sendDisableCommandToNutJS() {
+export function sendDisableCommandToNutJS(): void {
   fetch(`api/nutjs/disable`, { mode: "no-cors" });
 }
 
 // ########   Denon Control   ########
-export async function sendDenonCommand(button, path = "command") {
+export async function sendDenonCommand(
+  button: ValueButton,
+  path: "command" | "query" = "command",
+): Promise<FetchResult<string[]>> {
   const command = button.value;
 
-  // If we dont need the return value, commands can be sent with HTTP request
   if (DENON_HTTP_COMMANDS.includes(command)) {
     fetch(`api/denon-http/command/${command}`);
-    return { msg: command + "sent with HTTP request!" };
+    return { msg: `${command} sent with HTTP request!` };
   }
 
-  // If we need the return value (or to toggle) then we must use telnet with Denon Server
   const response = await fetch(`api/denon/${path}/${command}`);
   const body = await response.json();
 
-  if (200 === response.status) {
-    // sendCommand returns body: { msg: "message", data: "newly set value" }
-    // sendQuery returns body: { data: "param value" }
+  if (response.status === 200) {
     return { data: body.data };
-  } else {
-    // error returns body: { error: "errormsg" }
-    return { error: body.error };
   }
+  return { error: body.error };
 }
 
-export async function sendDenonQuery(query) {
-  return await sendDenonCommand({ value: query }, "query");
+export async function sendDenonQuery(query: string): Promise<FetchResult<string[]>> {
+  return sendDenonCommand({ value: query }, "query");
 }
 
-export async function fetchMainZoneData() {
-  let data;
+export async function fetchMainZoneData(): Promise<FetchResult<Record<string, string>>> {
+  let data: Record<string, string> | undefined;
   const response = await fetch(`api/denon-http/queryMainZone`);
-  if (200 !== response.status) {
-    return { error: response.error };
+  if (response.status !== 200) {
+    return { error: response.statusText };
   }
   const xmlText = await response.text();
 
@@ -152,19 +166,20 @@ export async function fetchMainZoneData() {
     },
     (error, results) => {
       if (error) {
-        return console.error("Error parsing xml response from Denon");
+        console.error("Error parsing xml response from Denon");
+        return;
       }
       data = {};
       Object.keys(results.item).forEach((key) => {
         const newKey = key.charAt(0).toLowerCase() + key.slice(1);
         if (results.item[key].value instanceof Array) {
-          data[newKey] = results.item[key].value || null;
+          data![newKey] = results.item[key].value || null;
         } else {
-          data[newKey] =
+          data![newKey] =
             results.item[key].value.toUpperCase().replaceAll(" ", "_") || null;
         }
       });
     },
   );
-  return data ? { data: data } : { error: "Parse error" };
+  return data ? { data } : { error: "Parse error" };
 }

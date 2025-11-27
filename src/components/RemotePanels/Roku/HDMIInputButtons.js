@@ -1,4 +1,4 @@
-import {REMOTE, ROKU_APPS} from "@/utilities/constants.js";
+import {REMOTE, ROKU_APPS} from "@/utilities/constants";
 import KeypressButton from "@/components/UI/KeypressButton";
 import {sendRokuLaunchCommand} from "@/utilities/http";
 
