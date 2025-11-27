@@ -19,7 +19,7 @@ export interface DenonState {
   powerOn: boolean;
   muteOn: boolean;
   input: DenonInput | null;
-  soundMode: AudioModeOption | (typeof DENON_SOUND_MODES)[keyof typeof DENON_SOUND_MODES] | string;
+  soundMode: (typeof DENON_SOUND_MODES)[keyof typeof DENON_SOUND_MODES];
   loading: boolean;
   dynComp: string;
   psDilOn: boolean;
@@ -190,7 +190,7 @@ export const DENON_STATE_DEFAULTS: DenonState = {
   powerOn: false,
   muteOn: false,
   input: null,
-  soundMode: "",
+  soundMode: {label: '', value: '', selectSurround: []},
   loading: false,
   dynComp: "",
   psDilOn: false,

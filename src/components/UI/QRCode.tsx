@@ -1,16 +1,17 @@
 import Image from "next/image";
-import {Dialog, Transition} from "@headlessui/react";
-import {Fragment} from "react";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faXmark} from "@fortawesome/free-solid-svg-icons";
+import { Dialog, Transition } from "@headlessui/react";
+import React, { Fragment } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faXmark } from "@fortawesome/free-solid-svg-icons";
 
-const QRCode = ({ isOpen, setIsOpen }) => {
+interface QRCodeProps {
+  isOpen: boolean;
+  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+const QRCode: React.FC<QRCodeProps> = ({ isOpen, setIsOpen }) => {
   function closeModal() {
     setIsOpen(false);
-  }
-
-  function openModal() {
-    setIsOpen(true);
   }
 
   return (
@@ -52,8 +53,8 @@ const QRCode = ({ isOpen, setIsOpen }) => {
                   </div>
                   <div className="w-full flex flex-col items-center justify-center gap-4">
                     <Image
-                      width="300"
-                      height="300"
+                      width={300}
+                      height={300}
                       src="/QR-remote-sean-home.png"
                       alt="QR Code"
                     />

@@ -1,4 +1,4 @@
-import {useTplinkContext} from "@/context/tplink.js";
+import {useTplinkContext} from "@/context/tplink";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faExclamationCircle} from "@fortawesome/free-solid-svg-icons";
 

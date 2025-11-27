@@ -1,10 +1,21 @@
 import { Switch } from "@headlessui/react";
+import React from "react";
 
-const Toggle = ({
+interface ToggleProps {
+  enabled: boolean;
+  onToggle: (enabled: boolean) => void;
+  label: string;
+  labelColor?: string;
+  labelPos?: "above" | "side" | string;
+  color: string;
+  disabled?: boolean;
+}
+
+const Toggle: React.FC<ToggleProps> = ({
   enabled,
   onToggle,
   label,
-  labelColor,
+  labelColor = "white",
   labelPos,
   color,
   disabled,
@@ -12,9 +23,7 @@ const Toggle = ({
   return (
     <Switch.Group>
       <div
-        className={`flex ${
-          labelPos === "above" ? "flex-col" : ""
-        } gap-3 items-center justify-center`}
+        className={`flex ${labelPos === "above" ? "flex-col" : ""} gap-3 items-center justify-center`}
       >
         <Switch.Label className={`text-${labelColor}`}>{label}</Switch.Label>
         <Switch

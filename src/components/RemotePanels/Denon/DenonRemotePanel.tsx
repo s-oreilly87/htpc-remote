@@ -3,9 +3,9 @@ import InputButtons from "./InputButtons";
 import AdvancedVolumeControl from "./AdvancedVolumeControl";
 import BottomSection from "../Shared/BottomSection";
 import { useEffect } from "react";
-import Overlay from "@/components/UI/Overlay.js";
+import Overlay from "@/components/UI/Overlay";
 import { useDenonContext } from "@/context/denon";
-import SoundModes from "@/components/RemotePanels/Denon/SoundModes.js";
+import SoundModes from "@/components/RemotePanels/Denon/SoundModes";
 
 const remote = REMOTE.DENON;
 

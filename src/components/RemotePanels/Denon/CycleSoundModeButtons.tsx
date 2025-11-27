@@ -75,7 +75,7 @@ function CycleSoundModes({ cycleTimeout, setCycleTimeout }) {
   const parseSoundModeFromResponseData = async (denonResponse) => {
     //all this parsing response may be for naught, since im updating state right after anyways
     let soundMode;
-    let foundSoundMode = false;
+    let foundSoundMode;
     for (const line of denonResponse) {
       if (line.substring(0, 2) === "MS") {
         foundSoundMode = line;

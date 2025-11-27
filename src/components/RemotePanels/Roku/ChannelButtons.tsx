@@ -8,13 +8,13 @@ import {
 import { buttonPress } from "@/utilities/utils";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
-import MoreChannelsModal from "@/components/RemotePanels/Roku/MoreChannelsModal.js";
+import MoreChannelsModal from "@/components/RemotePanels/Roku/MoreChannelsModal";
 
 function RokuChannels({ setPowerOn }) {
   const [iconsLoaded, setIconsLoaded] = useState(false);
-  const [moreChannels, setMoreChannels] = useState({});
-  const [moreChannelsModalOpen, setMoreChannelsModalOpen] = useState(false);
-  const [buttonPressTimerId, setButtonPressTimerId] = useState();
+  const [moreChannels, setMoreChannels] = useState<{ id: string, label: string }[]>([]);
+  const [isMoreChannelsModalOpen, setIsMoreChannelsModalOpen] = useState<boolean>(false);
+  const [buttonPressTimerId, setButtonPressTimerId] = useState<number>(null);
 
   const fetchIcon = async (button) => {
     const channelId = button.value;
@@ -68,7 +68,7 @@ function RokuChannels({ setPowerOn }) {
       return response.error;
     }
 
-    const channels = response.data;
+    const channels: { id: string, label:string }[] = response.data;
 
     const frontPageChannelIds = Object.values(ROKU_APPS.CHANNELS).map(
       (channel) => channel.id,
@@ -94,14 +94,14 @@ function RokuChannels({ setPowerOn }) {
   };
 
   const handleClickMore = (event) => {
-    setMoreChannelsModalOpen(true);
+    setIsMoreChannelsModalOpen(true);
   };
 
   return (
     <>
       <MoreChannelsModal
-        isOpen={moreChannelsModalOpen}
-        setIsOpen={setMoreChannelsModalOpen}
+        isOpen={isMoreChannelsModalOpen}
+        setIsOpen={setIsMoreChannelsModalOpen}
         moreChannels={moreChannels}
         fetchIcons={fetchIcons}
         setPowerOn={setPowerOn}

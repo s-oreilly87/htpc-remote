@@ -12,9 +12,7 @@ function RemotePanel({
   setSelectedRemote,
   prevRemote,
   rokuState,
-  setRokuState,
-  pcState,
-  setPcState,
+  setRokuState
 }) {
   return (
     <DenonProvider>
@@ -25,7 +23,7 @@ function RemotePanel({
           prevComponentIndex={REMOTE_INDEX[prevRemote]}
         >
           <KeepAlive name={REMOTE.PC}>
-            <PCRemotePanel pcState={pcState} setPcState={setPcState} />
+            <PCRemotePanel />
           </KeepAlive>
         </SlideScrollTransition>
 

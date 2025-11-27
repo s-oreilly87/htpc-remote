@@ -8,7 +8,7 @@ import KeypressButton from "@/components/UI/KeypressButton";
 import {sendKeystrokeToNutJS, sendRokuKeypress, sendRokuSearchQuery,} from "@/utilities/http";
 import {sleep} from "@/utilities/utils";
 import {throttle} from "lodash";
-import {lowerCase} from "lodash/string.js";
+import {lowerCase} from "lodash/string";
 
 function KeyboardGroup({ remote }) {
   const [inputExpanded, setInputExpanded] = useState(false);
@@ -23,7 +23,7 @@ function KeyboardGroup({ remote }) {
 
   const waitForSendInput = useRef(100);
 
-  const keyboardInput = useRef();
+  const keyboardInput = useRef(null);
 
   useEffect(() => {
     if (!inputExpanded) {
@@ -311,6 +311,7 @@ function KeyboardGroup({ remote }) {
           id="toggle-keyboard"
           className="btn-secondary absolute bottom-0 left-14 w-10"
           onClick={toggleInputExpanded}
+          remote={remote}
         >
           <FontAwesomeIcon icon={faKeyboard} />
         </KeypressButton>

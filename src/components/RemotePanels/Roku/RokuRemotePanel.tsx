@@ -6,7 +6,7 @@ import BackHomeOption from "./BackHomeOption";
 import BottomSection from "../Shared/BottomSection";
 import {useEffect} from "react";
 import {fetchRokuDeviceInfo} from "@/utilities/http";
-import Overlay from "@/components/UI/Overlay.js";
+import Overlay from "@/components/UI/Overlay";
 
 const remote = Constants.REMOTE.ROKU;
 function RokuRemote({ rokuState, setRokuState, setSelectedRemote }) {

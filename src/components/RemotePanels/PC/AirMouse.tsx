@@ -72,7 +72,7 @@ const AirMouse = () => {
   const handleEnable = (isEnabled) => {
     // Create websocket connection
     if (isEnabled) {
-      closeSocket().then(initializeSocket());
+      closeSocket().then(() => initializeSocket());
     } else {
       closeSocket();
       sendDisableCommandToNutJS();

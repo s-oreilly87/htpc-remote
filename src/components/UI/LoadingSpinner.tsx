@@ -1,4 +1,11 @@
-const LoadingSpinner = ({ color, size = 7 }) => {
+import React from "react";
+
+interface LoadingSpinnerProps {
+  color: string;
+  size?: number;
+}
+
+const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ color, size = 7 }) => {
   return (
     <div role="status">
       <svg

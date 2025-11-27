@@ -26,7 +26,7 @@ function DenonBottomLeftButtons({}) {
     let powerOn = response.data;
 
     updateDenonState({
-      powerOn: powerOn ?? !denonState.powerOn,
+      powerOn: !!powerOn ?? !denonState.powerOn,
     });
   };
   return (

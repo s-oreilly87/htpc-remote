@@ -1,26 +1,36 @@
 import { Transition } from "@headlessui/react";
+import React from "react";
 
-const SlideScrollTransition = ({
+interface SlideScrollTransitionProps {
+  children: React.ReactNode;
+  show: boolean;
+  selectedComponentIndex: number;
+  prevComponentIndex?: number | null;
+}
+
+const SlideScrollTransition: React.FC<SlideScrollTransitionProps> = ({
   children,
   show,
   selectedComponentIndex,
-  prevComponentIndex,
+  prevComponentIndex = null,
 }) => {
-  const enterFromClassNames = (selectedComponentIndex, prevComponentIndex) => {
+  const enterFromClassNames = (selectedIndex: number, previousIndex: number | null) => {
     let enterFrom = "opacity-0 ";
-    if (selectedComponentIndex < prevComponentIndex) {
+    if (previousIndex === null) return enterFrom;
+    if (selectedIndex < previousIndex) {
       enterFrom += "-translate-x-full";
-    } else if (selectedComponentIndex > prevComponentIndex) {
+    } else if (selectedIndex > previousIndex) {
       enterFrom += "translate-x-full";
     }
     return enterFrom;
   };
 
-  const leaveToClassNames = (selectedComponentIndex, prevComponentIndex) => {
+  const leaveToClassNames = (selectedIndex: number, previousIndex: number | null) => {
     let leaveTo = "opacity-0 ";
-    if (selectedComponentIndex < prevComponentIndex) {
+    if (previousIndex === null) return leaveTo;
+    if (selectedIndex < previousIndex) {
       leaveTo += "translate-x-full";
-    } else if (selectedComponentIndex > prevComponentIndex) {
+    } else if (selectedIndex > previousIndex) {
       leaveTo += "-translate-x-full";
     }
     return leaveTo;
@@ -31,10 +41,7 @@ const SlideScrollTransition = ({
       show={show}
       appear={true}
       enter="transition-all ease-in-out duration-[500ms]"
-      enterFrom={enterFromClassNames(
-        selectedComponentIndex,
-        prevComponentIndex,
-      )}
+      enterFrom={enterFromClassNames(selectedComponentIndex, prevComponentIndex)}
       enterTo="opacity-100 translate-x-0"
       leave="transition-all ease-in-out duration-[500ms]"
       leaveFrom="opacity-100 translate-x-0"
