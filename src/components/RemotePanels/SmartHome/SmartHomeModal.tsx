@@ -24,7 +24,7 @@ const SmartHomeModal = ({ isOpen, setIsOpen }) => {
     if (isOpen) {
       refreshSwitchInfo("yard-dining"); // not "all" right now
     }
-  }, [isOpen]);
+  }, [isOpen, refreshSwitchInfo]);
 
   function closeModal() {
     setIsOpen(false);
