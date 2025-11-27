@@ -224,28 +224,26 @@ export function DenonProvider({ children }: { children: ReactNode }) {
     updateDenonStateFromMainZoneQuery,
   ]);
 
-  const contextValue = useMemo<DenonContextValue>(
-    () => [
-      denonState,
-      updateDenonState,
-      {
-        all: refreshAll,
-        masterVol: refreshMasterVolume,
-        level: refreshLevel,
-        onState: refreshOnState,
-        dialogueAdjust: fetchDialogueAdjust,
-      },
-      setDenonState,
-    ],
+  const refreshers = useMemo(
+    () => ({
+      all: refreshAll,
+      masterVol: refreshMasterVolume,
+      level: refreshLevel,
+      onState: refreshOnState,
+      dialogueAdjust: fetchDialogueAdjust,
+    }),
     [
-      denonState,
       fetchDialogueAdjust,
       refreshAll,
       refreshLevel,
       refreshMasterVolume,
       refreshOnState,
-      updateDenonState,
     ],
+  );
+
+  const contextValue = useMemo<DenonContextValue>(
+    () => [denonState, updateDenonState, refreshers, setDenonState],
+    [denonState, refreshers, updateDenonState],
   );
 
   return (
