@@ -1,4 +1,11 @@
-import { createContext, useContext, useState, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useCallback,
+  useMemo,
+} from "react";
 
 export interface TplinkDeviceState {
   powerState: boolean;
@@ -11,7 +18,6 @@ export interface TplinkState {
   "yard-dining": TplinkDeviceState;
   basement?: TplinkDeviceState;
   loading: boolean;
-  // [key: string]: TplinkDeviceState;
 }
 
 export type TplinkContextValue = [
@@ -36,11 +42,11 @@ const Context = createContext<TplinkContextValue | undefined>(undefined);
 export function TplinkProvider({ children }: { children: ReactNode }) {
   const [tplinkState, setTplinkState] = useState<TplinkState>(DEFAULT_STATE);
 
-  const updateTplinkState = (props: Partial<TplinkState>) => {
+  const updateTplinkState = useCallback((props: Partial<TplinkState>) => {
     setTplinkState((prevState) => ({ ...prevState, ...props }));
-  };
+  }, []);
 
-  const refreshSwitchInfo = async (switchName: string) => {
+  const refreshSwitchInfo = useCallback(async (switchName: string) => {
     updateTplinkState({ loading: true });
     const response = await fetch(`api/tp-link/info/${switchName}`);
     if (200 !== response.status) {
@@ -49,20 +55,14 @@ export function TplinkProvider({ children }: { children: ReactNode }) {
     }
     updateTplinkState(await response.json());
     updateTplinkState({ loading: false });
-  };
+  }, [updateTplinkState]);
 
-  return (
-    <Context.Provider
-      value={[
-        tplinkState,
-        updateTplinkState,
-        refreshSwitchInfo,
-        setTplinkState,
-      ]}
-    >
-      {children}
-    </Context.Provider>
+  const contextValue = useMemo<TplinkContextValue>(
+    () => [tplinkState, updateTplinkState, refreshSwitchInfo, setTplinkState],
+    [refreshSwitchInfo, tplinkState, updateTplinkState],
   );
+
+  return <Context.Provider value={contextValue}>{children}</Context.Provider>;
 }
 
 export function useTplinkContext(): TplinkContextValue {

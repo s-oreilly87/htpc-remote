@@ -4,12 +4,22 @@ import HDMIInputButtons from "./HDMIInputButtons";
 import MediaButtons from "../Shared//MediaButtons";
 import BackHomeOption from "./BackHomeOption";
 import BottomSection from "../Shared/BottomSection";
-import {useEffect} from "react";
+import {useCallback, useEffect} from "react";
 import {fetchRokuDeviceInfo} from "@/utilities/http";
 import Overlay from "@/components/UI/Overlay";
 
 const remote = Constants.REMOTE.ROKU;
 function RokuRemote({ rokuState, setRokuState, setSelectedRemote }) {
+  const setRokuPowerOn = useCallback(
+    (powerOn) => {
+      setRokuState((prevState) => ({
+        ...prevState,
+        powerOn: powerOn,
+      }));
+    },
+    [setRokuState],
+  );
+
   useEffect(() => {
     async function fetchPowerState() {
       const response = await fetchRokuDeviceInfo();
@@ -20,14 +30,7 @@ function RokuRemote({ rokuState, setRokuState, setSelectedRemote }) {
       setRokuPowerOn(response.data["powerMode"] === "PowerOn");
     }
     fetchPowerState();
-  }, []);
-
-  const setRokuPowerOn = (powerOn) => {
-    setRokuState((prevState) => ({
-      ...prevState,
-      powerOn: powerOn,
-    }));
-  };
+  }, [setRokuPowerOn]);
 
   const searchForRoku = async () => {
     const ipAddresses = await fetch(

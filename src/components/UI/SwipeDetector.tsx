@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 
 interface SwipeDetectorProps {
   children: React.ReactNode;
@@ -9,20 +9,23 @@ const SwipeDetector: React.FC<SwipeDetectorProps> = ({ children, onSwipe }) => {
   const childRef = useRef<HTMLDivElement>(null);
   const startXRef = useRef<number | null>(null);
 
-  function handleTouchStart(event: TouchEvent) {
+  const handleTouchStart = useCallback((event: TouchEvent) => {
     startXRef.current = event.touches[0]?.clientX ?? null;
-  }
+  }, []);
 
-  function handleTouchEnd(event: TouchEvent) {
-    if (startXRef.current !== null) {
-      const endX = event.changedTouches[0]?.clientX ?? 0;
-      const distance = endX - startXRef.current;
-      if (Math.abs(distance) > 75) {
-        onSwipe(distance > 0 ? "right" : "left");
+  const handleTouchEnd = useCallback(
+    (event: TouchEvent) => {
+      if (startXRef.current !== null) {
+        const endX = event.changedTouches[0]?.clientX ?? 0;
+        const distance = endX - startXRef.current;
+        if (Math.abs(distance) > 75) {
+          onSwipe(distance > 0 ? "right" : "left");
+        }
+        startXRef.current = null;
       }
-      startXRef.current = null;
-    }
-  }
+    },
+    [onSwipe],
+  );
 
   useEffect(() => {
     const currentChild = childRef.current;
@@ -35,7 +38,7 @@ const SwipeDetector: React.FC<SwipeDetectorProps> = ({ children, onSwipe }) => {
         currentChild.removeEventListener("touchend", handleTouchEnd);
       };
     }
-  }, []);
+  }, [handleTouchEnd, handleTouchStart]);
 
   return <div ref={childRef}>{children}</div>;
 };

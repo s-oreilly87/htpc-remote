@@ -1,5 +1,5 @@
 import { ROKU_APPS } from "@/utilities/constants";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   fetchRokuChannels,
   sendRokuLaunchCommand,
@@ -14,9 +14,9 @@ function RokuChannels({ setPowerOn }) {
   const [iconsLoaded, setIconsLoaded] = useState(false);
   const [moreChannels, setMoreChannels] = useState<{ id: string, label: string }[]>([]);
   const [isMoreChannelsModalOpen, setIsMoreChannelsModalOpen] = useState<boolean>(false);
-  const [buttonPressTimerId, setButtonPressTimerId] = useState<number>(null);
+  const [buttonPressTimerId, setButtonPressTimerId] = useState<number | null>(null);
 
-  const fetchIcon = async (button) => {
+  const fetchIcon = useCallback(async (button: HTMLButtonElement) => {
     const channelId = button.value;
     const cachedImageUrl = localStorage.getItem(`channelImage${channelId}`);
 
@@ -50,18 +50,23 @@ function RokuChannels({ setPowerOn }) {
       button.innerHTML = button.id;
       button.style.color = "white";
     }
-  };
-  const fetchIcons = async (selector) => {
-    const channelButtons = document.querySelectorAll(`.${selector}`);
-    const promises = [];
-    for (const button of channelButtons) {
-      promises.push(fetchIcon(button));
-    }
-    await Promise.all(promises);
-    setIconsLoaded(true);
-  };
+  }, []);
+  const fetchIcons = useCallback(
+    async (selector: string) => {
+      const channelButtons = document.querySelectorAll(`.${selector}`);
+      const promises: Promise<void>[] = [];
+      for (const button of channelButtons) {
+        if (button instanceof HTMLButtonElement) {
+          promises.push(fetchIcon(button));
+        }
+      }
+      await Promise.all(promises);
+      setIconsLoaded(true);
+    },
+    [fetchIcon],
+  );
 
-  const fetchChannels = async () => {
+  const fetchChannels = useCallback(async () => {
     const response = await fetchRokuChannels();
     if (response.error) {
       console.log("fetch channels error");
@@ -81,11 +86,11 @@ function RokuChannels({ setPowerOn }) {
     setMoreChannels(moreChannels);
 
     return moreChannels;
-  };
+  }, []);
 
   useEffect(() => {
     fetchIcons("channel-button").then(fetchChannels);
-  }, []);
+  }, [fetchChannels, fetchIcons]);
 
   const handleClick = (event) => {
     sendRokuLaunchCommand(event.currentTarget);
