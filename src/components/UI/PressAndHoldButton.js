@@ -1,4 +1,4 @@
-import {REMOTE} from "@/utilities/constants.js";
+import {REMOTE} from "@/utilities/constants";
 import {useState} from "react";
 import {
     sendDenonCommand,
@@ -10,7 +10,7 @@ import {
     sendRokuKeyup,
 } from "@/utilities/http";
 import {buttonPress} from "@/utilities/utils";
-import {useDenonContext} from "@/context/denon.js";
+import {useDenonContext} from "@/context/denon";
 
 const PressAndHoldButton = ({
   remote,

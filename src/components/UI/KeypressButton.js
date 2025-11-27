@@ -1,5 +1,5 @@
 import {useState} from "react";
-import {REMOTE} from "@/utilities/constants.js";
+import {REMOTE} from "@/utilities/constants";
 import {sendDenonCommand, sendEventToHTPCEventGhost, sendKeystrokeToNutJS, sendRokuKeypress,} from "@/utilities/http";
 import {buttonPress, openPlexampAndroidApp} from "@/utilities/utils";
 

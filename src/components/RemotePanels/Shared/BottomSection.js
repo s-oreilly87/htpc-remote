@@ -1,4 +1,4 @@
-import {REMOTE} from "@/utilities/constants.js";
+import {REMOTE} from "@/utilities/constants";
 import RokuBottomLeftButtons from "../Roku/RokuBottomLeftButtons.js";
 import DenonBottomLeftButtons from "../Denon/DenonBottomLeftButtons.js";
 import Dpad from "./Dpad";

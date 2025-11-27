@@ -1,4 +1,4 @@
-import Constants from "@/utilities/constants.js";
+import Constants from "@/utilities/constants";
 import KeypressButton from "@/components/UI/KeypressButton";
 import KeyboardGroup from "../Shared/KeyboardGroup";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";

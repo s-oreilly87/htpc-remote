@@ -3,11 +3,11 @@ import { Listbox, Transition } from "@headlessui/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheck, faChevronDown } from "@fortawesome/free-solid-svg-icons";
 import { sendDenonCommand } from "@/utilities/http";
-import { DENON_SOUND_MODES } from "@/utilities/constants.js";
+import { DENON_SOUND_MODES } from "@/utilities/constants";
 import LoadingSpinner from "@/components/UI/LoadingSpinner.js";
 
 import { dot_matrix } from "@/styles/fonts.js";
-import { useDenonContext } from "@/context/denon.js";
+import { useDenonContext } from "@/context/denon";
 
 const SelectSoundMode = ({ cycleTimeout }) => {
   const [denonState, updateDenonState, refreshDenonState] = useDenonContext();

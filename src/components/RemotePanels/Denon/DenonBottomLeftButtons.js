@@ -1,9 +1,9 @@
-import Constants from "@/utilities/constants.js";
+import Constants from "@/utilities/constants";
 import KeypressButton from "@/components/UI/KeypressButton";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faPowerOff} from "@fortawesome/free-solid-svg-icons";
 import {sendDenonCommand} from "@/utilities/http";
-import {useDenonContext} from "@/context/denon.js";
+import {useDenonContext} from "@/context/denon";
 
 const remote = Constants.REMOTE.DENON;
 const KEYSTROKE = Constants.KEYSTROKE;

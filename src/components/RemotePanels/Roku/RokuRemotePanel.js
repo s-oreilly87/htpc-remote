@@ -1,11 +1,11 @@
-import Constants from "@/utilities/constants.js";
+import Constants from "@/utilities/constants";
 import ChannelButtons from "./ChannelButtons";
 import HDMIInputButtons from "./HDMIInputButtons";
 import MediaButtons from "../Shared//MediaButtons";
 import BackHomeOption from "./BackHomeOption";
 import BottomSection from "../Shared/BottomSection";
 import {useEffect} from "react";
-import {fetchRokuDeviceInfo} from "@/utilities/http.js";
+import {fetchRokuDeviceInfo} from "@/utilities/http";
 import Overlay from "@/components/UI/Overlay.js";
 
 const remote = Constants.REMOTE.ROKU;

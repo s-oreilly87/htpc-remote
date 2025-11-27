@@ -1,9 +1,9 @@
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment, useEffect, useState } from "react";
-import { sendRokuLaunchCommand } from "@/utilities/http.js";
+import { sendRokuLaunchCommand } from "@/utilities/http";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
-import { buttonPress } from "@/utilities/utils.js";
+import { buttonPress } from "@/utilities/utils";
 
 export default function MoreChannelsModal({
   isOpen,

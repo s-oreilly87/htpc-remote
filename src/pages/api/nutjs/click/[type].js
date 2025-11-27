@@ -1,5 +1,5 @@
 import { mouse } from "@nut-tree/nut-js";
-import { CLICK_TYPE } from "@/utilities/constants.js";
+import { CLICK_TYPE } from "@/utilities/constants";
 
 export default async function handleClick(req, res) {
   let { type } = req.query; //.toUpperCase() //probably unnecessary with constants refactor

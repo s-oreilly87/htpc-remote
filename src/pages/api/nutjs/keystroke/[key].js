@@ -1,5 +1,5 @@
 import {Key, keyboard} from "@nut-tree/nut-js";
-import {KEYSTROKE, PLATFORM} from "@/utilities/constants.js";
+import {KEYSTROKE, PLATFORM} from "@/utilities/constants";
 
 const nutKeyMap = {
   [KEYSTROKE.PC.ENTER]: Key.Enter,

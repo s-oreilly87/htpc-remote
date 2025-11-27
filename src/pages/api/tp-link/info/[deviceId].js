@@ -1,5 +1,5 @@
 import client from '@/api-modules/tplink/tplink-client'
-import {LIGHTSWITCHES, PLUGS} from "@/utilities/constants.js";
+import {LIGHTSWITCHES, PLUGS} from "@/utilities/constants";
 
 export default async function handleInfo(req, res) {
   let { deviceId } = req.query;

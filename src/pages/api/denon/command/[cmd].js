@@ -1,4 +1,4 @@
-import { KEYSTROKE } from "@/utilities/constants.js";
+import { KEYSTROKE } from "@/utilities/constants";
 import denon from "@/api-modules/denon/denon-telnet.js";
 import { promisify } from "util";
 

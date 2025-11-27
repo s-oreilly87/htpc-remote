@@ -1,4 +1,4 @@
-import {HTPC_EVENTGHOST_URL} from "@/utilities/constants.js";
+import {HTPC_EVENTGHOST_URL} from "@/utilities/constants";
 
 export default async function eventghostEventHandler(req, res) {
   const { event } = req.query;
