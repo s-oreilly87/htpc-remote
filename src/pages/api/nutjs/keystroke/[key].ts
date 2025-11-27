@@ -1,9 +1,13 @@
 import {Key, keyboard} from "@nut-tree/nut-js";
+import type {NextApiRequest, NextApiResponse} from "next";
+
 import {KEYSTROKE} from "@/utilities/constants";
 
 const PLATFORM = process.env.NEXT_PUBLIC_PLATFORM ?? "";
 
-const nutKeyMap = {
+type NutKey = Key | Key[];
+
+const nutKeyMap: Record<string, NutKey> = {
   [KEYSTROKE.PC.ENTER]: Key.Enter,
   [KEYSTROKE.PC.BACKSPACE]: Key.Backspace,
   [KEYSTROKE.PC.WIN_KEY]: Key.LeftWin,
@@ -24,22 +28,27 @@ const nutKeyMap = {
   [KEYSTROKE.PC.NEXT]: Key.AudioNext,
   [KEYSTROKE.KEY_COMBOS.MOVE_WINDOW]: [Key.LeftWin, Key.LeftShift, Key.Left],
 };
+
 if (PLATFORM === "MACOS" || PLATFORM === "LINUX") {
   nutKeyMap[KEYSTROKE.PC.WIN_KEY] = [Key.LeftSuper, Key.Space];
 }
 
-let keyTimeouts = {};
+const keyTimeouts: Partial<Record<Key, NodeJS.Timeout>> = {};
 
 keyboard.config.autoDelayMs = 50;
 
-export default async function handleKeystroke(req, res) {
-  let { key } = req.query;
+export default async function handleKeystroke(
+  req: NextApiRequest,
+  res: NextApiResponse<string>,
+) {
+  const queryKey = req.query.key;
+  let key: string | NutKey = Array.isArray(queryKey) ? queryKey[0] ?? "" : queryKey ?? "";
 
-  if (key.length > 1) {
-    if (nutKeyMap.hasOwnProperty(key)) {
+  if (typeof key === "string" && key.length > 1) {
+    if (Object.prototype.hasOwnProperty.call(nutKeyMap, key)) {
       key = nutKeyMap[key];
     } else {
-      key = key + " ";
+      key = `${key} `;
     }
   }
 
@@ -66,9 +75,11 @@ export default async function handleKeystroke(req, res) {
         await keyboard.releaseKey(each);
       }
     }
-  } else {
-
+  } else if (typeof key === "string") {
     await keyboard.type(key);
+  } else {
+    await keyboard.pressKey(key);
+    await keyboard.releaseKey(key);
   }
 
   res.send("key '" + key + "' pressed");
