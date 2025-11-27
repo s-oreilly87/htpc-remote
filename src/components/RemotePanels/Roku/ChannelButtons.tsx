@@ -8,7 +8,7 @@ import {
 import { buttonPress } from "@/utilities/utils";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
-import MoreChannelsModal from "@/components/RemotePanels/Roku/MoreChannelsModal.js";
+import MoreChannelsModal from "@/components/RemotePanels/Roku/MoreChannelsModal";
 
 function RokuChannels({ setPowerOn }) {
   const [iconsLoaded, setIconsLoaded] = useState(false);

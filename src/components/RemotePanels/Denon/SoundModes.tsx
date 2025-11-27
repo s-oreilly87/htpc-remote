@@ -1,6 +1,6 @@
 import { useState } from "react";
-import SoundModeSelect from "@/components/RemotePanels/Denon/SoundModeSelect.js";
-import CycleSoundModes from "@/components/RemotePanels/Denon/CycleSoundModeButtons.js";
+import SoundModeSelect from "@/components/RemotePanels/Denon/SoundModeSelect";
+import CycleSoundModes from "@/components/RemotePanels/Denon/CycleSoundModeButtons";
 
 function SoundModes() {
   const [cycleTimeout, setCycleTimeout] = useState(null);

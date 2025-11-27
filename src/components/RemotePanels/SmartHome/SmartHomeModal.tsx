@@ -2,10 +2,10 @@ import {Dialog, Transition} from "@headlessui/react";
 import {Fragment, useEffect} from "react";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faXmark} from "@fortawesome/free-solid-svg-icons";
-import {useTplinkContext} from "@/context/tplink.js";
+import {useTplinkContext} from "@/context/tplink";
 import {PLUGS} from "@/utilities/constants";
-import LightswitchToggle from "@/components/RemotePanels/SmartHome/LightswitchToggle.js";
-import LoadingSpinner from "@/components/UI/LoadingSpinner.js";
+import LightswitchToggle from "@/components/RemotePanels/SmartHome/LightswitchToggle";
+import LoadingSpinner from "@/components/UI/LoadingSpinner";
 
 const brightnessButtons = [
   { value: 1, label: " 1%", color: "amber-800", textColor: "amber-400" },

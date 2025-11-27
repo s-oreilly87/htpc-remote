@@ -5,8 +5,8 @@ import {faMinus, faPlus} from "@fortawesome/free-solid-svg-icons";
 import {useState} from "react";
 import {sendDenonCommand} from "@/utilities/http";
 import {buttonPress} from "@/utilities/utils";
-import Toggle from "@/components/UI/Toggle.js";
-import {dot_matrix} from "@/styles/fonts.js";
+import Toggle from "@/components/UI/Toggle";
+import {dot_matrix} from "@/styles/fonts";
 import {useDenonContext} from "@/context/denon";
 
 const remote = Constants.REMOTE.DENON;

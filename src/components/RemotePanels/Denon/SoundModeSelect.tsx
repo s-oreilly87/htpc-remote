@@ -4,9 +4,9 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheck, faChevronDown } from "@fortawesome/free-solid-svg-icons";
 import { sendDenonCommand } from "@/utilities/http";
 import { DENON_SOUND_MODES } from "@/utilities/constants";
-import LoadingSpinner from "@/components/UI/LoadingSpinner.js";
+import LoadingSpinner from "@/components/UI/LoadingSpinner";
 
-import { dot_matrix } from "@/styles/fonts.js";
+import { dot_matrix } from "@/styles/fonts";
 import { useDenonContext } from "@/context/denon";
 
 const SelectSoundMode = ({ cycleTimeout }) => {

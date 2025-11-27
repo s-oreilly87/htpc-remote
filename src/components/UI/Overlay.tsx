@@ -1,7 +1,11 @@
 import { Transition } from "@headlessui/react";
-import { Fragment } from "react";
+import React, { Fragment } from "react";
 
-const Overlay = ({ show }) => {
+interface OverlayProps {
+  show: boolean;
+}
+
+const Overlay: React.FC<OverlayProps> = ({ show }) => {
   return (
     <Transition show={show} as={Fragment}>
       <Transition.Child

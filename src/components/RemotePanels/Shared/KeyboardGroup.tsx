@@ -8,7 +8,7 @@ import KeypressButton from "@/components/UI/KeypressButton";
 import {sendKeystrokeToNutJS, sendRokuKeypress, sendRokuSearchQuery,} from "@/utilities/http";
 import {sleep} from "@/utilities/utils";
 import {throttle} from "lodash";
-import {lowerCase} from "lodash/string.js";
+import {lowerCase} from "lodash/string";
 
 function KeyboardGroup({ remote }) {
   const [inputExpanded, setInputExpanded] = useState(false);

@@ -1,10 +1,14 @@
 import { useEffect, useRef } from "react";
 import { useAbsoluteOrientationSensor } from "@/utilities/sensors";
 
-const AbsoluteOrientationSensor = ({ frequency, updateOrientation }) => {
-  // initialize relative orientation sensor
+interface AbsoluteOrientationSensorProps {
+  frequency: number;
+  updateOrientation: (current: unknown, previous: unknown) => void;
+}
+
+const AbsoluteOrientationSensor = ({ frequency, updateOrientation }: AbsoluteOrientationSensorProps) => {
   const absOrientation = useAbsoluteOrientationSensor({ frequency: frequency });
-  const prevAbsOrientation = useRef(null);
+  const prevAbsOrientation = useRef<unknown>(null);
 
   useEffect(() => {
     if (absOrientation) {

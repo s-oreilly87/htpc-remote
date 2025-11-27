@@ -1,4 +1,3 @@
-import { useRef } from "react";
 import {
   useAbsoluteOrientationSensor,
   useAccelerometer,
@@ -7,12 +6,10 @@ import {
 } from "@/utilities/sensors";
 
 const SensorData = () => {
-  // initialize sensors
   const acceleration = useAccelerometer({ frequency: 30 });
   const rotation = useGyroscope({ frequency: 30 });
   const absOrientation = useAbsoluteOrientationSensor({ frequency: 30 });
   const relOrientation = useRelativeOrientationSensor({ frequency: 30 });
-  const prevRelOrientation = useRef(null);
 
   const dataDisplay = () => {
     return (

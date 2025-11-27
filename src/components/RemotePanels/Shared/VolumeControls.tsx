@@ -3,7 +3,7 @@ import PressAndHoldButton from "@/components/UI/PressAndHoldButton";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faVolumeHigh, faVolumeLow, faVolumeXmark,} from "@fortawesome/free-solid-svg-icons";
 import {KEYSTROKE, REMOTE} from "@/utilities/constants";
-import {dot_matrix} from "@/styles/fonts.js";
+import {dot_matrix} from "@/styles/fonts";
 import {useDenonContext} from "@/context/denon";
 
 function VolumeControls({ remote }) {
