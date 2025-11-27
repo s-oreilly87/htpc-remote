@@ -13,7 +13,7 @@ export default function MoreChannelsModal({
   setPowerOn,
 }) {
   const [areIconsLoaded, setAreIconsLoaded] = useState<boolean>(false);
-  const [buttonPressTimerId, setButtonPressTimerId] = useState<number>(null);
+  const [buttonPressTimerId, setButtonPressTimerId] = useState<number | null>(null);
 
   function closeModal() {
     setIsOpen(false);
@@ -37,7 +37,7 @@ export default function MoreChannelsModal({
         fetchIcons("extra-channel-button").then(() => setAreIconsLoaded(true));
       }, 0);
     }
-  }, [isOpen]);
+  }, [fetchIcons, isOpen]);
 
   return (
     <>
