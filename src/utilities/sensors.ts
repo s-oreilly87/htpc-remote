@@ -10,8 +10,7 @@ interface SensorErrorEvent extends Event {
   error: DOMException;
 }
 
-interface OrientationSensor extends EventTarget {
-  quaternion: Quaternion;
+interface SensorWithControls extends EventTarget {
   start: () => void;
   stop: () => void;
   addEventListener(
@@ -26,7 +25,11 @@ interface OrientationSensor extends EventTarget {
   ): void;
 }
 
-interface AccelerometerSensor extends EventTarget {
+interface OrientationSensor extends SensorWithControls {
+  quaternion: Quaternion;
+}
+
+interface AccelerometerSensor extends SensorWithControls {
   x: number;
   y: number;
   z: number;
@@ -35,18 +38,12 @@ interface AccelerometerSensor extends EventTarget {
     y: number;
     z: number;
   };
-  start: () => void;
-  stop: () => void;
-  addEventListener(
-    type: "reading",
-    listener: () => void,
-    options?: boolean | AddEventListenerOptions,
-  ): void;
-  addEventListener(
-    type: "error",
-    listener: (event: SensorErrorEvent) => void,
-    options?: boolean | AddEventListenerOptions,
-  ): void;
+}
+
+interface GyroscopeSensor extends SensorWithControls {
+  x: number;
+  y: number;
+  z: number;
 }
 
 declare global {
@@ -54,7 +51,7 @@ declare global {
     AbsoluteOrientationSensor: new (config?: SensorConfig) => OrientationSensor;
     RelativeOrientationSensor: new (config?: SensorConfig) => OrientationSensor;
     Accelerometer: new (config?: SensorConfig) => AccelerometerSensor;
-    Gyroscope: new (config?: SensorConfig) => OrientationSensor;
+    Gyroscope: new (config?: SensorConfig) => GyroscopeSensor;
   }
 }
 
@@ -196,7 +193,7 @@ export function useAccelerometer(
 
 export function useGyroscope(
   { frequency }: SensorConfig = {},
-  callback?: (quaternion: Quaternion) => void,
+  callback?: (rotation: RotationReading) => void,
 ) {
   const [rotation, setRotation] = useState<RotationReading | null>(null);
 
@@ -207,14 +204,16 @@ export function useGyroscope(
       });
       sensor.start();
       sensor.addEventListener("reading", () => {
-        setRotation({
+        const currentRotation = {
           x: sensor.x,
           y: sensor.y,
           z: sensor.z,
-        });
+        };
+
+        setRotation(currentRotation);
 
         if (callback instanceof Function) {
-          callback(sensor.quaternion);
+          callback(currentRotation);
         }
       });
 
