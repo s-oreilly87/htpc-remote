@@ -1,10 +1,8 @@
 import { DenonKeystroke, RemoteType } from "@/constants/remotes";
 
 export const DENON_IP = process.env.NEXT_PUBLIC_DENON_IP ?? "";
-export const DENON_HTTP_COMMAND_URL =
-  process.env.DENON_HTTP_COMMAND_URL ?? "goform/formiPhoneAppDirect.xml";
-export const DENON_HTTP_QUERY_URL =
-  process.env.DENON_HTTP_QUERY_URL ?? "goform/formMainZone_MainZoneXml.xml";
+export const DENON_HTTP_COMMAND_URL = "goform/formiPhoneAppDirect.xml";
+export const DENON_HTTP_QUERY_URL = "goform/formMainZone_MainZoneXml.xml";
 
 export interface DenonInput {
   label: string;
