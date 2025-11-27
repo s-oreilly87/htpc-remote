@@ -1,10 +1,17 @@
-function DenonTelnetWrapper(telnetSocket) {
-  const events = {};
+type Listener = (...args: unknown[]) => void;
+type TelnetSocket = {
+  destroy: () => void;
+  write: (data: string) => void;
+  on: (eventName: string, listener: Listener) => void;
+};
+
+function DenonTelnetWrapper(telnetSocket: TelnetSocket) {
+  const events: Record<string, Listener[]> = {};
 
   //Not sure this is doing anything!?  chatGPT . . .
 
   // Forward the emit method to the wrapper and trigger the registered listeners.
-  const emit = (eventName, ...args) => {
+  const emit = (eventName: string, ...args: unknown[]) => {
     const listeners = events[eventName];
     if (listeners) {
       for (const listener of listeners) {
@@ -13,7 +20,7 @@ function DenonTelnetWrapper(telnetSocket) {
     }
   };
 
-  const on = (eventName, listener) => {
+  const on = (eventName: string, listener: Listener) => {
     if (!events[eventName]) {
       events[eventName] = [];
     }
@@ -21,15 +28,15 @@ function DenonTelnetWrapper(telnetSocket) {
     //console.log(events)
   };
 
-  const once = (eventName, listener) => {
-    const wrappedListener = (...args) => {
+  const once = (eventName: string, listener: Listener) => {
+    const wrappedListener: Listener = (...args) => {
       listener(...args);
       removeListener(eventName, wrappedListener);
     };
     on(eventName, wrappedListener);
   };
 
-  const removeListener = (eventName, listener) => {
+  const removeListener = (eventName: string, listener: Listener) => {
     const listeners = events[eventName];
     if (listeners) {
       const index = listeners.indexOf(listener);
@@ -39,7 +46,7 @@ function DenonTelnetWrapper(telnetSocket) {
     }
   };
 
-  const removeAllListeners = (eventName) => {
+  const removeAllListeners = (eventName: string) => {
     delete events[eventName];
   };
 

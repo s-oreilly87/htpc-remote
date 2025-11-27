@@ -1,4 +1,4 @@
-import { initializeState } from "@/api-modules/nutjs/nut-state.js";
+import { initializeState } from "@/api-modules/nutjs/nut-state";
 
 export default function handleDisable(req, res) {
   initializeState();

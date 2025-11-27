@@ -1,6 +1,29 @@
-import { DENON_HTTP_COMMANDS, ROKU_POST_OPTIONS } from "@/utilities/constants";
 import { parseString } from "xml2js";
+
+import { DENON_INPUTS } from "@/components/RemotePanels/Denon/denonConstants";
+import { DenonKeystroke } from "@/constants/remotes";
 import { convertKebabToCamel } from "@/utilities/utils";
+
+const ROKU_POST_OPTIONS: RequestInit = {
+  method: "POST",
+  headers: { "Content-Length": "0" },
+};
+
+export const DENON_HTTP_COMMANDS = [
+  DenonKeystroke.MENU_ON,
+  DenonKeystroke.MENU_OFF,
+  DenonKeystroke.UP,
+  DenonKeystroke.DOWN,
+  DenonKeystroke.LEFT,
+  DenonKeystroke.RIGHT,
+  DenonKeystroke.OK,
+  DenonKeystroke.BACK,
+  DenonKeystroke.INFO,
+  DenonKeystroke.OPTION,
+  DenonKeystroke.VOL_UP,
+  DenonKeystroke.VOL_DOWN,
+  ...Object.values(DENON_INPUTS).map((input) => input.value),
+];
 
 export interface ValueButton {
   value: string;

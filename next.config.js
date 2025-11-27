@@ -1,12 +1,13 @@
 /** @type {import('next').NextConfig} */
 // next.config.js
-import {
-  DENON_HTTP_COMMAND_URL,
-  DENON_HTTP_QUERY_URL,
-  DENON_IP,
-  ROKU_URL,
-} from "./src/constants/environment.js"
 import withPWA from 'next-pwa'
+
+const DENON_IP = process.env.NEXT_PUBLIC_DENON_IP ?? "192.168.1.252";
+const ROKU_IP = process.env.NEXT_PUBLIC_ROKU_IP ?? "192.168.1.222";
+const ROKU_PORT = 8060;
+const ROKU_URL = `http://${ROKU_IP}:${ROKU_PORT}`;
+const DENON_HTTP_COMMAND_URL = "goform/formiPhoneAppDirect.xml";
+const DENON_HTTP_QUERY_URL = "goform/formMainZone_MainZoneXml.xml";
 
 
 const nextConfig = {

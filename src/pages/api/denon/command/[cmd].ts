@@ -1,6 +1,8 @@
-import { KEYSTROKE } from "@/utilities/constants";
-import denon from "@/api-modules/denon/denon-telnet.js";
+import type { NextApiRequest, NextApiResponse } from "next";
 import { promisify } from "util";
+
+import denon from "@/api-modules/denon/denon-telnet";
+import { KEYSTROKE } from "@/utilities/constants";
 
 const getZonePowerStateAsync = promisify(denon.getZonePowerState).bind(denon);
 const setZonePowerStateAsync = promisify(denon.setZonePowerState).bind(denon);
@@ -8,8 +10,14 @@ const getMuteStateAsync = promisify(denon.getMuteState).bind(denon);
 const setMuteStateAsync = promisify(denon.setMuteState).bind(denon);
 const cmdAsync = promisify(denon.cmd).bind(denon);
 
-export default async function handleCommand(req, res) {
+export default async function handleCommand(
+  req: NextApiRequest,
+  res: NextApiResponse,
+): Promise<void> {
   let { cmd } = req.query; //.toUpperCase() //probably unnecessary with constants refactor
+  if (Array.isArray(cmd)) {
+    cmd = cmd[0];
+  }
 
   // Handle toggle commands with query and set in callback
   switch (cmd) {
@@ -23,7 +31,7 @@ export default async function handleCommand(req, res) {
         });
       } catch (error) {
         console.log("DENON_TELNET!! - Error: " + error);
-        res.status(500).send({ error: error });
+        res.status(500).send({ error });
       }
       break;
 
@@ -37,23 +45,21 @@ export default async function handleCommand(req, res) {
         });
       } catch (error) {
         console.log("DENON_TELNET - Error: " + error);
-        res.status(500).send({ error: error });
+        res.status(500).send({ error });
       }
       break;
 
     case KEYSTROKE.DENON.MENU_TOGGLE:
       try {
         const menuState = await cmdAsync("MNMEN?");
-        const data = await cmdAsync(
-          `MNMEN ${menuState === "ON" ? "OFF" : "ON"}`,
-        );
+        await cmdAsync(`MNMEN ${menuState === "ON" ? "OFF" : "ON"}`);
         res.status(200).send({
           msg: "Command " + cmd + " sent!",
           data: cmd,
         });
       } catch (error) {
         console.log("DENON_TELNET - Error: " + error);
-        res.status(500).send({ error: error });
+        res.status(500).send({ error });
       }
       break;
 
@@ -67,7 +73,7 @@ export default async function handleCommand(req, res) {
         });
       } catch (error) {
         console.log("DENON_TELNET - Error: " + error);
-        res.status(500).send({ error: error });
+        res.status(500).send({ error });
       }
   }
 }

@@ -3,7 +3,7 @@ import {Switch} from "@headlessui/react";
 import {useWakeLock} from "react-screen-wake-lock";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faLocationCrosshairs} from "@fortawesome/free-solid-svg-icons";
-import {hasRelativeOrientationSensor} from "@/utilities/sensors";
+import {hasRelativeOrientationSensor, type OrientationReading} from "@/utilities/sensors";
 import AirMouseCalibrationModal from "@/components/RemotePanels/PC/AirMouseCalibrationModal";
 import RelativeOrientationSensor from "@/components/Sensors/RelativeOrientationSensor";
 import io from "socket.io-client";
@@ -38,9 +38,12 @@ const AirMouse = () => {
     setHasRelOrientationSensor(hasRelativeOrientationSensor());
   }, []);
 
-  const currentOrientation = useRef(null);
+  const currentOrientation = useRef<OrientationReading | null>(null);
 
-  const updateOrientation = (orientation, prevOrientation) => {
+  const updateOrientation = (
+    orientation: OrientationReading,
+    prevOrientation: OrientationReading | null,
+  ) => {
     currentOrientation.current = orientation;
     if (prevOrientation) {
       const deltaX = prevOrientation.quaternion[2] - orientation.quaternion[2];
@@ -93,6 +96,9 @@ const AirMouse = () => {
   };
 
   const handleSetTopLeft = () => {
+    if (!currentOrientation.current) {
+      return;
+    }
     socket.emit("setTopLeft", {
       x: currentOrientation.current.quaternion[2],
       y: currentOrientation.current.quaternion[0],
@@ -100,6 +106,9 @@ const AirMouse = () => {
   };
 
   const handleSetBottomRight = () => {
+    if (!currentOrientation.current) {
+      return;
+    }
     socket.emit("setBottomRight", {
       x: currentOrientation.current.quaternion[2],
       y: currentOrientation.current.quaternion[0],

@@ -1,5 +1,8 @@
 import { DenonKeystroke, RemoteType } from "@/constants/remotes";
-import { DENON_HTTP_COMMAND_URL, DENON_HTTP_QUERY_URL, DENON_IP } from "@/constants/environment";
+
+export const DENON_IP = process.env.NEXT_PUBLIC_DENON_IP ?? "";
+export const DENON_HTTP_COMMAND_URL = "goform/formiPhoneAppDirect.xml";
+export const DENON_HTTP_QUERY_URL = "goform/formMainZone_MainZoneXml.xml";
 
 export interface DenonInput {
   label: string;
@@ -185,37 +188,6 @@ export const DENON_SOUND_MODES = {
     selectSurround: ["MONO_MOVIE"],
   },
 };
-
-export const DENON_STATE_DEFAULTS: DenonState = {
-  powerOn: false,
-  muteOn: false,
-  input: null,
-  soundMode: {label: '', value: '', selectSurround: []},
-  loading: false,
-  dynComp: "",
-  psDilOn: false,
-  psDynEqOn: false,
-  MV: 50.0,
-  PSDIL: 0,
-  PSREFLEV: "0",
-  PSDYNVOL: "OFF",
-};
-
-export const DENON_HTTP_COMMANDS = [
-  DenonKeystroke.MENU_ON,
-  DenonKeystroke.MENU_OFF,
-  DenonKeystroke.UP,
-  DenonKeystroke.DOWN,
-  DenonKeystroke.LEFT,
-  DenonKeystroke.RIGHT,
-  DenonKeystroke.OK,
-  DenonKeystroke.BACK,
-  DenonKeystroke.INFO,
-  DenonKeystroke.OPTION,
-  DenonKeystroke.VOL_UP,
-  DenonKeystroke.VOL_DOWN,
-  ...Object.values(DENON_INPUTS).map((input) => input.value),
-];
 
 export const DENON_REMOTE_META = {
   type: RemoteType.DENON,
