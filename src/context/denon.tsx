@@ -1,4 +1,11 @@
-import { createContext, useContext, useState, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useCallback,
+  useMemo,
+} from "react";
 import {
   DENON_INPUTS,
   DENON_SOUND_MODES,
@@ -42,18 +49,111 @@ export const DENON_STATE_DEFAULTS: DenonState = {
 export function DenonProvider({ children }: { children: ReactNode }) {
   const [denonState, setDenonState] = useState<DenonState>(DENON_STATE_DEFAULTS);
 
-  const updateDenonState = (props: Partial<DenonState>) => {
+  const updateDenonState = useCallback((props: Partial<DenonState>) => {
     setDenonState((prevState) => ({ ...prevState, ...props }));
-  };
+  }, []);
 
-  const refreshAll = async () => {
-    updateDenonState({ loading: true });
-    await updateDenonStateFromMainZoneQuery();
-    await updateDenonStateFromFetchLevels();
-    updateDenonState({ loading: false });
-  };
+  const fetchLevel = useCallback(async (query: string) => {
+    const response = await sendDenonQuery(query);
+    if (response.error) {
+      console.error(response.error);
+    } else {
+      return response.data?.[0]?.split(" ")[1];
+    }
+    return undefined;
+  }, []);
 
-  const updateDenonStateFromMainZoneQuery = async () => {
+  const refreshLevel = useCallback(
+    async (query: string) => {
+      updateDenonState({
+        [query]: await fetchLevel(query),
+      });
+    },
+    [fetchLevel, updateDenonState],
+  );
+
+  const fetchOnState = useCallback(async (query: string) => {
+    const response = await sendDenonQuery(query);
+    if (response.error) {
+      console.error(response.error);
+    } else {
+      return response.data?.[0]?.split(" ")[1] === "ON";
+    }
+    return undefined;
+  }, []);
+
+  const refreshOnState = useCallback(
+    async (query: string) => {
+      updateDenonState({
+        [query]: await fetchOnState(query),
+      });
+    },
+    [fetchOnState, updateDenonState],
+  );
+
+  const fetchMasterVolume = useCallback(async () => {
+    const masterVolResponse = await sendDenonQuery("MV");
+    if (masterVolResponse.error) {
+      console.error(masterVolResponse.error);
+    } else if (masterVolResponse.data) {
+      let value: string | number | undefined;
+      for (const val of masterVolResponse.data) {
+        if (val.startsWith("MV") && !val.startsWith("MVMAX")) {
+          value = val.split("V")[1];
+          break;
+        }
+      }
+
+      if (value) {
+        if (value.toString().length === 3) {
+          return parseFloat(value.toString()) / 10;
+        }
+        if (value.toString()[0] === "0") {
+          return Number(parseFloat(value.toString()[1]).toFixed(1));
+        }
+        return Number(parseFloat(value.toString()).toFixed(1));
+      }
+    }
+    return undefined;
+  }, []);
+
+  const refreshMasterVolume = useCallback(async () => {
+    const volume = await fetchMasterVolume();
+    if (volume !== undefined) {
+      updateDenonState({ MV: volume });
+    }
+  }, [fetchMasterVolume, updateDenonState]);
+
+  const fetchDialogueAdjust = useCallback(async (): Promise<[boolean, number] | undefined> => {
+    const dialogueAdjustResponse = await sendDenonQuery("PSDIL");
+    if (dialogueAdjustResponse.error) {
+      console.error(dialogueAdjustResponse.error);
+    } else if (dialogueAdjustResponse.data) {
+      const psDilOn = dialogueAdjustResponse.data[0].split(" ")[1] === "ON";
+      let PSDIL = 0;
+
+      let levelIndex = 1;
+      while (
+        dialogueAdjustResponse.data[levelIndex] === dialogueAdjustResponse.data[0] &&
+        levelIndex < 8
+      ) {
+        levelIndex++;
+      }
+
+      if (dialogueAdjustResponse.data[levelIndex]) {
+        PSDIL = parseDialogueAdjustLevel(
+          dialogueAdjustResponse.data[levelIndex].split(" ")[1],
+        );
+      } else {
+        console.error("for some reason didnt get 2 part PSDIL data. Heres what we got:");
+        console.error(dialogueAdjustResponse.data);
+      }
+      return [psDilOn, PSDIL];
+    }
+    return undefined;
+  }, []);
+
+  const updateDenonStateFromMainZoneQuery = useCallback(async () => {
     const response = await fetchMainZoneData();
 
     if (response.error) {
@@ -90,9 +190,9 @@ export function DenonProvider({ children }: { children: ReactNode }) {
       muteOn: data.mute === "ON",
       soundMode: soundMode ?? DENON_SOUND_MODES.NONE,
     });
-  };
+  }, [updateDenonState]);
 
-  const updateDenonStateFromFetchLevels = async () => {
+  const updateDenonStateFromFetchLevels = useCallback(async () => {
     const toUpdate: Partial<DenonState> = {};
     toUpdate.MV = await fetchMasterVolume();
     toUpdate.PSDYNVOL = await fetchLevel("PSDYNVOL");
@@ -105,135 +205,49 @@ export function DenonProvider({ children }: { children: ReactNode }) {
     }
 
     updateDenonState(toUpdate);
-  };
+  }, [
+    fetchDialogueAdjust,
+    fetchLevel,
+    fetchMasterVolume,
+    fetchOnState,
+    updateDenonState,
+  ]);
 
-  const fetchLevel = async (query: string) => {
-    const response = await sendDenonQuery(query);
-    if (response.error) {
-      console.error(response.error);
-    } else {
-      return response.data?.[0]?.split(" ")[1];
-    }
-    return undefined;
-  };
+  const refreshAll = useCallback(async () => {
+    updateDenonState({ loading: true });
+    await updateDenonStateFromMainZoneQuery();
+    await updateDenonStateFromFetchLevels();
+    updateDenonState({ loading: false });
+  }, [
+    updateDenonState,
+    updateDenonStateFromFetchLevels,
+    updateDenonStateFromMainZoneQuery,
+  ]);
 
-  const refreshLevel = async (query: string) => {
-    updateDenonState({
-      [query]: await fetchLevel(query),
-    });
-  };
+  const refreshers = useMemo(
+    () => ({
+      all: refreshAll,
+      masterVol: refreshMasterVolume,
+      level: refreshLevel,
+      onState: refreshOnState,
+      dialogueAdjust: fetchDialogueAdjust,
+    }),
+    [
+      fetchDialogueAdjust,
+      refreshAll,
+      refreshLevel,
+      refreshMasterVolume,
+      refreshOnState,
+    ],
+  );
 
-  const fetchOnState = async (query: string) => {
-    const response = await sendDenonQuery(query);
-    if (response.error) {
-      console.error(response.error);
-    } else {
-      return response.data?.[0]?.split(" ")[1] === "ON";
-    }
-    return undefined;
-  };
+  const contextValue = useMemo<DenonContextValue>(
+    () => [denonState, updateDenonState, refreshers, setDenonState],
+    [denonState, refreshers, updateDenonState],
+  );
 
-  const refreshOnState = async (query: string) => {
-    updateDenonState({
-      [query]: await fetchOnState(query),
-    });
-  };
-
-  const fetchMasterVolume = async () => {
-    const masterVolResponse = await sendDenonQuery("MV");
-    if (masterVolResponse.error) {
-      console.error(masterVolResponse.error);
-    } else if (masterVolResponse.data) {
-      let value: string | number | undefined;
-      for (const val of masterVolResponse.data) {
-        if (val.startsWith("MV") && !val.startsWith("MVMAX")) {
-          value = val.split("V")[1];
-          break;
-        }
-      }
-
-      if (value) {
-        if (value.toString().length === 3) {
-          return parseFloat(value.toString()) / 10;
-        }
-        if (value.toString()[0] === "0") {
-          return Number(parseFloat(value.toString()[1]).toFixed(1));
-        }
-        return Number(parseFloat(value.toString()).toFixed(1));
-      }
-    }
-    return undefined;
-  };
-
-  const refreshMasterVolume = async () => {
-    const volume = await fetchMasterVolume();
-    if (volume !== undefined) {
-      updateDenonState({ MV: volume });
-    }
-  };
-
-  const fetchDialogueAdjust = async (): Promise<[boolean, number] | undefined> => {
-    const dialogueAdjustResponse = await sendDenonQuery("PSDIL");
-    if (dialogueAdjustResponse.error) {
-      console.error(dialogueAdjustResponse.error);
-    } else if (dialogueAdjustResponse.data) {
-      const psDilOn = dialogueAdjustResponse.data[0].split(" ")[1] === "ON";
-      let PSDIL = 0;
-
-      let levelIndex = 1;
-      while (
-        dialogueAdjustResponse.data[levelIndex] === dialogueAdjustResponse.data[0] &&
-        levelIndex < 8
-      ) {
-        levelIndex++;
-      }
-
-      if (dialogueAdjustResponse.data[levelIndex]) {
-        PSDIL = parseDialogueAdjustLevel(
-          dialogueAdjustResponse.data[levelIndex].split(" ")[1],
-        );
-      } else {
-        console.error("for some reason didnt get 2 part PSDIL data. Heres what we got:");
-        console.error(dialogueAdjustResponse.data);
-      }
-      return [psDilOn, PSDIL];
-    }
-    return undefined;
-  };
-
-  const refreshDialogueAdjust = async () => {
-    const dialogueAdjust = await fetchDialogueAdjust();
-    if (dialogueAdjust) {
-      updateDenonState({
-        psDilOn: dialogueAdjust[0],
-        PSDIL: dialogueAdjust[1],
-      });
-    }
-  };
-
-  const parseDialogueAdjustLevel = (responseValue: string) => {
-    if (responseValue.length === 3) {
-      responseValue = (parseFloat(responseValue) / 10).toString();
-    } else {
-      responseValue = parseFloat(responseValue).toString();
-    }
-
-    return parseFloat(responseValue) - 50;
-  };
-
-  const refreshDenonState: DenonRefreshers = {
-    all: refreshAll,
-    masterVol: refreshMasterVolume,
-    level: refreshLevel,
-    onState: refreshOnState,
-    dialogueAdjust: refreshDialogueAdjust,
-  };
   return (
-    <Context.Provider
-      value={[denonState, updateDenonState, refreshDenonState, setDenonState]}
-    >
-      {children}
-    </Context.Provider>
+    <Context.Provider value={contextValue}>{children}</Context.Provider>
   );
 }
 
@@ -244,3 +258,17 @@ export function useDenonContext(): DenonContextValue {
   }
   return ctx;
 }
+
+export const parseDialogueAdjustLevel = (levelString: string) => {
+  const options: AudioModeOption[] = Object.values(DENON_SOUND_MODES);
+  let level: AudioModeOption | number = parseFloat(levelString);
+  // If the level is not a number, it must be one of the preset strings
+  if (isNaN(level)) {
+    for (const option of options) {
+      if (levelString === option.name) {
+        level = option;
+      }
+    }
+  }
+  return level;
+};
