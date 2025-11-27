@@ -1,4 +1,4 @@
-import { setNutState } from "@/api-modules/nutjs/nut-state.js";
+import { setNutState } from "@/api-modules/nutjs/nut-state";
 
 export default async function handleSetTopLeft(req, res) {
   const { topLeft } = req.query; //.toUpperCase() //probably unnecessary with constants refactor

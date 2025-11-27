@@ -1,6 +1,6 @@
 import { Server } from "socket.io";
 import { mouse, Point, screen, straightTo } from "@nut-tree/nut-js";
-import { getNutState, setNutState } from "@/api-modules/nutjs/nut-state.js";
+import { getNutState, setNutState } from "@/api-modules/nutjs/nut-state";
 
 let busy = false;
 async function initializeAirmouse(x, y) {

@@ -1,6 +1,9 @@
 import { URL_ENCODED_SYMBOLS } from "@/constants/encoding";
 import { RemoteType, RokuKeystroke } from "@/constants/remotes";
-import { ROKU_URL } from "@/constants/environment";
+
+const ROKU_IP = process.env.NEXT_PUBLIC_ROKU_IP ?? "";
+const ROKU_PORT = 8060;
+const ROKU_URL = ROKU_IP ? `http://${ROKU_IP}:${ROKU_PORT}` : "";
 
 export interface RokuChannel {
   id: string;
@@ -11,11 +14,6 @@ export interface RokuApps {
   CHANNELS: Record<string, RokuChannel>;
   HDMI: Record<string, RokuChannel>;
 }
-
-export const ROKU_POST_OPTIONS: RequestInit = {
-  method: "POST",
-  headers: { "Content-Length": "0" },
-};
 
 export const ROKU_APPS: RokuApps = {
   CHANNELS: {

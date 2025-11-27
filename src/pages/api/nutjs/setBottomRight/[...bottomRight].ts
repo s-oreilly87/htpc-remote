@@ -1,5 +1,5 @@
 //TODO: get locals into here
-import { getNutState, setNutState } from "@/api-modules/nutjs/nut-state.js";
+import { getNutState, setNutState } from "@/api-modules/nutjs/nut-state";
 
 export default async function handleSetBottomRight(req, res) {
   const { bottomRight } = req.query; //.toUpperCase() //probably unnecessary with constants refactor

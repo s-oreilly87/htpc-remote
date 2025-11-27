@@ -1,4 +1,4 @@
-import {KEYSTROKE, PLATFORM, REMOTE, URL_ENCODED_SYMBOLS,} from "@/utilities/constants";
+import {KEYSTROKE, REMOTE, URL_ENCODED_SYMBOLS,} from "@/utilities/constants";
 import {useEffect, useRef, useState} from "react";
 import {Transition} from "@headlessui/react";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
@@ -9,6 +9,8 @@ import {sendKeystrokeToNutJS, sendRokuKeypress, sendRokuSearchQuery,} from "@/ut
 import {sleep} from "@/utilities/utils";
 import {throttle} from "lodash";
 import {lowerCase} from "lodash/string";
+
+const PLATFORM = process.env.NEXT_PUBLIC_PLATFORM ?? "";
 
 function KeyboardGroup({ remote }) {
   const [inputExpanded, setInputExpanded] = useState(false);

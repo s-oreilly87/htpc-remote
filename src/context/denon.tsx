@@ -2,7 +2,6 @@ import { createContext, useContext, useState, ReactNode } from "react";
 import {
   DENON_INPUTS,
   DENON_SOUND_MODES,
-  DENON_STATE_DEFAULTS,
   AudioModeOption,
   DenonState,
 } from "@/components/RemotePanels/Denon/denonConstants";
@@ -24,6 +23,21 @@ export type DenonContextValue = [
 ];
 
 const Context = createContext<DenonContextValue | undefined>(undefined);
+
+export const DENON_STATE_DEFAULTS: DenonState = {
+  powerOn: false,
+  muteOn: false,
+  input: null,
+  soundMode: DENON_SOUND_MODES.NONE,
+  loading: false,
+  dynComp: "",
+  psDilOn: false,
+  psDynEqOn: false,
+  MV: 50.0,
+  PSDIL: 0,
+  PSREFLEV: "0",
+  PSDYNVOL: "OFF",
+};
 
 export function DenonProvider({ children }: { children: ReactNode }) {
   const [denonState, setDenonState] = useState<DenonState>(DENON_STATE_DEFAULTS);

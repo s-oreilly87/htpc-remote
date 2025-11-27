@@ -1,5 +1,7 @@
 import {Key, keyboard} from "@nut-tree/nut-js";
-import {KEYSTROKE, PLATFORM} from "@/utilities/constants";
+import {KEYSTROKE} from "@/utilities/constants";
+
+const PLATFORM = process.env.NEXT_PUBLIC_PLATFORM ?? "";
 
 const nutKeyMap = {
   [KEYSTROKE.PC.ENTER]: Key.Enter,
