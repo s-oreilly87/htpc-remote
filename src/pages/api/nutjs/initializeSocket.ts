@@ -1,5 +1,7 @@
 import { Server } from "socket.io";
 import type { NextApiRequest, NextApiResponse } from "next";
+import type { Server as HTTPServer } from "http";
+import type { Socket } from "net";
 import { mouse, Point, screen, straightTo } from "@nut-tree/nut-js";
 import { getNutState, setNutState, type NutState } from "@/api-modules/nutjs/nut-state";
 
@@ -13,8 +15,8 @@ type OrientationVector = {
   y: number;
 };
 
-type SocketServer = NextApiResponse["socket"] & {
-  server: NextApiResponse["socket"]["server"] & { io?: Server };
+type SocketServer = Socket & {
+  server: HTTPServer & { io?: Server };
 };
 
 type NextApiResponseWithSocket = NextApiResponse & { socket: SocketServer };
