@@ -29,12 +29,12 @@ function Navbar({ className, selectedRemote, onClickHandler }) {
   return (
     <>
       <QRCode isOpen={qrModalOpen} setIsOpen={setQrModalOpen} />
-      <TplinkProvider>
-        <SmartHomeModal
-          isOpen={smartHomeModalOpen}
-          setIsOpen={setSmartHomeModalOpen}
-        />
-      </TplinkProvider>
+      {/*<TplinkProvider>*/}
+      {/*  <SmartHomeModal*/}
+      {/*    isOpen={smartHomeModalOpen}*/}
+      {/*    setIsOpen={setSmartHomeModalOpen}*/}
+      {/*  />*/}
+      {/*</TplinkProvider>*/}
       <nav className={className}>
         <div className="max-w-7xl h-16 w-full mx-auto px-3 z-10 flex relative justify-center">
           <div className="py-1 absolute left-0 top-0 z-20 aspect-video">
@@ -82,15 +82,15 @@ function Navbar({ className, selectedRemote, onClickHandler }) {
                 HTPC
               </button>
             </div>
-            <div className="py-1 absolute right-2 top-3 z-20 hover:cursor-pointer">
-              <Image
-                  src={"/icons/lightbulb.png"}
-                  alt="Lightbulb"
-                  width={50}
-                  height={50}
-                  onClick={handleLightClick}
-              />
-            </div>
+            {/*<div className="py-1 absolute right-2 top-3 z-20 hover:cursor-pointer">*/}
+            {/*  <Image*/}
+            {/*      src={"/icons/lightbulb.png"}*/}
+            {/*      alt="Lightbulb"*/}
+            {/*      width={50}*/}
+            {/*      height={50}*/}
+            {/*      onClick={handleLightClick}*/}
+            {/*  />*/}
+            {/*</div>*/}
           </div>
         </div>
       </nav>
