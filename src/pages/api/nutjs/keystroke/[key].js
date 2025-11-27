@@ -22,7 +22,7 @@ const nutKeyMap = {
   [KEYSTROKE.PC.NEXT]: Key.AudioNext,
   [KEYSTROKE.KEY_COMBOS.MOVE_WINDOW]: [Key.LeftWin, Key.LeftShift, Key.Left],
 };
-if (PLATFORM === "MACOS") {
+if (PLATFORM === "MACOS" || PLATFORM === "LINUX") {
   nutKeyMap[KEYSTROKE.PC.WIN_KEY] = [Key.LeftSuper, Key.Space];
 }
 
