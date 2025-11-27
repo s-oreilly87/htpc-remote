@@ -1,3 +1,3 @@
-export * from "./constants";
-import Constants from "./constants";
+export * from "./constants.ts";
+import Constants from "./constants.ts";
 export default Constants;
