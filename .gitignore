@@ -39,3 +39,6 @@ yarn-error.log*
 # Next-Pwa
 public/sw.js
 public/workbox-*
+
+# backup of nutjs node module
+.nutjs-backup
