@@ -121,40 +121,38 @@ const PressAndHoldButton: React.FC<PressAndHoldButtonProps> = ({
     if (button.value === "MVUP") {
       setDenonState((prevState) => ({
         ...prevState,
-        MV: (parseFloat(prevState.MV) + 0.5).toFixed(1),
+        MV: prevState.MV + 0.5,
       }));
     } else if (button.value === "MVDOWN") {
       setDenonState((prevState) => ({
         ...prevState,
-        MV: (parseFloat(prevState.MV) - 0.5).toFixed(1),
+        MV: prevState.MV - 0.5,
       }));
     }
   };
 
   const updateVolDisplayFromResponse = (response: { data?: string[] }) => {
     if (response.data) {
-      let value: string | number | undefined;
+      let value: number | undefined;
       for (const val of response.data) {
         if (val.startsWith("MV") && !val.startsWith("MVMAX")) {
-          value = val.split("V")[1];
+          const string = val.split("V")[1];
+          if (!string) {
+            return console.error("Did not receive MasterVolume data in Denon response.");
+          }
+
+          if (string.length === 3) {
+            value = parseFloat(string) / 10;
+          } else if (string[0] === "0") {
+            value = parseFloat(string[1]);
+          } else {
+            value = parseFloat(string);
+          }
           break;
         }
       }
-      if (!value) {
-        return console.error("Did not receive MasterVolume data in Denon response.");
-      }
 
-      if (typeof value === "string") {
-        if (value.length === 3) {
-          value = parseFloat(value) / 10;
-        } else if (value[0] === "0") {
-          value = parseFloat(value[1]).toFixed(1);
-        } else {
-          value = parseFloat(value).toFixed(1);
-        }
-      }
-
-      updateDenonState({ MV: value as string });
+      updateDenonState({ MV: value });
     }
   };
 

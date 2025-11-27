@@ -19,7 +19,7 @@ const DIALOGUE_ADJUST_DISABLED_MODES = [
 const AdvancedVolumeControl = ({}) => {
   const [denonState, updateDenonState, refreshDenonState] = useDenonContext();
 
-  const [buttonPressTimerId, setButtonPressTimerId] = useState();
+  const [buttonPressTimerId, setButtonPressTimerId] = useState<number>(null);
 
   const parseAndSetDialogueAdjustLevel = (responseValue) => {
     // 0.5 steps come in without the decimal
@@ -38,12 +38,10 @@ const AdvancedVolumeControl = ({}) => {
   const handleClick = async (event) => {
     const button = event.currentTarget;
     buttonPress(button, buttonPressTimerId, setButtonPressTimerId);
-
     const response = await sendDenonCommand(button, "command");
     if (response.error) {
       return console.log(response.error);
     }
-
     // Update denonState based on the response
     // PSDIL comes in as an array of [PSDIL ON/OFF, PSDIL LEVEL]   BUT we get 4 of each!??
     for (const line of response.data) {
@@ -52,7 +50,6 @@ const AdvancedVolumeControl = ({}) => {
       if (splitData[0] === "PSDIL" && ["ON", "OFF"].includes(splitData[1])) {
         updateDenonState({ psDilOn: splitData[1] === "ON" });
       } else if (splitData[0] === "PSDIL") {
-        console.log('partsing psdil');
         // PSDIL LEVEL needs to be parsed
         parseAndSetDialogueAdjustLevel(splitData[1]);
         break;  // break after finding first PSDIL LEVEL

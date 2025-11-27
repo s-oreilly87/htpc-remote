@@ -23,7 +23,7 @@ function KeyboardGroup({ remote }) {
 
   const waitForSendInput = useRef(100);
 
-  const keyboardInput = useRef();
+  const keyboardInput = useRef(null);
 
   useEffect(() => {
     if (!inputExpanded) {
@@ -311,6 +311,7 @@ function KeyboardGroup({ remote }) {
           id="toggle-keyboard"
           className="btn-secondary absolute bottom-0 left-14 w-10"
           onClick={toggleInputExpanded}
+          remote={remote}
         >
           <FontAwesomeIcon icon={faKeyboard} />
         </KeypressButton>

@@ -51,9 +51,9 @@ const SmartHomeModal = ({ isOpen, setIsOpen }) => {
       return console.error("Invalid Brightness value");
     }
 
-    if (tplinkState.basement.powerState === false) {
-      sendSetPowerState('')
-    }
+    // if (tplinkState.basement.powerState === false) {
+    //   sendSetPowerState('')
+    // }
     // Just need to update the state immediately, request will get sent by useThrottleFn
     updateTplinkState({
       basement: {

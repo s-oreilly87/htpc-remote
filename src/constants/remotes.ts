@@ -57,6 +57,7 @@ export enum RokuKeystroke {
   PLAY = "Play",
   FFWD = "Fwd",
   ENTER = "Enter",
+  BACKSPACE = "Backspace",
 }
 
 export enum DenonKeystroke {

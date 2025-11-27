@@ -4,8 +4,9 @@ import DenonBottomLeftButtons from "../Denon/DenonBottomLeftButtons";
 import Dpad from "./Dpad";
 import VolumeControls from "./VolumeControls";
 import PlexBottomLeftButtons from "@/components/RemotePanels/PC/PlexBottomLeftButtons";
+import {RemoteType} from "@/constants";
 
-function BottomSection({ remote, rokuState, setRokuPowerOn }) {
+function BottomSection({ remote, rokuState, setRokuPowerOn }: { remote: RemoteType, rokuState?: any, setRokuPowerOn?: any}) {
   return (
     <div id="bottom-section" className="w-full h-full flex">
       <div className="flex w-1/6">

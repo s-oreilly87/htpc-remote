@@ -13,7 +13,6 @@ import { getKeyByValue, usePrevious } from "@/utilities/utils";
 const App = () => {
   const [selectedRemote, setSelectedRemote] = useState<RemoteType>(RemoteType.ROKU);
   const [rokuState, setRokuState] = useState(ROKU_STATE_DEFAULTS);
-  const [pcState, setPcState] = useState<Record<string, unknown> | undefined>();
   const resetDocHeight = () => {
     const vh = window.innerHeight * 0.01;
     document.documentElement.style.setProperty("--vh", `${vh}px`);
@@ -105,8 +104,6 @@ const App = () => {
                   prevRemote={prevRemote}
                   rokuState={rokuState}
                   setRokuState={setRokuState}
-                  pcState={pcState}
-                  setPcState={setPcState}
                 />
               </SwipeDetector>
             </div>

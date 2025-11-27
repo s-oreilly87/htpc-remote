@@ -12,8 +12,8 @@ export default function MoreChannelsModal({
   fetchIcons,
   setPowerOn,
 }) {
-  const [iconsLoaded, setIconsLoaded] = useState(false);
-  const [buttonPressTimerId, setButtonPressTimerId] = useState();
+  const [areIconsLoaded, setAreIconsLoaded] = useState<boolean>(false);
+  const [buttonPressTimerId, setButtonPressTimerId] = useState<number>(null);
 
   function closeModal() {
     setIsOpen(false);
@@ -34,7 +34,7 @@ export default function MoreChannelsModal({
     if (isOpen) {
       //set timeout is needed, even if 0??
       setTimeout(() => {
-        fetchIcons("extra-channel-button").then(setIconsLoaded(true));
+        fetchIcons("extra-channel-button").then(() => setAreIconsLoaded(true));
       }, 0);
     }
   }, [isOpen]);
@@ -78,10 +78,10 @@ export default function MoreChannelsModal({
                   </div>
                   <div
                     className={`grid grid-cols-3 grid-rows-2 gap-3 w-full ${
-                      iconsLoaded ? "opacity-100" : "opacity-0"
+                      areIconsLoaded ? "opacity-100" : "opacity-0"
                     } transition-opacity duration-500 ease-in-out`}
                   >
-                    {Object.values(moreChannels).map((CHANNEL) => (
+                    {Object.values(moreChannels).map((CHANNEL: {id: string, label: string }) => (
                       <button
                         onClick={handleClick}
                         key={CHANNEL.id}

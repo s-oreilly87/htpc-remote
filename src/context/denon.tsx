@@ -56,7 +56,7 @@ export function DenonProvider({ children }: { children: ReactNode }) {
       console.info(`Unknown Input: ${data.inputFuncSelect}`);
     }
 
-    let soundMode: AudioModeOption | typeof DENON_SOUND_MODES[keyof typeof DENON_SOUND_MODES] | undefined =
+    let soundMode: typeof DENON_SOUND_MODES[keyof typeof DENON_SOUND_MODES] =
       Object.values(DENON_SOUND_MODES).find((mode) =>
         mode.selectSurround.includes(data.selectSurround as string),
       );
