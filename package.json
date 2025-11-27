@@ -47,8 +47,6 @@
     "xml2js": "^0.4.23"
   },
   "devDependencies": {
-    "@types/react": "file:vendor/@types/react",
-    "@types/react-dom": "file:./vendor/@types/react-dom",
     "autoprefixer": "^10.4.13",
     "concurrently": "^8.2.2",
     "postcss": "^8.4.21",
