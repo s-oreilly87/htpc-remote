@@ -120,7 +120,7 @@ export function useRelativeOrientationSensor(
   );
 
   useEffect(() => {
-    if ("RelativeOrientationSensor" in window) {
+    if (typeof window.RelativeOrientationSensor === "function") {
       const sensor = new window.RelativeOrientationSensor({
         frequency,
       });
@@ -236,6 +236,10 @@ export function useGyroscope(
 export function hasRelativeOrientationSensor() {
   let relOrientationSensor: OrientationSensor | null = null;
   try {
+    if (typeof window.RelativeOrientationSensor !== "function") {
+      return false;
+    }
+
     relOrientationSensor = new window.RelativeOrientationSensor({
       frequency: 10,
     });
@@ -269,7 +273,7 @@ export function hasRelativeOrientationSensor() {
 
 export function hasAWorkingRelativeOrientationSensor() {
   let relOrientation: OrientationReading | null;
-  if ("RelativeOrientationSensor" in window) {
+  if (typeof window.RelativeOrientationSensor === "function") {
     const sensor = new window.RelativeOrientationSensor({
       frequency: 5,
     });
