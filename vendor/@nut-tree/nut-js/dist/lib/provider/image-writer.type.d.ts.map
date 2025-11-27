@@ -1,0 +1,1 @@
+{"version":3,"file":"image-writer.type.d.ts","sourceRoot":"","sources":["../../../lib/provider/image-writer.type.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,KAAK,EAAE,MAAM,gBAAgB,CAAC;AACvC,OAAO,EAAE,iBAAiB,EAAE,MAAM,uBAAuB,CAAC;AAE1D,MAAM,WAAW,qBAAqB;IACpC,KAAK,EAAE,KAAK,CAAC;IACb,IAAI,EAAE,MAAM,CAAC;CACd;AAED,oBAAY,WAAW,GAAG,iBAAiB,CAAC,qBAAqB,EAAE,IAAI,CAAC,CAAC"}

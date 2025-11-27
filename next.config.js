@@ -23,6 +23,15 @@ const nextConfig = {
       },
     ]
   },
+    webpack: (config, { isServer }) => {
+        if (isServer) {
+            config.externals.push({
+                '@nut-tree/libnut': 'commonjs @nut-tree/libnut',
+            });
+        }
+
+        return config;
+    },
 }
 
 export default withPWA({

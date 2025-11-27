@@ -1,0 +1,1 @@
+{"version":3,"file":"jimp-image-writer.class.d.ts","sourceRoot":"","sources":["../../../../lib/provider/io/jimp-image-writer.class.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,WAAW,EAAE,qBAAqB,EAAE,MAAM,sBAAsB,CAAC;AAG1E,MAAM,CAAC,OAAO,MAAO,YAAW,WAAW;IACzC,KAAK,CAAC,UAAU,EAAE,qBAAqB,GAAG,OAAO,CAAC,IAAI,CAAC;CASxD"}
