@@ -1,13 +1,23 @@
 import { parseString } from "xml2js";
 
 import { DENON_INPUTS } from "@/components/RemotePanels/Denon/denonConstants";
-import { DenonKeystroke } from "@/constants/remotes";
+import {
+  AudioMode,
+  DisplayMode,
+  KeyAction,
+  LaunchApp,
+  ApiResponse,
+} from "@/constants/htpcControls";
+import { DenonKeystroke, KEYSTROKE } from "@/constants/remotes";
 import { convertKebabToCamel } from "@/utilities/utils";
 
 const ROKU_POST_OPTIONS: RequestInit = {
   method: "POST",
   headers: { "Content-Length": "0" },
 };
+
+const PLATFORM = process.env.NEXT_PUBLIC_PLATFORM ?? "";
+const USE_YDOTOOL = PLATFORM === "LINUX_WAYLAND";
 
 export const DENON_HTTP_COMMANDS = [
   DenonKeystroke.MENU_ON,
@@ -33,6 +43,43 @@ export interface FetchResult<T> {
   data?: T;
   error?: unknown;
   msg?: string;
+}
+
+async function postJson(path: string, body: unknown): Promise<ApiResponse> {
+  try {
+    const response = await fetch(path, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body ?? {}),
+    });
+
+    const data = (await response.json().catch(() => null)) as ApiResponse | null;
+    if (!response.ok) {
+      return { ok: false, error: data?.error ?? response.statusText };
+    }
+
+    return data ?? { ok: true };
+  } catch (error) {
+    console.error(error);
+    return { ok: false, error: error instanceof Error ? error.message : "Unknown error" };
+  }
+}
+
+// ########   HTPC Control (Wayland)   ########
+export async function sendKey(action: KeyAction, options: { text?: string } = {}): Promise<ApiResponse> {
+  return postJson(`/api/key`, { action, ...options });
+}
+
+export async function launchApp(app: LaunchApp): Promise<ApiResponse> {
+  return postJson(`/api/launch`, { app });
+}
+
+export async function setDisplayMode(mode: DisplayMode): Promise<ApiResponse> {
+  return postJson(`/api/display`, { mode });
+}
+
+export async function setAudioMode(mode: AudioMode): Promise<ApiResponse> {
+  return postJson(`/api/audio`, { mode });
 }
 
 // ########   Roku Control   ########
@@ -139,8 +186,52 @@ export function sendClickToNutJS(type: string): void {
   fetch(`api/nutjs/click/${type}`, { mode: "no-cors" });
 }
 
-export function sendKeystrokeToNutJS(key: string): void {
+const KEYSTROKE_TO_ACTION: Partial<Record<string, KeyAction>> = {
+  [KEYSTROKE.PC.ENTER]: KeyAction.Enter,
+  [KEYSTROKE.PC.ALT_TAB]: KeyAction.AltTab,
+  [KEYSTROKE.PC.ESCAPE]: KeyAction.Esc,
+  [KEYSTROKE.PC.TAB]: KeyAction.Tab,
+  [KEYSTROKE.PC.UP]: KeyAction.Up,
+  [KEYSTROKE.PC.DOWN]: KeyAction.Down,
+  [KEYSTROKE.PC.LEFT]: KeyAction.Left,
+  [KEYSTROKE.PC.RIGHT]: KeyAction.Right,
+  [KEYSTROKE.PC.VOL_UP]: KeyAction.VolUp,
+  [KEYSTROKE.PC.VOL_DOWN]: KeyAction.VolDown,
+  [KEYSTROKE.PC.MUTE]: KeyAction.Mute,
+  [KEYSTROKE.PC.PREV]: KeyAction.Prev,
+  [KEYSTROKE.PC.REWIND]: KeyAction.Left,
+  [KEYSTROKE.PC.PLAY]: KeyAction.PlayPause,
+  [KEYSTROKE.PC.FFWD]: KeyAction.Right,
+  [KEYSTROKE.PC.NEXT]: KeyAction.Next,
+};
+
+export async function sendKeystrokeToNutJS(key: string): Promise<void> {
+  if (USE_YDOTOOL) {
+    const payload = mapKeyToAction(key);
+    if (payload) {
+      await sendKey(payload.action, { text: payload.text });
+      return;
+    }
+  }
+
   fetch(`api/nutjs/keystroke/${key}`, { mode: "no-cors" });
+}
+
+function mapKeyToAction(key: string): { action: KeyAction; text?: string } | null {
+  if (key.length === 1) {
+    return { action: KeyAction.Type, text: key };
+  }
+
+  const mappedAction = KEYSTROKE_TO_ACTION[key];
+  if (!mappedAction) {
+    return null;
+  }
+
+  if (mappedAction === KeyAction.Type) {
+    return { action: mappedAction, text: key };
+  }
+
+  return { action: mappedAction };
 }
 
 export function sendDisableCommandToNutJS(): void {

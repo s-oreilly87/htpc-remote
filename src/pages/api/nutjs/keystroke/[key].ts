@@ -29,7 +29,7 @@ const nutKeyMap: Record<string, NutKey> = {
   [KEYSTROKE.KEY_COMBOS.MOVE_WINDOW]: [Key.LeftWin, Key.LeftShift, Key.Left],
 };
 
-if (PLATFORM === "MACOS" || PLATFORM === "LINUX") {
+if (PLATFORM === "MACOS" || PLATFORM === "LINUX" || PLATFORM === "LINUX_WAYLAND") {
   nutKeyMap[KEYSTROKE.PC.WIN_KEY] = [Key.LeftSuper, Key.Space];
 }
 
