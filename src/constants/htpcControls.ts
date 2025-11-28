@@ -9,6 +9,8 @@ export enum KeyAction {
   Back = "back",
   Esc = "esc",
   Tab = "tab",
+  AltDown = "alt-down",
+  AltUp = "alt-up",
   AltTab = "alt-tab",
   VolUp = "vol-up",
   VolDown = "vol-down",

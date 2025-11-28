@@ -18,6 +18,9 @@ const ROKU_POST_OPTIONS: RequestInit = {
 
 const PLATFORM = process.env.NEXT_PUBLIC_PLATFORM ?? "";
 const USE_YDOTOOL = PLATFORM === "LINUX_WAYLAND";
+const ALT_HOLD_DURATION_MS = 1500;
+let altHoldTimeout: ReturnType<typeof setTimeout> | null = null;
+let isAltHeld = false;
 
 export const DENON_HTTP_COMMANDS = [
   DenonKeystroke.MENU_ON,
@@ -207,6 +210,11 @@ const KEYSTROKE_TO_ACTION: Partial<Record<string, KeyAction>> = {
 
 export async function sendKeystrokeToNutJS(key: string): Promise<void> {
   if (USE_YDOTOOL) {
+    if (key === KEYSTROKE.PC.ALT_TAB) {
+      await handleAltTabViaYdotool();
+      return;
+    }
+
     const payload = mapKeyToAction(key);
     if (payload) {
       await sendKey(payload.action, { text: payload.text });
@@ -232,6 +240,25 @@ function mapKeyToAction(key: string): { action: KeyAction; text?: string } | nul
   }
 
   return { action: mappedAction };
+}
+
+async function handleAltTabViaYdotool(): Promise<void> {
+  if (!isAltHeld) {
+    await sendKey(KeyAction.AltDown);
+    isAltHeld = true;
+  }
+
+  await sendKey(KeyAction.Tab);
+
+  if (altHoldTimeout) {
+    clearTimeout(altHoldTimeout);
+  }
+
+  altHoldTimeout = setTimeout(() => {
+    sendKey(KeyAction.AltUp).catch((error) => console.error("alt-up failed", error));
+    isAltHeld = false;
+    altHoldTimeout = null;
+  }, ALT_HOLD_DURATION_MS);
 }
 
 export function sendDisableCommandToNutJS(): void {
