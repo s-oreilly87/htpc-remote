@@ -260,15 +260,19 @@ export function useDenonContext(): DenonContextValue {
 }
 
 export const parseDialogueAdjustLevel = (levelString: string) => {
-  const options: AudioModeOption[] = Object.values(DENON_SOUND_MODES);
-  let level: AudioModeOption | number = parseFloat(levelString);
-  // If the level is not a number, it must be one of the preset strings
-  if (isNaN(level)) {
-    for (const option of options) {
-      if (levelString === option.name) {
-        level = option;
-      }
-    }
+  const parsedLevel = parseFloat(levelString);
+
+  if (Number.isNaN(parsedLevel)) {
+    return 0;
   }
-  return level;
+
+  // PSDIL values arrive as integers with an implicit decimal place and a 50 offset
+  // Example: "535" should be interpreted as 3.5 (53.5 - 50)
+  let level = parsedLevel;
+
+  if (!levelString.includes(".") && levelString.length >= 3) {
+    level /= 10;
+  }
+
+  return level - 50;
 };

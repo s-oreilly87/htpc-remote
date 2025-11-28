@@ -7,7 +7,7 @@ import {sendDenonCommand} from "@/utilities/http";
 import {buttonPress} from "@/utilities/utils";
 import Toggle from "@/components/UI/Toggle";
 import {dot_matrix} from "@/styles/fonts";
-import {useDenonContext} from "@/context/denon";
+import {parseDialogueAdjustLevel, useDenonContext} from "@/context/denon";
 
 const remote = Constants.REMOTE.DENON;
 
@@ -20,20 +20,6 @@ const AdvancedVolumeControl = ({}) => {
   const [denonState, updateDenonState, refreshDenonState] = useDenonContext();
 
   const [buttonPressTimerId, setButtonPressTimerId] = useState<number>(null);
-
-  const parseAndSetDialogueAdjustLevel = (responseValue) => {
-    // 0.5 steps come in without the decimal
-    console.log(responseValue);
-    if (responseValue.length === 3) {
-      responseValue = parseFloat(responseValue) / 10;
-    } else {
-      responseValue = parseFloat(responseValue);
-    }
-
-    // 50 is the new 0
-    responseValue -= 50;
-    updateDenonState({ PSDIL: responseValue });
-  };
 
   const handleClick = async (event) => {
     const button = event.currentTarget;
@@ -51,7 +37,8 @@ const AdvancedVolumeControl = ({}) => {
         updateDenonState({ psDilOn: splitData[1] === "ON" });
       } else if (splitData[0] === "PSDIL") {
         // PSDIL LEVEL needs to be parsed
-        parseAndSetDialogueAdjustLevel(splitData[1]);
+        const parsedLevel = parseDialogueAdjustLevel(splitData[1]);
+        updateDenonState({ PSDIL: parsedLevel });
         break;  // break after finding first PSDIL LEVEL
       } else if (denonState.hasOwnProperty(splitData[0])) {
         updateDenonState({ [splitData[0]]: splitData[1] });
