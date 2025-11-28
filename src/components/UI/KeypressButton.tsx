@@ -5,27 +5,41 @@ import {
   sendDenonCommand,
   sendEventToHTPCEventGhost,
   sendKeystrokeToNutJS,
+  launchApp,
   sendRokuKeypress,
 } from "@/utilities/http";
 import { buttonPress, openPlexampAndroidApp } from "@/utilities/utils";
+import { LaunchApp } from "@/constants/htpcControls";
 
 interface RemoteButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   remote: (typeof REMOTE)[keyof typeof REMOTE];
 }
 
+const PLATFORM = process.env.NEXT_PUBLIC_PLATFORM ?? "";
+const USE_LINUX_API = PLATFORM === "LINUX" || PLATFORM === "LINUX_WAYLAND";
+
 const RemoteButton: React.FC<RemoteButtonProps> = ({ remote, children, ...props }) => {
   const [buttonPressTimerId, setButtonPressTimerId] = useState<number | undefined>();
 
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleClick = async (event: React.MouseEvent<HTMLButtonElement>) => {
     if (remote === REMOTE.ROKU) {
       sendRokuKeypress(event.currentTarget);
     } else if (remote === REMOTE.PC) {
       if (event.currentTarget.value.startsWith("KEYSTROKE")) {
         sendKeystrokeToNutJS(event.currentTarget.value);
       } else {
-        sendEventToHTPCEventGhost(event.currentTarget);
-        if (event.currentTarget.value === "launchPlexamp") {
-          openPlexampAndroidApp();
+        const launchAppName = getLaunchAppFromValue(event.currentTarget.value);
+
+        if (USE_LINUX_API && launchAppName) {
+          await launchApp(launchAppName);
+          if (launchAppName === LaunchApp.Plexamp) {
+            openPlexampAndroidApp();
+          }
+        } else {
+          sendEventToHTPCEventGhost(event.currentTarget);
+          if (event.currentTarget.value === "launchPlexamp") {
+            openPlexampAndroidApp();
+          }
         }
       }
     } else if (remote === REMOTE.DENON) {
@@ -48,3 +62,13 @@ const RemoteButton: React.FC<RemoteButtonProps> = ({ remote, children, ...props 
 };
 
 export default RemoteButton;
+
+function getLaunchAppFromValue(value: string): LaunchApp | undefined {
+  const launchMap: Record<string, LaunchApp> = {
+    launchKodi: LaunchApp.Kodi,
+    launchMoonlight: LaunchApp.Moonlight,
+    launchPlexamp: LaunchApp.Plexamp,
+  };
+
+  return launchMap[value];
+}
