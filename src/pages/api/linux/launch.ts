@@ -5,7 +5,7 @@ import {
   LaunchApp,
   VALID_LAUNCH_APPS,
 } from "@/constants/htpcControls";
-import { runCommand } from "./lib/command";
+import { runCommand } from "../lib/command";
 
 type LaunchBody = {
   app?: LaunchApp | string;

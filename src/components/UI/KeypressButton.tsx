@@ -16,7 +16,7 @@ interface RemoteButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement
 }
 
 const PLATFORM = process.env.NEXT_PUBLIC_PLATFORM ?? "";
-const USE_HTPC_API = PLATFORM === "LINUX" || PLATFORM === "LINUX_WAYLAND";
+const USE_LINUX_API = PLATFORM === "LINUX" || PLATFORM === "LINUX_WAYLAND";
 
 const RemoteButton: React.FC<RemoteButtonProps> = ({ remote, children, ...props }) => {
   const [buttonPressTimerId, setButtonPressTimerId] = useState<number | undefined>();
@@ -30,7 +30,7 @@ const RemoteButton: React.FC<RemoteButtonProps> = ({ remote, children, ...props 
       } else {
         const launchAppName = getLaunchAppFromValue(event.currentTarget.value);
 
-        if (USE_HTPC_API && launchAppName) {
+        if (USE_LINUX_API && launchAppName) {
           await launchApp(launchAppName);
           if (launchAppName === LaunchApp.Plexamp) {
             openPlexampAndroidApp();

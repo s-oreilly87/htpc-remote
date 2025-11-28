@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 
 import { ApiResponse, KeyAction, VALID_KEY_ACTIONS } from "@/constants/htpcControls";
-import { runCommand } from "./lib/command";
+import { runCommand } from "../lib/command";
 
 type KeyRequestBody = {
   action?: KeyAction | string;

@@ -1,10 +1,14 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 
-import { ApiResponse, AudioMode, VALID_AUDIO_MODES } from "@/constants/htpcControls";
-import { runCommand } from "./lib/command";
+import {
+  ApiResponse,
+  DisplayMode,
+  VALID_DISPLAY_MODES,
+} from "@/constants/htpcControls";
+import { runCommand } from "../lib/command";
 
-type AudioBody = {
-  mode?: AudioMode | string;
+type DisplayBody = {
+  mode?: DisplayMode | string;
 };
 
 export default async function handler(
@@ -17,14 +21,14 @@ export default async function handler(
     return;
   }
 
-  const { mode } = (req.body ?? {}) as AudioBody;
+  const { mode } = (req.body ?? {}) as DisplayBody;
   if (!isValidMode(mode)) {
     res.status(400).json({ ok: false, error: "Invalid mode" });
     return;
   }
 
   try {
-    await runCommand("htpc-audio", [mode]);
+    await runCommand("htpc-res", [mode]);
     res.status(200).json({ ok: true });
   } catch (error) {
     console.error(error);
@@ -33,6 +37,6 @@ export default async function handler(
   }
 }
 
-function isValidMode(mode: unknown): mode is AudioMode {
-  return typeof mode === "string" && VALID_AUDIO_MODES.includes(mode as AudioMode);
+function isValidMode(mode: unknown): mode is DisplayMode {
+  return typeof mode === "string" && VALID_DISPLAY_MODES.includes(mode as DisplayMode);
 }
