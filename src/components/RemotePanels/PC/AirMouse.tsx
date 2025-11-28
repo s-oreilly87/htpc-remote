@@ -1,4 +1,4 @@
-import {useEffect, useRef, useState} from "react";
+import {useCallback, useEffect, useRef, useState} from "react";
 import {Switch} from "@headlessui/react";
 import {useWakeLock} from "react-screen-wake-lock";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
@@ -6,12 +6,12 @@ import {faLocationCrosshairs} from "@fortawesome/free-solid-svg-icons";
 import {hasRelativeOrientationSensor, type OrientationReading} from "@/utilities/sensors";
 import AirMouseCalibrationModal from "@/components/RemotePanels/PC/AirMouseCalibrationModal";
 import RelativeOrientationSensor from "@/components/Sensors/RelativeOrientationSensor";
-import io from "socket.io-client";
+import {io, type Socket} from "socket.io-client";
 import {sendClickToNutJS, sendDisableCommandToNutJS,} from "@/utilities/http";
 import {CLICK_TYPE} from "@/utilities/constants";
 
 const AirMouse = () => {
-  const [socket, setSocket] = useState(io);
+  const [socket, setSocket] = useState<Socket | null>(null);
   const [enabled, setEnabled] = useState(false);
   const [hasRelOrientationSensor, setHasRelOrientationSensor] = useState(false);
   const [showCalibration, setShowCalibration] = useState(false);
@@ -45,7 +45,7 @@ const AirMouse = () => {
     prevOrientation: OrientationReading | null,
   ) => {
     currentOrientation.current = orientation;
-    if (prevOrientation) {
+    if (prevOrientation && socket) {
       const deltaX = prevOrientation.quaternion[2] - orientation.quaternion[2];
       const deltaY = prevOrientation.quaternion[0] - orientation.quaternion[0];
       if (Math.abs(deltaX) > 0.0005 || Math.abs(deltaY) > 0.0005) {
@@ -60,17 +60,17 @@ const AirMouse = () => {
   const initializeSocket = async () => {
     await fetch(`api/nutjs/initializeSocket`);
     const newSocket = io();
-    socket.on("connect", () => {
+    newSocket.on("connect", () => {
       console.log("Socket connected");
     });
     setSocket(newSocket);
   };
 
-  const closeSocket = async () => {
-    if (socket) {
-      socket.close();
-    }
-  };
+  const closeSocket = useCallback(async () => {
+    socket?.removeAllListeners();
+    socket?.close();
+    setSocket(null);
+  }, [socket]);
 
   const handleEnable = (isEnabled) => {
     // Create websocket connection
@@ -99,7 +99,7 @@ const AirMouse = () => {
     if (!currentOrientation.current) {
       return;
     }
-    socket.emit("setTopLeft", {
+    socket?.emit("setTopLeft", {
       x: currentOrientation.current.quaternion[2],
       y: currentOrientation.current.quaternion[0],
     });
@@ -109,11 +109,17 @@ const AirMouse = () => {
     if (!currentOrientation.current) {
       return;
     }
-    socket.emit("setBottomRight", {
+    socket?.emit("setBottomRight", {
       x: currentOrientation.current.quaternion[2],
       y: currentOrientation.current.quaternion[0],
     });
   };
+
+  useEffect(() => {
+    return () => {
+      void closeSocket();
+    };
+  }, [closeSocket]);
 
   return (
     <>
