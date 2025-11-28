@@ -1,6 +1,12 @@
 import { parseString } from "xml2js";
 
 import { DENON_INPUTS } from "@/components/RemotePanels/Denon/denonConstants";
+import {
+  AudioMode,
+  DisplayMode,
+  LaunchApp,
+  ApiResponse,
+} from "@/constants/htpcControls";
 import { DenonKeystroke } from "@/constants/remotes";
 import { convertKebabToCamel } from "@/utilities/utils";
 
@@ -8,6 +14,9 @@ const ROKU_POST_OPTIONS: RequestInit = {
   method: "POST",
   headers: { "Content-Length": "0" },
 };
+
+const PLATFORM = process.env.NEXT_PUBLIC_PLATFORM ?? "";
+const USE_YDOTOOL = PLATFORM === "LINUX_WAYLAND";
 
 export const DENON_HTTP_COMMANDS = [
   DenonKeystroke.MENU_ON,
@@ -33,6 +42,39 @@ export interface FetchResult<T> {
   data?: T;
   error?: unknown;
   msg?: string;
+}
+
+async function postJson(path: string, body: unknown): Promise<ApiResponse> {
+  try {
+    const response = await fetch(path, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body ?? {}),
+    });
+
+    const data = (await response.json().catch(() => null)) as ApiResponse | null;
+    if (!response.ok) {
+      return { ok: false, error: data?.error ?? response.statusText };
+    }
+
+    return data ?? { ok: true };
+  } catch (error) {
+    console.error(error);
+    return { ok: false, error: error instanceof Error ? error.message : "Unknown error" };
+  }
+}
+
+// ########   HTPC Control (Linux)   ########
+export async function launchApp(app: LaunchApp): Promise<ApiResponse> {
+  return postJson(`/api/linux/launch`, { app });
+}
+
+export async function setDisplayMode(mode: DisplayMode): Promise<ApiResponse> {
+  return postJson(`/api/linux/display`, { mode });
+}
+
+export async function setAudioMode(mode: AudioMode): Promise<ApiResponse> {
+  return postJson(`/api/linux/audio`, { mode });
 }
 
 // ########   Roku Control   ########
@@ -139,7 +181,12 @@ export function sendClickToNutJS(type: string): void {
   fetch(`api/nutjs/click/${type}`, { mode: "no-cors" });
 }
 
-export function sendKeystrokeToNutJS(key: string): void {
+export async function sendKeystrokeToNutJS(key: string): Promise<void> {
+  if (USE_YDOTOOL) {
+    await fetch(`/api/linux/ydotool/${key}`, { mode: "no-cors" });
+    return;
+  }
+
   fetch(`api/nutjs/keystroke/${key}`, { mode: "no-cors" });
 }
 

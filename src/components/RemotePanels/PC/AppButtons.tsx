@@ -1,19 +1,26 @@
-import Constants from "@/utilities/constants";
-import KeypressButton from "@/components/UI/KeypressButton";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faClapperboard, faGamepad, faMusic,} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faClapperboard, faGamepad, faMusic } from "@fortawesome/free-solid-svg-icons";
 
-const AppButtons = (props) => {
+import KeypressButton from "@/components/UI/KeypressButton";
+import Constants from "@/utilities/constants";
+
+function AppButtons(): JSX.Element {
+  const platform = process.env.NEXT_PUBLIC_PLATFORM ?? "";
+  const useKodi = platform === "LINUX" || platform === "LINUX_WAYLAND";
+  const primaryApp = useKodi
+    ? { value: "launchKodi", label: "Kodi" }
+    : { value: "launchPlex", label: "Plex" };
+
   return (
     <div className="flex mx-auto w-full">
       <div className="w-full flex gap-2 justify-center">
         <KeypressButton
           remote={Constants.REMOTE.PC}
           className="btn btn-primary-pc w-1/4 flex flex-col items-center justify-center gap-1"
-          value="launchPlex"
+          value={primaryApp.value}
         >
           <FontAwesomeIcon icon={faClapperboard} className="w-1/3 mx-auto" />
-          Plex
+          {primaryApp.label}
         </KeypressButton>
         <KeypressButton
           remote={Constants.REMOTE.PC}
@@ -34,6 +41,6 @@ const AppButtons = (props) => {
       </div>
     </div>
   );
-};
+}
 
 export default AppButtons;

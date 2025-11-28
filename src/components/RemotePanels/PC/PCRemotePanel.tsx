@@ -6,6 +6,8 @@ import BottomSection from "../Shared/BottomSection";
 import AirMouse from "@/components/RemotePanels/PC/AirMouse";
 
 const remote = Constants.REMOTE.PC;
+const PLATFORM = process.env.NEXT_PUBLIC_PLATFORM ?? "";
+const SHOW_AIR_MOUSE = PLATFORM !== "LINUX_WAYLAND";
 
 function PCRemote() {
   return (
@@ -17,7 +19,7 @@ function PCRemote() {
         <HTPCPresets />
         <MediaButtons remote={remote} />
         <AppButtons />
-        <AirMouse />
+        {SHOW_AIR_MOUSE && <AirMouse />}
       </div>
       <div className="h-50 items-end">
         <BottomSection remote={remote} />
