@@ -10,7 +10,7 @@ const KEYSTROKE = Constants.KEYSTROKE;
 function PCBottomLeftButtons(props) {
 
     const platform = process.env.NEXT_PUBLIC_PLATFORM ?? "";
-    const isKodi = platform === "LINUX" || platform === "LINUX_WAYLAND";
+    const isLinux = platform === "LINUX" || platform === "LINUX_WAYLAND";
 
     return (
       <div className="flex flex-col gap-2 w-full relative justify-evenly">
@@ -18,7 +18,7 @@ function PCBottomLeftButtons(props) {
               <KeypressButton
                   remote={REMOTE.PC}
                   className="w-8 h-8 bg-red-600 shadow-inner shadow-red-500 text-white rounded-md flex justify-center items-center translate-x-2"
-                  value="closeWindow"
+                  value={isLinux ? KEYSTROKE.PC.CLOSE_WINDOW : "closeWindow"}
               >
                   <FontAwesomeIcon
                       width={16}
@@ -43,7 +43,7 @@ function PCBottomLeftButtons(props) {
               <KeypressButton
                   remote={REMOTE.PC}
                   className="btn-secondary w-full flex justify-center items-center"
-                  value={isKodi ? KEYSTROKE.PC.BACKSPACE : KEYSTROKE.PC.ESCAPE}
+                  value={isLinux ? KEYSTROKE.PC.BACKSPACE : KEYSTROKE.PC.ESCAPE}
               >
                   <FontAwesomeIcon icon={faArrowLeft} className="w-6 h-6"/>
               </KeypressButton>

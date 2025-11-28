@@ -38,6 +38,7 @@ export enum PcKeystroke {
   FFWD = "KEYSTROKE_RIGHT",
   NEXT = "KEYSTROKE_NEXT",
   OK = "KEYSTROKE_ENTER",
+  CLOSE_WINDOW = "KEYSTROKE_CLOSE_WINDOW"
 }
 
 export enum RokuKeystroke {

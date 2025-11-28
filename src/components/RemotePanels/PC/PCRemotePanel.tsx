@@ -38,30 +38,32 @@ export default PCRemote;
 
 function KodiButtons() {
     return (
-        <div className="flex mx-auto w-full mb-10">
-            <div className="w-full flex gap-2 justify-center">
+        <div className="flex flex-col gap-4 justify-between items-center mb-10 border border-gray-600 rounded-lg mx-auto p-3 w-fit">
+            <span className="text-white text-md">Kodi</span>
+            <div className="flex gap-2 justify-center">
                 <KeypressButton
                     remote={Constants.REMOTE.PC}
-                    className="btn btn-secondary w-1/5 flex flex-col items-center justify-center gap-1"
+                    className="btn btn-secondary w-20 flex flex-col items-center justify-center gap-1"
                     value="KEYSTROKE_i"
                 >
                     <FontAwesomeIcon icon={faCircleInfo} className="w-1/3 mx-auto" />
                 </KeypressButton>
                 <KeypressButton
                     remote={Constants.REMOTE.PC}
-                    className="btn btn-secondary w-1/5 flex flex-col items-center justify-center gap-1"
+                    className="btn btn-secondary w-20 flex flex-col items-center justify-center gap-1"
                     value="KEYSTROKE_c"
                 >
                     <FontAwesomeIcon icon={faBars} className="w-1/3 mx-auto" />
                 </KeypressButton>
                 <KeypressButton
                     remote={Constants.REMOTE.PC}
-                    className="btn btn-secondary w-1/5 flex flex-col items-center justify-center gap-1"
+                    className="btn btn-secondary w-20 flex flex-col items-center justify-center gap-1"
                     value="KEYSTROKE_o"
                 >
                     <FontAwesomeIcon icon={faStar} className="w-1/3 mx-auto" />
                 </KeypressButton>
             </div>
         </div>
+
     );
 }

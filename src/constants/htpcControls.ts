@@ -18,6 +18,7 @@ export enum KeyAction {
   PlayPause = "play-pause",
   Next = "next",
   Prev = "prev",
+  CloseWindow = "close-window"
 }
 
 export enum LaunchApp {

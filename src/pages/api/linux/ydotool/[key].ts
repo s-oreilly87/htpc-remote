@@ -23,6 +23,7 @@ const KEYSTROKE_TO_ACTION: Partial<Record<string, KeyAction>> = {
     [KEYSTROKE.PC.FFWD]: KeyAction.Right,
     [KEYSTROKE.PC.NEXT]: KeyAction.Next,
     [KEYSTROKE.PC.BACKSPACE]: KeyAction.Back,
+    [KEYSTROKE.PC.CLOSE_WINDOW]: KeyAction.CloseWindow,
 };
 
 const ALT_HOLD_DURATION_MS = 1500;
