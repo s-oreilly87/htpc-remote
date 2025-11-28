@@ -19,7 +19,7 @@ export interface DenonRefreshers {
   masterVol: () => Promise<void>;
   level: (query: string) => Promise<void>;
   onState: (query: string) => Promise<void>;
-  dialogueAdjust: () => Promise<void>;
+  dialogueAdjust: () => Promise<[boolean, number] | undefined>;
 }
 
 export type DenonContextValue = [
