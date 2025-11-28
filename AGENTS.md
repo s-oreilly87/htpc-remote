@@ -1,9 +1,10 @@
-Overview
+## Overview
 
 This document defines how Codex agents should interact with this project.
 The project is a Next.js application for an HTPC remote control, and it must be developed and executed in a consistent, predictable way.
+This is the only Agents file, dont look for others.
 
-The primary goals:
+### The primary goals:
 
 Maintain a TypeScript-first codebase
 
@@ -13,8 +14,8 @@ Clean up remaining JS/TS inconsistencies as agents modify or create files
 
 Avoid unnecessary Next.js boilerplate rewrites
 
-Runtime Expectations
-Development Server
+### Runtime Expectations
+#### Development Server
 
 Agents must always start the application using:
 
@@ -34,16 +35,16 @@ generate production artifacts
 
 rewrite project scripts to add build/start steps
 
-Environment
+#### Environment
 
-Node.js 18+
+Node.js 19+
 
 npm preferred (not yarn/pnpm)
 
 .env.local should be respected if present, but agents should not create or modify environment variables unless explicitly instructed.
 
-Code Requirements
-TypeScript Enforcement
+### Code Requirements
+#### TypeScript Enforcement
 
 The project is transitioning from a JS/TS hybrid to full TypeScript.
 
@@ -63,7 +64,7 @@ Introduce JavaScript files unless explicitly requested
 
 Add TypeScript boilerplate configs unless asked (tsconfig is already in place)
 
-UI / Functionality Scope
+### UI / Functionality Scope
 
 Agents may modify or add:
 
@@ -75,7 +76,7 @@ ECP / Roku / HTPC control endpoints
 
 API routes for backend integrations
 
-Styling (Tailwind preferred if used in project)
+Styling (Tailwind 3, mandatory)
 
 Agents must not:
 
@@ -83,10 +84,10 @@ Introduce design systems, component libraries, or global rewrites unless instruc
 
 Remove existing functionality intentionally or “refactor for style”
 
-Coding Standards
-General
+### Coding Standards
+#### General
 
-Follow existing formatting (Prettier if configured)
+Follow existing formatting (Prettier)
 
 Keep modules focused and small
 
@@ -100,7 +101,20 @@ Server components only where compatible with Next.js App Router
 
 Prefer client components when interacting with DOM or browser APIs
 
-APIs
+Define interfaces for all components - if only needed locally name "Props", if exported name {ComponentName}Props
+
+#### PRs + Commits
+
+Use descriptive commit messages focussing on the MAIN purpose
+
+When creating the PR, use the ORIGINAL prompt for creating title
+
+Followup prompts should have their purpose added as a concise point in description
+
+Never create a PR title/description based only on the most recent prompt (unless its the first and only) 
+
+
+### APIs
 
 Keep API routes minimal
 
@@ -108,8 +122,8 @@ Must return JSON
 
 Use TypeScript for request/response types
 
-Agent Behavior Guidelines
-Allowed
+### Agent Behavior Guidelines
+#### Allowed
 
 Create new components/pages in TS
 
@@ -121,7 +135,7 @@ Improve reliability of remote functions
 
 Add tests if appropriate
 
-Not Allowed
+#### Not Allowed
 
 Running production builds
 
