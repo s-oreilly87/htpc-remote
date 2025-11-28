@@ -27,9 +27,11 @@ export enum LaunchApp {
   Moonlight = "moonlight",
 }
 
-export enum DisplayMode {
-  Res4k60 = "4k60",
-  Res1440p120 = "1440p120",
+export enum DisplayModeForLinux {
+  Res4k60HDR = "4k60",
+  Res4k60SDR = "4k60SDR",
+  Res1440p120HDR = "1440p120",
+  Res1440p120SDR = "1440p120SDR",
 }
 
 export enum AudioMode {
@@ -46,5 +48,5 @@ export interface ApiResponse {
 
 export const VALID_KEY_ACTIONS: readonly KeyAction[] = Object.values(KeyAction);
 export const VALID_LAUNCH_APPS: readonly LaunchApp[] = Object.values(LaunchApp);
-export const VALID_DISPLAY_MODES: readonly DisplayMode[] = Object.values(DisplayMode);
+export const VALID_DISPLAY_MODES: readonly DisplayModeForLinux[] = Object.values(DisplayModeForLinux);
 export const VALID_AUDIO_MODES: readonly AudioMode[] = Object.values(AudioMode);

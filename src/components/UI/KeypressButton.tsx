@@ -4,8 +4,8 @@ import { REMOTE } from "@/utilities/constants";
 import {
   sendDenonCommand,
   sendEventToHTPCEventGhost,
-  sendKeystrokeToNutJS,
-  launchApp,
+  sendKeystrokeToHtpc,
+  launchLinuxApp,
   sendRokuKeypress,
 } from "@/utilities/http";
 import { buttonPress, openPlexampAndroidApp } from "@/utilities/utils";
@@ -26,12 +26,12 @@ const RemoteButton: React.FC<RemoteButtonProps> = ({ remote, children, ...props 
       sendRokuKeypress(event.currentTarget);
     } else if (remote === REMOTE.PC) {
       if (event.currentTarget.value.startsWith("KEYSTROKE")) {
-        sendKeystrokeToNutJS(event.currentTarget.value);
+        sendKeystrokeToHtpc(event.currentTarget.value);
       } else {
         const launchAppName = getLaunchAppFromValue(event.currentTarget.value);
 
         if (USE_LINUX_API && launchAppName) {
-          await launchApp(launchAppName);
+          await launchLinuxApp(launchAppName);
           if (launchAppName === LaunchApp.Plexamp) {
             openPlexampAndroidApp();
           }
@@ -63,7 +63,7 @@ const RemoteButton: React.FC<RemoteButtonProps> = ({ remote, children, ...props 
 
 export default RemoteButton;
 
-function getLaunchAppFromValue(value: string): LaunchApp | undefined {
+export function getLaunchAppFromValue(value: string): LaunchApp | undefined {
   const launchMap: Record<string, LaunchApp> = {
     launchKodi: LaunchApp.Kodi,
     launchMoonlight: LaunchApp.Moonlight,

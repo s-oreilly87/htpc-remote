@@ -3,7 +3,7 @@ import { parseString } from "xml2js";
 import { DENON_INPUTS } from "@/components/RemotePanels/Denon/denonConstants";
 import {
   AudioMode,
-  DisplayMode,
+  DisplayModeForLinux,
   LaunchApp,
   ApiResponse,
 } from "@/constants/htpcControls";
@@ -65,15 +65,15 @@ async function postJson(path: string, body: unknown): Promise<ApiResponse> {
 }
 
 // ########   HTPC Control (Linux)   ########
-export async function launchApp(app: LaunchApp): Promise<ApiResponse> {
+export async function launchLinuxApp(app: LaunchApp): Promise<ApiResponse> {
   return postJson(`/api/linux/launch`, { app });
 }
 
-export async function setDisplayMode(mode: DisplayMode): Promise<ApiResponse> {
+export async function setLinuxDisplayMode(mode: DisplayModeForLinux): Promise<ApiResponse> {
   return postJson(`/api/linux/display`, { mode });
 }
 
-export async function setAudioMode(mode: AudioMode): Promise<ApiResponse> {
+export async function setLinuxAudioMode(mode: AudioMode): Promise<ApiResponse> {
   return postJson(`/api/linux/audio`, { mode });
 }
 
@@ -181,7 +181,7 @@ export function sendClickToNutJS(type: string): void {
   fetch(`api/nutjs/click/${type}`, { mode: "no-cors" });
 }
 
-export async function sendKeystrokeToNutJS(key: string): Promise<void> {
+export async function sendKeystrokeToHtpc(key: string): Promise<void> {
   if (USE_YDOTOOL) {
     await fetch(`/api/linux/ydotool/${key}`, { mode: "no-cors" });
     return;

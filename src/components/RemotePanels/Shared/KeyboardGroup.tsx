@@ -5,7 +5,7 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faKeyboard, faMagnifyingGlass, faXmark,} from "@fortawesome/free-solid-svg-icons";
 import {faWindows} from "@fortawesome/free-brands-svg-icons";
 import KeypressButton from "@/components/UI/KeypressButton";
-import {sendKeystrokeToNutJS, sendRokuKeypress, sendRokuSearchQuery,} from "@/utilities/http";
+import {sendKeystrokeToHtpc, sendRokuKeypress, sendRokuSearchQuery,} from "@/utilities/http";
 import {sleep} from "@/utilities/utils";
 import {throttle} from "lodash";
 import {lowerCase} from "lodash/string";
@@ -42,7 +42,7 @@ function KeyboardGroup({ remote }) {
 
     if (remote === REMOTE.PC) {
       if (!inputExpanded) {
-        sendKeystrokeToNutJS(KEYSTROKE[remote].WIN_KEY);
+        sendKeystrokeToHtpc(KEYSTROKE[remote].WIN_KEY);
         setInputExpanded(!inputExpanded);
         startMenuOpen.current = true;
         return;
@@ -50,10 +50,10 @@ function KeyboardGroup({ remote }) {
 
       // if user has typed - need to send an extra winkey to clear field so second one closes start menu
       if (hasTyped.current) {
-        sendKeystrokeToNutJS(KEYSTROKE[remote].WIN_KEY);
+        sendKeystrokeToHtpc(KEYSTROKE[remote].WIN_KEY);
       }
       if (startMenuOpen.current) {
-        sendKeystrokeToNutJS(KEYSTROKE[remote].WIN_KEY);
+        sendKeystrokeToHtpc(KEYSTROKE[remote].WIN_KEY);
       }
     }
     setInputExpanded(!inputExpanded);
@@ -72,7 +72,7 @@ function KeyboardGroup({ remote }) {
       } else if (key === KEYSTROKE.KEYS.ENTER) {
         key = KEYSTROKE[remote].ENTER;
       }
-      sendKeystrokeToNutJS(key);
+      sendKeystrokeToHtpc(key);
     }
   };
 
@@ -169,7 +169,7 @@ function KeyboardGroup({ remote }) {
           sendRokuKeypress({ value: KEYSTROKE.ROKU.BACKSPACE });
         }
       } else if (remote === REMOTE.PC) {
-        sendKeystrokeToNutJS(KEYSTROKE.PC.BACKSPACE);
+        sendKeystrokeToHtpc(KEYSTROKE.PC.BACKSPACE);
       }
     }
   };

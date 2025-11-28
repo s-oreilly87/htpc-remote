@@ -2,13 +2,13 @@ import type { NextApiRequest, NextApiResponse } from "next";
 
 import {
   ApiResponse,
-  DisplayMode,
+  DisplayModeForLinux,
   VALID_DISPLAY_MODES,
 } from "@/constants/htpcControls";
 import { runCommand } from "../lib/command";
 
 type DisplayBody = {
-  mode?: DisplayMode | string;
+  mode?: DisplayModeForLinux | string;
 };
 
 export default async function handler(
@@ -37,6 +37,6 @@ export default async function handler(
   }
 }
 
-function isValidMode(mode: unknown): mode is DisplayMode {
-  return typeof mode === "string" && VALID_DISPLAY_MODES.includes(mode as DisplayMode);
+function isValidMode(mode: unknown): mode is DisplayModeForLinux {
+  return typeof mode === "string" && VALID_DISPLAY_MODES.includes(mode as DisplayModeForLinux);
 }

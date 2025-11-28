@@ -1,18 +1,23 @@
-import {AUDIO_MODES_FOR_SELECT, DISPLAY_MODES_FOR_SELECT, REMOTE, ROKU_APPS,} from "@/utilities/constants";
-import KeypressButton from "@/components/UI/KeypressButton";
+import {AUDIO_MODES_FOR_SELECT, DISPLAY_MODES_FOR_SELECT_EG, REMOTE, ROKU_APPS,} from "@/utilities/constants";
+import KeypressButton, {getLaunchAppFromValue} from "@/components/UI/KeypressButton";
 import CustomModesCollapse from "./CustomModesCollapse";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faGamepad, faMusic, faTv} from "@fortawesome/free-solid-svg-icons";
 import {
+    launchLinuxApp,
     sendDenonCommand,
     sendEventToGameStreamEventGhost,
     sendEventToHTPCEventGhost,
-    sendRokuLaunchCommand,
+    sendRokuLaunchCommand, setLinuxDisplayMode,
 } from "@/utilities/http";
 import {useState} from "react";
 import {openPlexampAndroidApp} from "@/utilities/utils";
+import {DISPLAY_MODES_FOR_SELECT_LINUX} from "@/components/RemotePanels/PC/pcConstants";
 
 const remote = REMOTE.PC;
+
+const platform = process.env.NEXT_PUBLIC_PLATFORM ?? '';
+const isLinux = platform === "LINUX" || platform === "LINUX_WAYLAND";
 
 const presetToEffectsMap = {
   // presetPCStereo: {
@@ -35,23 +40,23 @@ const presetToEffectsMap = {
   // },
   presetGamestream4K60: {
     audioMode: AUDIO_MODES_FOR_SELECT.ATMOS,
-    displayModeHTPC: DISPLAY_MODES_FOR_SELECT.HTPC_4K60,
+    displayModeHTPC: isLinux ? DISPLAY_MODES_FOR_SELECT_LINUX.HTPC_4K60_HDR : DISPLAY_MODES_FOR_SELECT_EG.HTPC_4K60,
     displayModeGamestreamEventGhost: 'displayDummy4K60',
     rokuApp: ROKU_APPS.HDMI.HDMI4,
-    // launchApp: 'launchMoonlight'
+    launchApp: 'launchMoonlight'
   },
   presetGamestream1440p120: {
     audioMode: AUDIO_MODES_FOR_SELECT.ATMOS,
-    displayModeHTPC: DISPLAY_MODES_FOR_SELECT.HTPC_1440p120,
+    displayModeHTPC: isLinux ? DISPLAY_MODES_FOR_SELECT_LINUX.HTPC_1440P120_HDR : DISPLAY_MODES_FOR_SELECT_EG.HTPC_1440p120,
     displayModeGamestreamEventGhost: 'displayDummy1440p120',
     rokuApp: ROKU_APPS.HDMI.HDMI4,
-    // launchApp: 'launchMoonlight'
+    launchApp: 'launchMoonlight'
   },
   presetWatchPlex: {
     audioMode: AUDIO_MODES_FOR_SELECT.ATMOS,
-    displayModeHTPC: DISPLAY_MODES_FOR_SELECT.HTPC_4K60,
+    displayModeHTPC: isLinux ? DISPLAY_MODES_FOR_SELECT_LINUX.HTPC_4K60_HDR : DISPLAY_MODES_FOR_SELECT_EG.HTPC_4K60,
     rokuApp: ROKU_APPS.HDMI.HDMI4,
-    launchApp: 'launchPlex'
+    launchApp: isLinux ? 'launchKodi' : 'launchPlex'
   },
   presetPlexampStereo: {
     audioMode: AUDIO_MODES_FOR_SELECT.STEREO,
@@ -65,49 +70,161 @@ const presetToEffectsMap = {
   },
 };
 
+let presetInProgress = false;
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 function AudioVideoPresets() {
   const [selectedAudioMode, setSelectedAudioMode] = useState(
     AUDIO_MODES_FOR_SELECT.PLACEHOLDER,
   );
   const [selectedDisplayMode, setSelectedDisplayMode] = useState(
-    DISPLAY_MODES_FOR_SELECT.PLACEHOLDER,
+    DISPLAY_MODES_FOR_SELECT_EG.PLACEHOLDER,
   );
 
-  const handleClick = async (event) => {
-    const htpcEventGhostCommand = event.currentTarget.value;
-    const preset = presetToEffectsMap[htpcEventGhostCommand];
 
-    if (preset.rokuApp) {
-      sendRokuLaunchCommand({ value: preset.rokuApp.id });
-    }
+    const handleClick = async (event) => {
+        if (presetInProgress) {
+            console.log("Preset already running, ignoring click");
+            return;
+        }
 
-    if (preset.displayModeGamestreamEventGhost) {
-      await sendEventToGameStreamEventGhost({ value: preset.displayModeGamestreamEventGhost });
-    }
+        presetInProgress = true;
+        try {
+            const htpcEventGhostCommand = event.currentTarget.value;
+            const preset = presetToEffectsMap[htpcEventGhostCommand];
+            console.log(htpcEventGhostCommand, preset);
 
-    if (preset.displayModeHTPC) {
-      setSelectedDisplayMode(preset.displayModeHTPC);
-    }
-    sendEventToHTPCEventGhost({ value: htpcEventGhostCommand }).then(() => {
-      setTimeout(() => {
-        sendDenonCommand({ value: preset.audioMode.denonCmd });
-      }, 2000);
-    });
+            // 1. Android app (this is just your phone, not KWin-sensitive)
+            if (preset.androidApp) {
+                try {
+                    openPlexampAndroidApp();
+                } catch (e) {
+                    console.log(e);
+                }
+            }
 
-    setSelectedAudioMode(preset.audioMode);
+            // 2. Roku input / app first: wake TV + select HDMI
+            if (preset.rokuApp) {
+                console.log("have preset rokuApp:", preset.rokuApp);
+                sendRokuLaunchCommand({ value: preset.rokuApp.id });
+                // give TV time to power on / lock HDMI
+                await sleep(2000);
+            }
 
-    if (preset.launchApp) {
-      await sendEventToHTPCEventGhost({ value: preset.launchApp });
-    }
+            // 3. HTPC display mode (Linux → kscreen-doctor, else → EventGhost)
+            if (preset.displayModeHTPC) {
+                console.log("have preset displayModeHtpc:", preset.displayModeHTPC);
+                setSelectedDisplayMode(preset.displayModeHTPC);
 
-    if (preset.androidApp) {
-      try {
-        openPlexampAndroidApp();
-      } catch (e) {
-        console.log(e)
+                if (isLinux) {
+                    await setLinuxDisplayMode(preset.displayModeHTPC.value);
+                } else {
+                    await sendEventToHTPCEventGhost({ value: htpcEventGhostCommand });
+                }
+
+                // critical: let KWin settle after mode + scale change
+                await sleep(3000); // tune: 2500–4000ms depending on how flaky it is
+            }
+
+            // 4. Audio mode
+            if (preset.audioMode) {
+                setSelectedAudioMode(preset.audioMode);
+                if (preset.audioMode.denonCmd) {
+                    console.log("sending denon command for:", preset.audioMode);
+                    await sendDenonCommand({ value: preset.audioMode.denonCmd });
+                    await sleep(500); // small pause before launching app
+                }
+                // TODO: set HTPC audio mode here if you add that path
+            }
+
+            // 5. Launch app on HTPC
+            await maybeLaunchApp(preset);
+
+            // 6. GameStream display mode on Windows (does not affect KWin)
+            if (preset.displayModeGamestreamEventGhost) {
+                console.log(
+                    "have preset GameStreamEg: " + preset.displayModeGamestreamEventGhost
+                );
+                await sendEventToGameStreamEventGhost({
+                    value: preset.displayModeGamestreamEventGhost,
+                });
+            }
+        } finally {
+            presetInProgress = false;
+        }
+    };
+
+
+  // const handleClick = async (event) => {
+  //   const htpcEventGhostCommand = event.currentTarget.value;
+  //   const preset = presetToEffectsMap[htpcEventGhostCommand];
+  //     console.log(htpcEventGhostCommand, preset)
+  //
+  //     if (preset.androidApp) {
+  //         try {
+  //             openPlexampAndroidApp();
+  //         } catch (e) {
+  //             console.log(e)
+  //         }
+  //     }
+  //
+  //   if (preset.rokuApp) {
+  //       console.log('have preset rokuApp: ');
+  //       console.log(preset.rokuApp)
+  //     sendRokuLaunchCommand({ value: preset.rokuApp.id });
+  //   }
+  //
+  //     if (preset.displayModeHTPC) {
+  //         console.log('have preset displayModeHtpc: ')
+  //         console.log(preset.displayModeHTPC);
+  //         console.log(htpcEventGhostCommand)
+  //
+  //         setSelectedDisplayMode(preset.displayModeHTPC);
+  //
+  //         const displayModeCommandCallback = isLinux
+  //             ? () => setLinuxDisplayMode(preset.displayModeHTPC.value)
+  //             : () => sendEventToHTPCEventGhost({ value: htpcEventGhostCommand });
+  //
+  //         displayModeCommandCallback().then(() => {
+  //             setTimeout(() => {
+  //                 if (preset.audioMode.denonCmd) {
+  //                     console.log('sending denon command for: ')
+  //                     console.log(preset.audioMode);
+  //                     sendDenonCommand({ value: preset.audioMode.denonCmd });
+  //                 }
+  //                  maybeLaunchApp(preset);
+  //             }, 2000);
+  //         });
+  //     } else {
+  //         await maybeLaunchApp(preset);
+  //     }
+  //
+  //     if (preset.audioMode) {
+  //         setSelectedAudioMode(preset.audioMode);
+  //         // TODO: should be setting htpc audio mode here too!?
+  //     }
+  //
+  //
+  //     if (preset.displayModeGamestreamEventGhost) {
+  //       console.log('have preset GameSTreamEg: ' + preset.displayModeGamestreamEventGhost);
+  //       // TODO: figure out for gamestream Linux
+  //       await sendEventToGameStreamEventGhost({ value: preset.displayModeGamestreamEventGhost });
+  //   }
+  //
+  //
+  // };
+
+  async function maybeLaunchApp(preset) {
+      if (preset.launchApp) {
+          console.log('have preset launchAPp: ' + preset.launchApp);
+          console.log(getLaunchAppFromValue(preset.launchApp));
+
+          isLinux
+              ? await launchLinuxApp(getLaunchAppFromValue(preset.launchApp))
+              : await sendEventToHTPCEventGhost({ value: preset.launchApp });
       }
-    }
-  };
+  }
 
   return (
     <div className="flex flex-col gap-2">

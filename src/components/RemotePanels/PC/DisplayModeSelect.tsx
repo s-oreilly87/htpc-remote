@@ -1,20 +1,27 @@
-import {sendEventToHTPCEventGhost, sendRokuLaunchCommand} from "@/utilities/http";
+import {sendEventToHTPCEventGhost, sendRokuLaunchCommand, setLinuxDisplayMode} from "@/utilities/http";
 import {Listbox, Transition} from "@headlessui/react";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faCheck, faChevronDown} from "@fortawesome/free-solid-svg-icons";
 import {Fragment} from "react";
-import {DISPLAY_MODES_FOR_SELECT} from "@/utilities/constants";
+import {DISPLAY_MODES_FOR_SELECT_EG} from "@/utilities/constants";
+import {DISPLAY_MODES_FOR_SELECT_LINUX} from "@/components/RemotePanels/PC/pcConstants";
 
 function DisplayModeSelect({ selectedDisplayMode, setSelectedDisplayMode }) {
+  const platform = process.env.NEXT_PUBLIC_PLATFORM ?? '';
+  const isLinux = platform === "LINUX" || platform === "LINUX_WAYLAND";
+  const displayModesObject = isLinux ? DISPLAY_MODES_FOR_SELECT_LINUX : DISPLAY_MODES_FOR_SELECT_EG;
+
   const handleSelect = (selectedDisplayMode) => {
     setSelectedDisplayMode(selectedDisplayMode);
-    sendEventToHTPCEventGhost({ value: selectedDisplayMode.value });
+
+    isLinux ? setLinuxDisplayMode(selectedDisplayMode.value) : sendEventToHTPCEventGhost({ value: selectedDisplayMode.value });
+
     if (selectedDisplayMode.rokuChannel) {
-      sendRokuLaunchCommand(selectedDisplayMode.rokuChannel);
+        sendRokuLaunchCommand(selectedDisplayMode.rokuChannel);
     }
   };
 
-  return (
+    return (
     <div className="flex w-4/5 mx-auto">
       <Listbox value={selectedDisplayMode} by="key" onChange={handleSelect}>
         <div className="relative mt-1 w-full">
@@ -37,7 +44,7 @@ function DisplayModeSelect({ selectedDisplayMode, setSelectedDisplayMode }) {
             leaveTo="opacity-0"
           >
             <Listbox.Options className="fixed z-40 mt-1 max-h-100 left-[12%] right-[12%] max-w-[440px] overflow-auto rounded-md bg-gray-700 py-1 text-base text-center shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-              {Object.values(DISPLAY_MODES_FOR_SELECT).map((mode) => (
+              {Object.values(displayModesObject).map((mode) => (
                 <Listbox.Option
                   key={mode.key}
                   value={mode}

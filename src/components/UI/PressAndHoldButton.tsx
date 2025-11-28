@@ -5,7 +5,7 @@ import {
   sendDenonCommand,
   sendDenonQuery,
   sendEventToHTPCEventGhost,
-  sendKeystrokeToNutJS,
+  sendKeystrokeToHtpc,
   sendRokuKeydown,
   sendRokuKeypress,
   sendRokuKeyup,
@@ -39,7 +39,7 @@ const PressAndHoldButton: React.FC<PressAndHoldButtonProps> = ({
 
   const pcSimulatePressAndHoldStart = (button: ValueButton & HTMLButtonElement) => {
     if (button.value.startsWith("KEYSTROKE")) {
-      sendKeystrokeToNutJS(button.value);
+      sendKeystrokeToHtpc(button.value);
     } else {
       sendEventToHTPCEventGhost(button);
     }
@@ -48,7 +48,7 @@ const PressAndHoldButton: React.FC<PressAndHoldButtonProps> = ({
     setTouchTimer(
       setTimeout(() => {
         pressAndHoldVibration();
-        setSendKeyInterval(setInterval(() => sendKeystrokeToNutJS(button.value), 150));
+        setSendKeyInterval(setInterval(() => sendKeystrokeToHtpc(button.value), 150));
       }, 500),
     );
   };
