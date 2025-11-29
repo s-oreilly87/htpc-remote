@@ -2,14 +2,14 @@ import React, { useState } from "react";
 
 import { REMOTE } from "@/utilities/constants";
 import {
-  sendDenonCommand,
-  sendEventToHTPCEventGhost,
-  sendKeystrokeToHtpc,
-  launchLinuxApp,
-  sendRokuKeypress,
+    sendDenonCommand,
+    sendEventToHTPCEventGhost,
+    sendKeystrokeToHtpc,
+    launchLinuxApp,
+    sendRokuKeypress, setLinuxDisplayMode,
 } from "@/utilities/http";
-import { buttonPress, openPlexampAndroidApp } from "@/utilities/utils";
-import { LinuxLaunchAppCommand } from "@/constants/htpcControls";
+import {buttonPress, openPlexampAndroidApp, sleep} from "@/utilities/utils";
+import {LinuxDisplayModeCommand, LinuxLaunchAppCommand} from "@/constants/htpcControls";
 
 interface RemoteButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   remote: (typeof REMOTE)[keyof typeof REMOTE];
@@ -31,6 +31,10 @@ const RemoteButton: React.FC<RemoteButtonProps> = ({ remote, children, ...props 
         const launchAppName = getLaunchAppFromValue(event.currentTarget.value);
 
         if (USE_LINUX_API && launchAppName) {
+            if (launchAppName === LinuxLaunchAppCommand.Kodi) {
+                await setLinuxDisplayMode(LinuxDisplayModeCommand.Res4k60HDR);
+                await sleep(2000)
+            }
           await launchLinuxApp(launchAppName);
           if (launchAppName === LinuxLaunchAppCommand.Plexamp) {
             openPlexampAndroidApp();

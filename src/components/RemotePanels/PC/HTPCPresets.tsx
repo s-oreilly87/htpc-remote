@@ -82,7 +82,6 @@ function AudioVideoPresets() {
     DISPLAY_MODES_FOR_SELECT_EG.PLACEHOLDER,
   );
 
-
     const handleClick = async (event) => {
         if (presetInProgress) {
             console.log("Preset already running, ignoring click");
