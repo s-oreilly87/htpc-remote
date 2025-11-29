@@ -17,7 +17,7 @@ function DisplayModeSelect({ selectedDisplayMode, setSelectedDisplayMode }) {
     isLinux ? setLinuxDisplayMode(selectedDisplayMode.value) : sendEventToHTPCEventGhost({ value: selectedDisplayMode.value });
 
     if (selectedDisplayMode.rokuChannel) {
-        sendRokuLaunchCommand(selectedDisplayMode.rokuChannel);
+        sendRokuLaunchCommand({ value: selectedDisplayMode.rokuChannel.id });
     }
   };
 

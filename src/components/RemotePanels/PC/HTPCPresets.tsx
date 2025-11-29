@@ -93,9 +93,8 @@ function AudioVideoPresets() {
         try {
             const htpcEventGhostCommand = event.currentTarget.value;
             const preset = presetToEffectsMap[htpcEventGhostCommand];
-            console.log(htpcEventGhostCommand, preset);
 
-            // 1. Android app (this is just your phone, not KWin-sensitive)
+            // 1. Android app
             if (preset.androidApp) {
                 try {
                     openPlexampAndroidApp();
@@ -106,7 +105,6 @@ function AudioVideoPresets() {
 
             // 2. Roku input / app first: wake TV + select HDMI
             if (preset.rokuApp) {
-                console.log("have preset rokuApp:", preset.rokuApp);
                 sendRokuLaunchCommand({ value: preset.rokuApp.id });
                 // give TV time to power on / lock HDMI
                 await sleep(2000);
@@ -114,7 +112,6 @@ function AudioVideoPresets() {
 
             // 3. HTPC display mode (Linux → kscreen-doctor, else → EventGhost)
             if (preset.displayModeHTPC) {
-                console.log("have preset displayModeHtpc:", preset.displayModeHTPC);
                 setSelectedDisplayMode(preset.displayModeHTPC);
 
                 if (isLinux) {
@@ -131,7 +128,6 @@ function AudioVideoPresets() {
             if (preset.audioMode) {
                 setSelectedAudioMode(preset.audioMode);
                 if (preset.audioMode.denonCmd) {
-                    console.log("sending denon command for:", preset.audioMode);
                     await sendDenonCommand({ value: preset.audioMode.denonCmd });
                     await sleep(500); // small pause before launching app
                 }
@@ -143,9 +139,6 @@ function AudioVideoPresets() {
 
             // 6. GameStream display mode on Windows (does not affect KWin)
             if (preset.displayModeGamestreamEventGhost) {
-                console.log(
-                    "have preset GameStreamEg: " + preset.displayModeGamestreamEventGhost
-                );
                 await sendEventToGameStreamEventGhost({
                     value: preset.displayModeGamestreamEventGhost,
                 });
@@ -154,66 +147,6 @@ function AudioVideoPresets() {
             presetInProgress = false;
         }
     };
-
-
-  // const handleClick = async (event) => {
-  //   const htpcEventGhostCommand = event.currentTarget.value;
-  //   const preset = presetToEffectsMap[htpcEventGhostCommand];
-  //     console.log(htpcEventGhostCommand, preset)
-  //
-  //     if (preset.androidApp) {
-  //         try {
-  //             openPlexampAndroidApp();
-  //         } catch (e) {
-  //             console.log(e)
-  //         }
-  //     }
-  //
-  //   if (preset.rokuApp) {
-  //       console.log('have preset rokuApp: ');
-  //       console.log(preset.rokuApp)
-  //     sendRokuLaunchCommand({ value: preset.rokuApp.id });
-  //   }
-  //
-  //     if (preset.displayModeHTPC) {
-  //         console.log('have preset displayModeHtpc: ')
-  //         console.log(preset.displayModeHTPC);
-  //         console.log(htpcEventGhostCommand)
-  //
-  //         setSelectedDisplayMode(preset.displayModeHTPC);
-  //
-  //         const displayModeCommandCallback = isLinux
-  //             ? () => setLinuxDisplayMode(preset.displayModeHTPC.value)
-  //             : () => sendEventToHTPCEventGhost({ value: htpcEventGhostCommand });
-  //
-  //         displayModeCommandCallback().then(() => {
-  //             setTimeout(() => {
-  //                 if (preset.audioMode.denonCmd) {
-  //                     console.log('sending denon command for: ')
-  //                     console.log(preset.audioMode);
-  //                     sendDenonCommand({ value: preset.audioMode.denonCmd });
-  //                 }
-  //                  maybeLaunchApp(preset);
-  //             }, 2000);
-  //         });
-  //     } else {
-  //         await maybeLaunchApp(preset);
-  //     }
-  //
-  //     if (preset.audioMode) {
-  //         setSelectedAudioMode(preset.audioMode);
-  //         // TODO: should be setting htpc audio mode here too!?
-  //     }
-  //
-  //
-  //     if (preset.displayModeGamestreamEventGhost) {
-  //       console.log('have preset GameSTreamEg: ' + preset.displayModeGamestreamEventGhost);
-  //       // TODO: figure out for gamestream Linux
-  //       await sendEventToGameStreamEventGhost({ value: preset.displayModeGamestreamEventGhost });
-  //   }
-  //
-  //
-  // };
 
   async function maybeLaunchApp(preset) {
       if (preset.launchApp) {
