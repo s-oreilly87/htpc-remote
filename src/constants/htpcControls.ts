@@ -1,4 +1,4 @@
-export enum KeyAction {
+export enum LinuxKeyAction {
   Type = "type",
   Up = "up",
   Down = "down",
@@ -21,24 +21,24 @@ export enum KeyAction {
   CloseWindow = "close-window"
 }
 
-export enum LaunchApp {
+export enum LinuxLaunchAppCommand {
   Kodi = "kodi",
   Plexamp = "plexamp",
   Moonlight = "moonlight",
 }
 
-export enum DisplayModeForLinux {
+export enum LinuxDisplayModeCommand {
   Res4k60HDR = "4k60",
   Res4k60SDR = "4k60SDR",
   Res1440p120HDR = "1440p120",
   Res1440p120SDR = "1440p120SDR",
 }
 
-export enum AudioMode {
+export enum LinuxAudioModeCommand {
   AnalogStereo = "analog-stereo",
   HdmiStereo = "hdmi-stereo",
-  Surround51 = "surround51-hdmi2",
-  Surround71 = "surround71-hdmi2",
+  Surround51 = "surround51-hdmi",
+  Surround71 = "surround71-hdmi ",
 }
 
 export interface ApiResponse {
@@ -46,7 +46,7 @@ export interface ApiResponse {
   error?: string;
 }
 
-export const VALID_KEY_ACTIONS: readonly KeyAction[] = Object.values(KeyAction);
-export const VALID_LAUNCH_APPS: readonly LaunchApp[] = Object.values(LaunchApp);
-export const VALID_DISPLAY_MODES: readonly DisplayModeForLinux[] = Object.values(DisplayModeForLinux);
-export const VALID_AUDIO_MODES: readonly AudioMode[] = Object.values(AudioMode);
+export const VALID_KEY_ACTIONS: readonly LinuxKeyAction[] = Object.values(LinuxKeyAction);
+export const VALID_LAUNCH_APPS: readonly LinuxLaunchAppCommand[] = Object.values(LinuxLaunchAppCommand);
+export const VALID_DISPLAY_MODES: readonly LinuxDisplayModeCommand[] = Object.values(LinuxDisplayModeCommand);
+export const VALID_AUDIO_MODES: readonly LinuxAudioModeCommand[] = Object.values(LinuxAudioModeCommand);

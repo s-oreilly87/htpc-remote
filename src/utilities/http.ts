@@ -2,9 +2,9 @@ import { parseString } from "xml2js";
 
 import { DENON_INPUTS } from "@/components/RemotePanels/Denon/denonConstants";
 import {
-  AudioMode,
-  DisplayModeForLinux,
-  LaunchApp,
+  LinuxAudioModeCommand,
+  LinuxDisplayModeCommand,
+  LinuxLaunchAppCommand,
   ApiResponse,
 } from "@/constants/htpcControls";
 import { DenonKeystroke } from "@/constants/remotes";
@@ -65,15 +65,15 @@ async function postJson(path: string, body: unknown): Promise<ApiResponse> {
 }
 
 // ########   HTPC Control (Linux)   ########
-export async function launchLinuxApp(app: LaunchApp): Promise<ApiResponse> {
+export async function launchLinuxApp(app: LinuxLaunchAppCommand): Promise<ApiResponse> {
   return postJson(`/api/linux/launch`, { app });
 }
 
-export async function setLinuxDisplayMode(mode: DisplayModeForLinux): Promise<ApiResponse> {
+export async function setLinuxDisplayMode(mode: LinuxDisplayModeCommand): Promise<ApiResponse> {
   return postJson(`/api/linux/display`, { mode });
 }
 
-export async function setLinuxAudioMode(mode: AudioMode): Promise<ApiResponse> {
+export async function setLinuxAudioMode(mode: LinuxAudioModeCommand): Promise<ApiResponse> {
   return postJson(`/api/linux/audio`, { mode });
 }
 

@@ -10,7 +10,7 @@ import {
   SYSTEM_KEYS,
 } from "@/constants/remotes";
 import {
-  AUDIO_MODES_FOR_SELECT as PC_AUDIO_MODES,
+  AUDIO_MODES_FOR_SELECT_EG as PC_AUDIO_MODES,
   DISPLAY_MODES_FOR_SELECT_EG,
 } from "@/components/RemotePanels/PC/pcConstants";
 import {

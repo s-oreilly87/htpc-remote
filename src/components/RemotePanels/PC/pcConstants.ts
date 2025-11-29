@@ -1,7 +1,8 @@
 import { RemoteType } from "@/constants/remotes";
 import { URL_ENCODED_SYMBOLS } from "@/constants/encoding";
 import { ROKU_APPS } from "@/components/RemotePanels/Roku/rokuConstants";
-import {DisplayModeForLinux} from "@/constants/htpcControls";
+import {LinuxAudioModeCommand, LinuxDisplayModeCommand} from "@/constants/htpcControls";
+import {DENON_AUDIO_MODES} from "@/utilities/constants";
 
 export interface SelectOption {
   key: string;
@@ -12,7 +13,7 @@ export interface SelectOption {
   rokuChannel?: { id: string; label: string };
 }
 
-export const AUDIO_MODES_FOR_SELECT: Record<string, SelectOption> = {
+export const AUDIO_MODES_FOR_SELECT_EG: Record<string, SelectOption> = {
   PLACEHOLDER: {
     key: "PLACEHOLDER",
     label: "Select Audio Mode",
@@ -51,6 +52,39 @@ export const AUDIO_MODES_FOR_SELECT: Record<string, SelectOption> = {
   },
 };
 
+export const AUDIO_MODES_FOR_SELECT_LINUX: Record<string, SelectOption> = {
+    PLACEHOLDER: {
+        key: "PLACEHOLDER",
+        label: "Select Audio Mode",
+        value: "",
+        disabled: true,
+    },
+    PURE: {
+        key: "PURE",
+        label: "Pure Stereo 24/192 (no sub)",
+        value: LinuxAudioModeCommand.HdmiStereo,
+        denonCmd: "MSQUICK1",
+    },
+    STEREO: {
+        key: "STEREO",
+        label: "Stereo (Atmos w/ sub)",
+        value: LinuxAudioModeCommand.Surround51,
+        denonCmd: 'MSQUICK2'
+    },
+    DOLBY_UPMIX: {
+        key: "DOLBY_UPMIX",
+        label: "Stereo (Dolby Surround Upmix)",
+        value: LinuxAudioModeCommand.HdmiStereo,
+        denonCmd: 'MSQUICK2'
+    },
+    SURROUND51: {
+        key: "SURROUND51",
+        label: "5.1 Surround",
+        value: LinuxAudioModeCommand.Surround51,
+        denonCmd: 'MSQUICK3'
+    }
+};
+
 export const DISPLAY_MODES_FOR_SELECT_EG: Record<string, SelectOption> = {
   PLACEHOLDER: {
     key: "PLACEHOLDER",
@@ -87,25 +121,25 @@ export const DISPLAY_MODES_FOR_SELECT_LINUX: Record<string, SelectOption> = {
     },
     HTPC_4K60_HDR: {
         key: "HTPC_4K60_HDR",
-        value: DisplayModeForLinux.Res4k60HDR,
+        value: LinuxDisplayModeCommand.Res4k60HDR,
         label: "HTPC (4K60 HDR)",
         rokuChannel: ROKU_APPS.HDMI.HDMI4,
     },
     HTPC_1440p120_HDR: {
         key: "HTPC_1440p120_HDR",
-        value: DisplayModeForLinux.Res1440p120HDR,
+        value: LinuxDisplayModeCommand.Res1440p120HDR,
         label: "HTPC (1440p120 HDR)",
         rokuChannel: ROKU_APPS.HDMI.HDMI4,
     },
     HTPC_4K60_SDR: {
         key: "HTPC_4K60_SDR",
-        value: DisplayModeForLinux.Res4k60SDR,
+        value: LinuxDisplayModeCommand.Res4k60SDR,
         label: "HTPC (4K60 SDR)",
         rokuChannel: ROKU_APPS.HDMI.HDMI4,
     },
     HTPC_1440p120_SDR: {
         key: "HTPC_1440p120_SDR",
-        value: DisplayModeForLinux.Res1440p120SDR,
+        value: LinuxDisplayModeCommand.Res1440p120SDR,
         label: "HTPC (1440p120 SDR)",
         rokuChannel: ROKU_APPS.HDMI.HDMI4,
     },

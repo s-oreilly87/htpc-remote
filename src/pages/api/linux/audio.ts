@@ -1,10 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 
-import { ApiResponse, AudioMode, VALID_AUDIO_MODES } from "@/constants/htpcControls";
+import { ApiResponse, LinuxAudioModeCommand, VALID_AUDIO_MODES } from "@/constants/htpcControls";
 import { runCommand } from "../lib/command";
 
 type AudioBody = {
-  mode?: AudioMode | string;
+  mode?: LinuxAudioModeCommand | string;
 };
 
 export default async function handler(
@@ -18,6 +18,7 @@ export default async function handler(
   }
 
   const { mode } = (req.body ?? {}) as AudioBody;
+
   if (!isValidMode(mode)) {
     res.status(400).json({ ok: false, error: "Invalid mode" });
     return;
@@ -33,6 +34,6 @@ export default async function handler(
   }
 }
 
-function isValidMode(mode: unknown): mode is AudioMode {
-  return typeof mode === "string" && VALID_AUDIO_MODES.includes(mode as AudioMode);
+function isValidMode(mode: unknown): mode is LinuxAudioModeCommand {
+  return typeof mode === "string" && VALID_AUDIO_MODES.includes(mode as LinuxAudioModeCommand);
 }

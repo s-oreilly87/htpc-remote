@@ -9,7 +9,7 @@ import {
   sendRokuKeypress,
 } from "@/utilities/http";
 import { buttonPress, openPlexampAndroidApp } from "@/utilities/utils";
-import { LaunchApp } from "@/constants/htpcControls";
+import { LinuxLaunchAppCommand } from "@/constants/htpcControls";
 
 interface RemoteButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   remote: (typeof REMOTE)[keyof typeof REMOTE];
@@ -32,7 +32,7 @@ const RemoteButton: React.FC<RemoteButtonProps> = ({ remote, children, ...props 
 
         if (USE_LINUX_API && launchAppName) {
           await launchLinuxApp(launchAppName);
-          if (launchAppName === LaunchApp.Plexamp) {
+          if (launchAppName === LinuxLaunchAppCommand.Plexamp) {
             openPlexampAndroidApp();
           }
         } else {
@@ -63,11 +63,11 @@ const RemoteButton: React.FC<RemoteButtonProps> = ({ remote, children, ...props 
 
 export default RemoteButton;
 
-export function getLaunchAppFromValue(value: string): LaunchApp | undefined {
-  const launchMap: Record<string, LaunchApp> = {
-    launchKodi: LaunchApp.Kodi,
-    launchMoonlight: LaunchApp.Moonlight,
-    launchPlexamp: LaunchApp.Plexamp,
+export function getLaunchAppFromValue(value: string): LinuxLaunchAppCommand | undefined {
+  const launchMap: Record<string, LinuxLaunchAppCommand> = {
+    launchKodi: LinuxLaunchAppCommand.Kodi,
+    launchMoonlight: LinuxLaunchAppCommand.Moonlight,
+    launchPlexamp: LinuxLaunchAppCommand.Plexamp,
   };
 
   return launchMap[value];

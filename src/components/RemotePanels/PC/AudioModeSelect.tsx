@@ -1,15 +1,24 @@
-import {sendDenonCommand, sendEventToHTPCEventGhost} from "@/utilities/http";
+import {sendDenonCommand, sendEventToHTPCEventGhost, setLinuxAudioMode} from "@/utilities/http";
 import {Listbox, Transition} from "@headlessui/react";
 import {Fragment} from "react";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faCheck, faChevronDown} from "@fortawesome/free-solid-svg-icons";
 import {AUDIO_MODES_FOR_SELECT} from "@/utilities/constants";
+import {AUDIO_MODES_FOR_SELECT_EG, AUDIO_MODES_FOR_SELECT_LINUX} from "@/components/RemotePanels/PC/pcConstants";
 
 function AudioModeSelect({ selectedAudioMode, setSelectedAudioMode }) {
-  const handleSelect = (selectedAudioMode) => {
+    const platform = process.env.NEXT_PUBLIC_PLATFORM ?? '';
+    const isLinux = platform === "LINUX" || platform === "LINUX_WAYLAND";
+
+    const audioModesForSelect = isLinux ? AUDIO_MODES_FOR_SELECT_LINUX : AUDIO_MODES_FOR_SELECT_EG;
+
+    const handleSelect = (selectedAudioMode) => {
     setSelectedAudioMode(selectedAudioMode);
-    sendEventToHTPCEventGhost({ value: selectedAudioMode.value });
-    sendDenonCommand({ value: selectedAudioMode.denonCmd });
+    isLinux ? setLinuxAudioMode(selectedAudioMode.value) : sendEventToHTPCEventGhost({ value: selectedAudioMode.value });
+
+    if (selectedAudioMode.denonCmd) {
+        sendDenonCommand({ value: selectedAudioMode.denonCmd });
+    }
   };
 
   return (
@@ -35,7 +44,7 @@ function AudioModeSelect({ selectedAudioMode, setSelectedAudioMode }) {
             leaveTo="opacity-0"
           >
             <Listbox.Options className="fixed z-40 mt-1 max-h-100 left-[12%] right-[12%] max-w-[440px] overflow-auto rounded-md bg-gray-700 py-1 text-base text-center shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-              {Object.values(AUDIO_MODES_FOR_SELECT).map(
+              {Object.values(audioModesForSelect).map(
                 (mode) => mode.value !== null ? (
                   <Listbox.Option
                     key={mode.key}

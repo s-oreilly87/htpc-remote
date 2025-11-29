@@ -8,11 +8,11 @@ import {
     sendDenonCommand,
     sendEventToGameStreamEventGhost,
     sendEventToHTPCEventGhost,
-    sendRokuLaunchCommand, setLinuxDisplayMode,
+    sendRokuLaunchCommand, setLinuxAudioMode, setLinuxDisplayMode,
 } from "@/utilities/http";
 import {useState} from "react";
 import {openPlexampAndroidApp} from "@/utilities/utils";
-import {DISPLAY_MODES_FOR_SELECT_LINUX} from "@/components/RemotePanels/PC/pcConstants";
+import {AUDIO_MODES_FOR_SELECT_LINUX, DISPLAY_MODES_FOR_SELECT_LINUX} from "@/components/RemotePanels/PC/pcConstants";
 
 const remote = REMOTE.PC;
 
@@ -39,32 +39,32 @@ const presetToEffectsMap = {
   //   rokuApp: ROKU_APPS.HDMI.HDMI2,
   // },
   presetGamestream4K60: {
-    audioMode: AUDIO_MODES_FOR_SELECT.ATMOS,
+    audioMode: isLinux ? AUDIO_MODES_FOR_SELECT_LINUX.SURROUND51 : AUDIO_MODES_FOR_SELECT.ATMOS,
     displayModeHTPC: isLinux ? DISPLAY_MODES_FOR_SELECT_LINUX.HTPC_4K60_HDR : DISPLAY_MODES_FOR_SELECT_EG.HTPC_4K60,
     displayModeGamestreamEventGhost: 'displayDummy4K60',
     rokuApp: ROKU_APPS.HDMI.HDMI4,
     launchApp: 'launchMoonlight'
   },
   presetGamestream1440p120: {
-    audioMode: AUDIO_MODES_FOR_SELECT.ATMOS,
+    audioMode: isLinux ? AUDIO_MODES_FOR_SELECT_LINUX.SURROUND51 : AUDIO_MODES_FOR_SELECT.ATMOS,
     displayModeHTPC: isLinux ? DISPLAY_MODES_FOR_SELECT_LINUX.HTPC_1440P120_HDR : DISPLAY_MODES_FOR_SELECT_EG.HTPC_1440p120,
     displayModeGamestreamEventGhost: 'displayDummy1440p120',
     rokuApp: ROKU_APPS.HDMI.HDMI4,
     launchApp: 'launchMoonlight'
   },
   presetWatchPlex: {
-    audioMode: AUDIO_MODES_FOR_SELECT.ATMOS,
+    audioMode: isLinux ? AUDIO_MODES_FOR_SELECT_LINUX.SURROUND51 : AUDIO_MODES_FOR_SELECT.ATMOS,
     displayModeHTPC: isLinux ? DISPLAY_MODES_FOR_SELECT_LINUX.HTPC_4K60_HDR : DISPLAY_MODES_FOR_SELECT_EG.HTPC_4K60,
     rokuApp: ROKU_APPS.HDMI.HDMI4,
     launchApp: isLinux ? 'launchKodi' : 'launchPlex'
   },
   presetPlexampStereo: {
-    audioMode: AUDIO_MODES_FOR_SELECT.STEREO,
+    audioMode: isLinux ? AUDIO_MODES_FOR_SELECT_LINUX.STEREO : AUDIO_MODES_FOR_SELECT.STEREO,
     launchApp: 'launchPlexamp',
     androidApp: 'plexamp'
   },
   presetPlexampUpmix: {
-    audioMode: AUDIO_MODES_FOR_SELECT.DOLBY_UPMIX,
+    audioMode: isLinux ? AUDIO_MODES_FOR_SELECT_LINUX.DOLBY_UPMIX : AUDIO_MODES_FOR_SELECT.DOLBY_UPMIX,
     launchApp: 'launchPlexamp',
     androidApp: 'plexamp'
   },
@@ -127,11 +127,11 @@ function AudioVideoPresets() {
             // 4. Audio mode
             if (preset.audioMode) {
                 setSelectedAudioMode(preset.audioMode);
+                isLinux ? await setLinuxAudioMode(preset.audioMode.value) : await sendEventToHTPCEventGhost({ value: preset.audioMode.value });
                 if (preset.audioMode.denonCmd) {
                     await sendDenonCommand({ value: preset.audioMode.denonCmd });
                     await sleep(500); // small pause before launching app
                 }
-                // TODO: set HTPC audio mode here if you add that path
             }
 
             // 5. Launch app on HTPC

@@ -2,13 +2,13 @@ import type { NextApiRequest, NextApiResponse } from "next";
 
 import {
   ApiResponse,
-  LaunchApp,
+  LinuxLaunchAppCommand,
   VALID_LAUNCH_APPS,
 } from "@/constants/htpcControls";
 import { runCommand } from "../lib/command";
 
 type LaunchBody = {
-  app?: LaunchApp | string;
+  app?: LinuxLaunchAppCommand | string;
 };
 
 export default async function handler(
@@ -37,6 +37,6 @@ export default async function handler(
   }
 }
 
-function isValidApp(app: unknown): app is LaunchApp {
-  return typeof app === "string" && VALID_LAUNCH_APPS.includes(app as LaunchApp);
+function isValidApp(app: unknown): app is LinuxLaunchAppCommand {
+  return typeof app === "string" && VALID_LAUNCH_APPS.includes(app as LinuxLaunchAppCommand);
 }

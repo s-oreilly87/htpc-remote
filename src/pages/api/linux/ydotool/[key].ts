@@ -1,29 +1,29 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 
-import { ApiResponse, KeyAction } from "@/constants/htpcControls";
+import { ApiResponse, LinuxKeyAction } from "@/constants/htpcControls";
 import { KEYSTROKE } from "@/utilities/constants";
 
 import { runCommand } from "../../lib/command";
 
-const KEYSTROKE_TO_ACTION: Partial<Record<string, KeyAction>> = {
-    [KEYSTROKE.PC.ENTER]: KeyAction.Enter,
-    [KEYSTROKE.PC.ALT_TAB]: KeyAction.AltTab,
-    [KEYSTROKE.PC.ESCAPE]: KeyAction.Esc,
-    [KEYSTROKE.PC.TAB]: KeyAction.Tab,
-    [KEYSTROKE.PC.UP]: KeyAction.Up,
-    [KEYSTROKE.PC.DOWN]: KeyAction.Down,
-    [KEYSTROKE.PC.LEFT]: KeyAction.Left,
-    [KEYSTROKE.PC.RIGHT]: KeyAction.Right,
-    [KEYSTROKE.PC.VOL_UP]: KeyAction.VolUp,
-    [KEYSTROKE.PC.VOL_DOWN]: KeyAction.VolDown,
-    [KEYSTROKE.PC.MUTE]: KeyAction.Mute,
-    [KEYSTROKE.PC.PREV]: KeyAction.Prev,
-    [KEYSTROKE.PC.REWIND]: KeyAction.Left,
-    [KEYSTROKE.PC.PLAY]: KeyAction.PlayPause,
-    [KEYSTROKE.PC.FFWD]: KeyAction.Right,
-    [KEYSTROKE.PC.NEXT]: KeyAction.Next,
-    [KEYSTROKE.PC.BACKSPACE]: KeyAction.Back,
-    [KEYSTROKE.PC.CLOSE_WINDOW]: KeyAction.CloseWindow,
+const KEYSTROKE_TO_ACTION: Partial<Record<string, LinuxKeyAction>> = {
+    [KEYSTROKE.PC.ENTER]: LinuxKeyAction.Enter,
+    [KEYSTROKE.PC.ALT_TAB]: LinuxKeyAction.AltTab,
+    [KEYSTROKE.PC.ESCAPE]: LinuxKeyAction.Esc,
+    [KEYSTROKE.PC.TAB]: LinuxKeyAction.Tab,
+    [KEYSTROKE.PC.UP]: LinuxKeyAction.Up,
+    [KEYSTROKE.PC.DOWN]: LinuxKeyAction.Down,
+    [KEYSTROKE.PC.LEFT]: LinuxKeyAction.Left,
+    [KEYSTROKE.PC.RIGHT]: LinuxKeyAction.Right,
+    [KEYSTROKE.PC.VOL_UP]: LinuxKeyAction.VolUp,
+    [KEYSTROKE.PC.VOL_DOWN]: LinuxKeyAction.VolDown,
+    [KEYSTROKE.PC.MUTE]: LinuxKeyAction.Mute,
+    [KEYSTROKE.PC.PREV]: LinuxKeyAction.Prev,
+    [KEYSTROKE.PC.REWIND]: LinuxKeyAction.Left,
+    [KEYSTROKE.PC.PLAY]: LinuxKeyAction.PlayPause,
+    [KEYSTROKE.PC.FFWD]: LinuxKeyAction.Right,
+    [KEYSTROKE.PC.NEXT]: LinuxKeyAction.Next,
+    [KEYSTROKE.PC.BACKSPACE]: LinuxKeyAction.Back,
+    [KEYSTROKE.PC.CLOSE_WINDOW]: LinuxKeyAction.CloseWindow,
 };
 
 const ALT_HOLD_DURATION_MS = 1500;
@@ -65,38 +65,38 @@ export default async function handleYdotoolKeystroke(
   }
 }
 
-function mapKeyToAction(key: string): { action: KeyAction; text?: string } | null {
+function mapKeyToAction(key: string): { action: LinuxKeyAction; text?: string } | null {
   if (key.length === 1) {
-    return { action: KeyAction.Type, text: key };
+    return { action: LinuxKeyAction.Type, text: key };
   }
 
   const mappedAction = KEYSTROKE_TO_ACTION[key];
   if (!mappedAction) {
       if (key.startsWith("KEYSTROKE_")) {
-          return { action: KeyAction.Type, text: key.slice(10) };
+          return { action: LinuxKeyAction.Type, text: key.slice(10) };
       }
     return null;
   }
 
-  if (mappedAction === KeyAction.Type) {
+  if (mappedAction === LinuxKeyAction.Type) {
     return { action: mappedAction, text: key };
   }
 
   return { action: mappedAction };
 }
 
-async function performAction(payload: { action: KeyAction; text?: string }): Promise<void> {
+async function performAction(payload: { action: LinuxKeyAction; text?: string }): Promise<void> {
   switch (payload.action) {
-    case KeyAction.AltTab:
+    case LinuxKeyAction.AltTab:
       await handleAltTab();
       break;
-    case KeyAction.AltDown:
+    case LinuxKeyAction.AltDown:
       await holdAlt();
       break;
-    case KeyAction.AltUp:
+    case LinuxKeyAction.AltUp:
       await releaseAlt();
       break;
-    case KeyAction.Type:
+    case LinuxKeyAction.Type:
       await runCommand("htpc-key", [payload.action, payload.text ?? ""]);
       break;
     default:
@@ -107,7 +107,7 @@ async function performAction(payload: { action: KeyAction; text?: string }): Pro
 
 async function handleAltTab(): Promise<void> {
   await holdAlt();
-  await runCommand("htpc-key", [KeyAction.Tab]);
+  await runCommand("htpc-key", [LinuxKeyAction.Tab]);
 
   if (altHoldTimeout) {
     clearTimeout(altHoldTimeout);
@@ -123,7 +123,7 @@ async function holdAlt(): Promise<void> {
     return;
   }
 
-  await runCommand("htpc-key", [KeyAction.AltDown]);
+  await runCommand("htpc-key", [LinuxKeyAction.AltDown]);
   isAltHeld = true;
 }
 
@@ -137,6 +137,6 @@ async function releaseAlt(): Promise<void> {
     return;
   }
 
-  await runCommand("htpc-key", [KeyAction.AltUp]);
+  await runCommand("htpc-key", [LinuxKeyAction.AltUp]);
   isAltHeld = false;
 }
