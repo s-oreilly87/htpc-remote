@@ -53,7 +53,7 @@ const presetToEffectsMap = {
     launchApp: 'launchMoonlight'
   },
   presetWatchPlex: {
-    audioMode: isLinux ? AUDIO_MODES_FOR_SELECT_LINUX.SURROUND51 : AUDIO_MODES_FOR_SELECT.ATMOS,
+    audioMode: isLinux ? null : AUDIO_MODES_FOR_SELECT.ATMOS, //Linux: Kodi is set up to bitstream, dont change audio mode
     displayModeHTPC: isLinux ? DISPLAY_MODES_FOR_SELECT_LINUX.HTPC_4K60_HDR : DISPLAY_MODES_FOR_SELECT_EG.HTPC_4K60,
     rokuApp: ROKU_APPS.HDMI.HDMI4,
     launchApp: isLinux ? 'launchKodi' : 'launchPlex'
