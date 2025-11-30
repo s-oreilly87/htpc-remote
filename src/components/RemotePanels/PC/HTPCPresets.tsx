@@ -58,7 +58,7 @@ const presetToEffectsMap = {
     displayModeHTPC: isLinux ? DISPLAY_MODES_FOR_SELECT_LINUX.HTPC_4K60_HDR : DISPLAY_MODES_FOR_SELECT_EG.HTPC_4K60,
     rokuApp: ROKU_APPS.HDMI.HDMI4,
     launchApp: isLinux ? 'launchKodi' : 'launchPlex',
-    killApp: isLinux && 'launchKodi' // easier than a "kill" enum
+    killApp: isLinux && 'launchPlexamp' // easier than a "kill" enum
   },
   presetPlexampStereo: {
     audioMode: isLinux ? AUDIO_MODES_FOR_SELECT_LINUX.STEREO : AUDIO_MODES_FOR_SELECT.STEREO,
