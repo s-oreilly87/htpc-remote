@@ -2,15 +2,14 @@ import Constants from "@/utilities/constants";
 import KeypressButton from "@/components/UI/KeypressButton";
 import KeyboardGroup from "../Shared/KeyboardGroup";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faArrowLeft, faWindowRestore, faX, faExpandAlt} from "@fortawesome/free-solid-svg-icons";
+import {faArrowLeft, faWindowRestore, faX} from "@fortawesome/free-solid-svg-icons";
+import { usePlatform } from "@/hooks/usePlatform";
 
 const REMOTE = Constants.REMOTE;
 const KEYSTROKE = Constants.KEYSTROKE;
 
-function PCBottomLeftButtons(props) {
-
-    const platform = process.env.NEXT_PUBLIC_PLATFORM ?? "";
-    const isLinux = platform === "LINUX" || platform === "LINUX_WAYLAND";
+function PCBottomLeftButtons() {
+    const { isLinux } = usePlatform();
 
     return (
       <div className="flex flex-col gap-2 w-full relative justify-evenly">

@@ -4,20 +4,25 @@ import {Fragment} from "react";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faCheck, faChevronDown} from "@fortawesome/free-solid-svg-icons";
 import {AUDIO_MODES_FOR_SELECT} from "@/utilities/constants";
-import {AUDIO_MODES_FOR_SELECT_EG, AUDIO_MODES_FOR_SELECT_LINUX} from "@/components/RemotePanels/PC/pcConstants";
+import {AUDIO_MODES_FOR_SELECT_EG, AUDIO_MODES_FOR_SELECT_LINUX, SelectOption} from "@/components/RemotePanels/PC/pcConstants";
+import { usePlatform } from "@/hooks/usePlatform";
 
-function AudioModeSelect({ selectedAudioMode, setSelectedAudioMode }) {
-    const platform = process.env.NEXT_PUBLIC_PLATFORM ?? '';
-    const isLinux = platform === "LINUX" || platform === "LINUX_WAYLAND";
+interface AudioModeSelectProps {
+  selectedAudioMode: SelectOption;
+  setSelectedAudioMode: (mode: SelectOption) => void;
+}
 
-    const audioModesForSelect = isLinux ? AUDIO_MODES_FOR_SELECT_LINUX : AUDIO_MODES_FOR_SELECT_EG;
+function AudioModeSelect({ selectedAudioMode, setSelectedAudioMode }: AudioModeSelectProps) {
+  const { isLinux } = usePlatform();
 
-    const handleSelect = (selectedAudioMode) => {
-    setSelectedAudioMode(selectedAudioMode);
-    isLinux ? setLinuxAudioMode(selectedAudioMode.value) : sendEventToHTPCEventGhost({ value: selectedAudioMode.value });
+  const audioModesForSelect = isLinux ? AUDIO_MODES_FOR_SELECT_LINUX : AUDIO_MODES_FOR_SELECT_EG;
 
-    if (selectedAudioMode.denonCmd) {
-        sendDenonCommand({ value: selectedAudioMode.denonCmd });
+  const handleSelect = (newAudioMode: SelectOption) => {
+    setSelectedAudioMode(newAudioMode);
+    isLinux ? setLinuxAudioMode(newAudioMode.value) : sendEventToHTPCEventGhost({ value: newAudioMode.value });
+
+    if (newAudioMode.denonCmd) {
+      sendDenonCommand({ value: newAudioMode.denonCmd });
     }
   };
 

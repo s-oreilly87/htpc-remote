@@ -9,14 +9,15 @@ import {
 } from "@/constants/htpcControls";
 import { DenonKeystroke } from "@/constants/remotes";
 import { convertKebabToCamel } from "@/utilities/utils";
+import { getPlatformInfo } from "@/hooks/usePlatform";
 
 const ROKU_POST_OPTIONS: RequestInit = {
   method: "POST",
   headers: { "Content-Length": "0" },
 };
 
-const PLATFORM = process.env.NEXT_PUBLIC_PLATFORM ?? "";
-const USE_YDOTOOL = PLATFORM === "LINUX_WAYLAND";
+const { isLinuxWayland } = getPlatformInfo();
+const USE_YDOTOOL = isLinuxWayland;
 
 export const DENON_HTTP_COMMANDS = [
   DenonKeystroke.MENU_ON,
