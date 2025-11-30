@@ -69,6 +69,10 @@ export async function launchLinuxApp(app: LinuxLaunchAppCommand): Promise<ApiRes
   return postJson(`/api/linux/launch`, { app });
 }
 
+export async function killLinuxApp(app: LinuxLaunchAppCommand): Promise<ApiResponse> {
+    return postJson(`/api/linux/kill`, { app });
+}
+
 export async function setLinuxDisplayMode(mode: LinuxDisplayModeCommand): Promise<ApiResponse> {
   return postJson(`/api/linux/display`, { mode });
 }

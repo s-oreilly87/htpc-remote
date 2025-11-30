@@ -7,7 +7,7 @@ import {
 } from "@/constants/htpcControls";
 import { runCommand } from "../lib/command";
 
-type LaunchBody = {
+type KillBody = {
   app?: LinuxLaunchAppCommand | string;
 };
 
@@ -21,14 +21,14 @@ export default async function handler(
     return;
   }
 
-  const { app } = (req.body ?? {}) as LaunchBody;
+  const { app } = (req.body ?? {}) as KillBody;
   if (!isValidApp(app)) {
     res.status(400).json({ ok: false, error: "Invalid app" });
     return;
   }
 
   try {
-    await runCommand("htpc-launch", [app]);
+    await runCommand("htpc-kill", [app]);
     res.status(200).json({ ok: true });
   } catch (error) {
     console.error(error);
@@ -39,8 +39,4 @@ export default async function handler(
 
 function isValidApp(app: unknown): app is LinuxLaunchAppCommand {
   return typeof app === "string" && VALID_LAUNCH_APPS.includes(app as LinuxLaunchAppCommand);
-}
-
-async function killOtherApps(app: LinuxLaunchAppCommand) {
-    await runCommand("htpc-kill", [app]);
 }
