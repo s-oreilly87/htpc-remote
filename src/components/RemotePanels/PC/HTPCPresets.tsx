@@ -97,7 +97,7 @@ function AudioVideoPresets() {
 
             // TODO: this is ugly
             if (preset.killApp) {
-                await killLinuxApp(preset.killApp);
+                await killLinuxApp(getLaunchAppFromValue(preset.killApp)); // uggh, gross
                 await sleep(500);
             }
 
