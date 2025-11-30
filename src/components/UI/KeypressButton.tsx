@@ -41,6 +41,8 @@ const RemoteButton: React.FC<RemoteButtonProps> = ({ remote, children, ...props 
             }
 
             if (launchAppName === LinuxLaunchAppCommand.Plexamp) {
+                await killLinuxApp(LinuxLaunchAppCommand.Kodi)
+                await sleep(2000)
                 openPlexampAndroidApp();
             }
 

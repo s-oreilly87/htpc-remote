@@ -63,11 +63,13 @@ const presetToEffectsMap = {
   presetPlexampStereo: {
     audioMode: isLinux ? AUDIO_MODES_FOR_SELECT_LINUX.STEREO : AUDIO_MODES_FOR_SELECT.STEREO,
     launchApp: 'launchPlexamp',
+    killApp: 'launchKodi',
     androidApp: 'plexamp'
   },
   presetPlexampUpmix: {
     audioMode: isLinux ? AUDIO_MODES_FOR_SELECT_LINUX.DOLBY_UPMIX : AUDIO_MODES_FOR_SELECT.DOLBY_UPMIX,
     launchApp: 'launchPlexamp',
+    killApp: 'launchKodi',
     androidApp: 'plexamp'
   },
 };
