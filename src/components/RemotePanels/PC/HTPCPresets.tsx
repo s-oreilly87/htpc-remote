@@ -4,6 +4,7 @@ import CustomModesCollapse from "./CustomModesCollapse";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faGamepad, faMusic, faTv} from "@fortawesome/free-solid-svg-icons";
 import {
+    killLinuxApp,
     launchLinuxApp,
     sendDenonCommand,
     sendEventToGameStreamEventGhost,
@@ -56,7 +57,8 @@ const presetToEffectsMap = {
     audioMode: isLinux ? null : AUDIO_MODES_FOR_SELECT.ATMOS, //Linux: Kodi is set up to bitstream, dont change audio mode
     displayModeHTPC: isLinux ? DISPLAY_MODES_FOR_SELECT_LINUX.HTPC_4K60_HDR : DISPLAY_MODES_FOR_SELECT_EG.HTPC_4K60,
     rokuApp: ROKU_APPS.HDMI.HDMI4,
-    launchApp: isLinux ? 'launchKodi' : 'launchPlex'
+    launchApp: isLinux ? 'launchKodi' : 'launchPlex',
+    killApp: isLinux && 'killKodi'
   },
   presetPlexampStereo: {
     audioMode: isLinux ? AUDIO_MODES_FOR_SELECT_LINUX.STEREO : AUDIO_MODES_FOR_SELECT.STEREO,
@@ -92,6 +94,13 @@ function AudioVideoPresets() {
         try {
             const htpcEventGhostCommand = event.currentTarget.value;
             const preset = presetToEffectsMap[htpcEventGhostCommand];
+
+            // TODO: this is ugly
+            if (preset.killApp) {
+                const launchApp = preset.killApp.replace('kill', 'launch')
+                await killLinuxApp(launchApp);
+                await sleep(500);
+            }
 
             // 1. Android app
             if (preset.androidApp) {
