@@ -9,10 +9,14 @@ import {sendKeystrokeToHtpc, sendRokuKeypress, sendRokuSearchQuery,} from "@/uti
 import {sleep} from "@/utilities/utils";
 import {throttle} from "lodash";
 import {lowerCase} from "lodash/string";
+import { usePlatform } from "@/hooks/usePlatform";
 
-const PLATFORM = process.env.NEXT_PUBLIC_PLATFORM ?? "";
+interface KeyboardGroupProps {
+  remote: (typeof REMOTE)[keyof typeof REMOTE];
+}
 
-function KeyboardGroup({ remote }) {
+function KeyboardGroup({ remote }: KeyboardGroupProps) {
+  const { isMac, isPc } = usePlatform();
   const [inputExpanded, setInputExpanded] = useState(false);
 
   const [inputSoFar, setInputSoFar] = useState("");
@@ -237,10 +241,10 @@ function KeyboardGroup({ remote }) {
               onClick={toggleInputExpanded}
               value={KEYSTROKE.PC.WIN_KEY}
             >
-              {!inputExpanded && PLATFORM === "MACOS" && (
+              {!inputExpanded && isMac && (
                 <FontAwesomeIcon icon={faMagnifyingGlass} />
               )}
-              {!inputExpanded && PLATFORM === "PC" && (
+              {!inputExpanded && isPc && (
                 <FontAwesomeIcon icon={faWindows} />
               )}
               {inputExpanded && <FontAwesomeIcon icon={faXmark} />}

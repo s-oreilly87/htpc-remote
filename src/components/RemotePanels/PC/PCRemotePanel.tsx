@@ -7,13 +7,16 @@ import AirMouse from "@/components/RemotePanels/PC/AirMouse";
 import KeypressButton from "@/components/UI/KeypressButton";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faStar, faCircleInfo, faBars} from "@fortawesome/free-solid-svg-icons";
+import { usePlatform } from "@/hooks/usePlatform";
 
 const remote = Constants.REMOTE.PC;
-const PLATFORM = process.env.NEXT_PUBLIC_PLATFORM ?? "";
-const SHOW_AIR_MOUSE = PLATFORM !== "LINUX_WAYLAND";
-const SHOW_KODI_BUTTONS = ["LINUX", "LINUX_WAYLAND"].includes(PLATFORM);
 
 function PCRemote() {
+  const { isLinux, isLinuxWayland } = usePlatform();
+
+  const showAirMouse = !isLinuxWayland;
+  const showKodiButtons = isLinux;
+
   return (
     <div
       id="htpc-remote"
@@ -24,10 +27,10 @@ function PCRemote() {
         <MediaButtons remote={remote} />
         <AppButtons />
 
-        {SHOW_AIR_MOUSE && <AirMouse />}
+        {showAirMouse && <AirMouse />}
       </div>
       <div className="h-50 items-end">
-        {SHOW_KODI_BUTTONS && <KodiButtons />}
+        {showKodiButtons && <KodiButtons />}
         <BottomSection remote={remote} />
       </div>
     </div>

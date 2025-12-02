@@ -2,8 +2,9 @@ import {Key, keyboard} from "@nut-tree/nut-js";
 import type {NextApiRequest, NextApiResponse} from "next";
 
 import {KEYSTROKE} from "@/utilities/constants";
+import { getPlatformInfo } from "@/hooks/usePlatform";
 
-const PLATFORM = process.env.NEXT_PUBLIC_PLATFORM ?? "";
+const { platform: PLATFORM } = getPlatformInfo();
 
 type NutKey = Key | Key[];
 

@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, { useState } from "react";
 
 import {REMOTE} from "@/utilities/constants";
 import {
@@ -12,16 +12,15 @@ import {
 } from "@/utilities/http";
 import {buttonPress, openPlexampAndroidApp, sleep} from "@/utilities/utils";
 import {LinuxDisplayModeCommand, LinuxLaunchAppCommand} from "@/constants/htpcControls";
+import { usePlatform } from "@/hooks/usePlatform";
 
 interface RemoteButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   remote: (typeof REMOTE)[keyof typeof REMOTE];
 }
 
-const PLATFORM = process.env.NEXT_PUBLIC_PLATFORM ?? "";
-const USE_LINUX_API = PLATFORM === "LINUX" || PLATFORM === "LINUX_WAYLAND";
-
 const RemoteButton: React.FC<RemoteButtonProps> = ({ remote, children, ...props }) => {
   const [buttonPressTimerId, setButtonPressTimerId] = useState<number | undefined>();
+  const { isLinux } = usePlatform();
 
   const handleClick = async (event: React.MouseEvent<HTMLButtonElement>) => {
     if (remote === REMOTE.ROKU) {
@@ -32,7 +31,7 @@ const RemoteButton: React.FC<RemoteButtonProps> = ({ remote, children, ...props 
       } else {
         const launchAppName = getLaunchAppFromValue(event.currentTarget.value);
 
-        if (USE_LINUX_API && launchAppName) {
+        if (isLinux && launchAppName) {
             if (launchAppName === LinuxLaunchAppCommand.Kodi) {
                 await killLinuxApp(LinuxLaunchAppCommand.Plexamp)
                 await sleep(2000)

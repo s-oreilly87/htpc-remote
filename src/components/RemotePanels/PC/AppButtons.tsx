@@ -4,10 +4,11 @@ import {faClapperboard, faGamepad, faMusic} from "@fortawesome/free-solid-svg-ic
 import KeypressButton from "@/components/UI/KeypressButton";
 import Constants from "@/utilities/constants";
 import {JSX} from "react";
+import { usePlatform } from "@/hooks/usePlatform";
 
 function AppButtons(): JSX.Element {
-  const platform = process.env.NEXT_PUBLIC_PLATFORM ?? "";
-  const videoApp = platform === "LINUX" || platform === "LINUX_WAYLAND"
+  const { isLinux } = usePlatform();
+  const videoApp = isLinux
     ? { value: "launchKodi", label: "Kodi" }
     : { value: "launchPlex", label: "Plex" };
 

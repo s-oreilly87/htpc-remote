@@ -4,24 +4,29 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faCheck, faChevronDown} from "@fortawesome/free-solid-svg-icons";
 import {Fragment} from "react";
 import {DISPLAY_MODES_FOR_SELECT_EG} from "@/utilities/constants";
-import {DISPLAY_MODES_FOR_SELECT_LINUX} from "@/components/RemotePanels/PC/pcConstants";
+import {DISPLAY_MODES_FOR_SELECT_LINUX, SelectOption} from "@/components/RemotePanels/PC/pcConstants";
+import { usePlatform } from "@/hooks/usePlatform";
 
-function DisplayModeSelect({ selectedDisplayMode, setSelectedDisplayMode }) {
-  const platform = process.env.NEXT_PUBLIC_PLATFORM ?? '';
-  const isLinux = platform === "LINUX" || platform === "LINUX_WAYLAND";
+interface DisplayModeSelectProps {
+  selectedDisplayMode: SelectOption;
+  setSelectedDisplayMode: (mode: SelectOption) => void;
+}
+
+function DisplayModeSelect({ selectedDisplayMode, setSelectedDisplayMode }: DisplayModeSelectProps) {
+  const { isLinux } = usePlatform();
   const displayModesObject = isLinux ? DISPLAY_MODES_FOR_SELECT_LINUX : DISPLAY_MODES_FOR_SELECT_EG;
 
-  const handleSelect = (selectedDisplayMode) => {
-    setSelectedDisplayMode(selectedDisplayMode);
+  const handleSelect = (newDisplayMode: SelectOption) => {
+    setSelectedDisplayMode(newDisplayMode);
 
-    isLinux ? setLinuxDisplayMode(selectedDisplayMode.value) : sendEventToHTPCEventGhost({ value: selectedDisplayMode.value });
+    isLinux ? setLinuxDisplayMode(newDisplayMode.value) : sendEventToHTPCEventGhost({ value: newDisplayMode.value });
 
-    if (selectedDisplayMode.rokuChannel) {
-        sendRokuLaunchCommand({ value: selectedDisplayMode.rokuChannel.id });
+    if (newDisplayMode.rokuChannel) {
+      sendRokuLaunchCommand({ value: newDisplayMode.rokuChannel.id });
     }
   };
 
-    return (
+  return (
     <div className="flex w-4/5 mx-auto">
       <Listbox value={selectedDisplayMode} by="key" onChange={handleSelect}>
         <div className="relative mt-1 w-full">
