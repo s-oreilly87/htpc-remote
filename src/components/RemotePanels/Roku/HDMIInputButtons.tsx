@@ -1,6 +1,6 @@
-import {REMOTE, ROKU_APPS} from "@/utilities/constants";
+import {DENON_INPUTS, REMOTE, ROKU_APPS} from "@/utilities/constants";
 import KeypressButton from "@/components/UI/KeypressButton";
-import {sendRokuLaunchCommand} from "@/utilities/http";
+import {sendDenonCommand, sendRokuLaunchCommand} from "@/utilities/http";
 
 function HDMIInputs({ setPowerOn, setSelectedRemote }) {
   const handleClick = (event) => {
@@ -8,8 +8,9 @@ function HDMIInputs({ setPowerOn, setSelectedRemote }) {
     setPowerOn(true);
   };
 
-  const handleClickWithRemoteChange = (event, remote) => {
+  const handlePCInputClickWithDenonCommandAndRemoteSwitch = (event, remote) => {
     sendRokuLaunchCommand(event.currentTarget);
+    sendDenonCommand({value: DENON_INPUTS.PC.value})
     setPowerOn(true);
     setSelectedRemote(remote);
   };
@@ -31,7 +32,7 @@ function HDMIInputs({ setPowerOn, setSelectedRemote }) {
           id="receiver"
           className="btn btn-primary-roku w-1/2 z-50"
           value={ROKU_APPS.HDMI.HDMI4.id}
-          onClick={(e) => handleClickWithRemoteChange(e, REMOTE.PC)}
+          onClick={(e) => handlePCInputClickWithDenonCommandAndRemoteSwitch(e, REMOTE.PC)}
         >
           {ROKU_APPS.HDMI.HDMI4.label}
         </KeypressButton>
