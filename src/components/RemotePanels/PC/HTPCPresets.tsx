@@ -22,6 +22,7 @@ import {
   SelectOption,
 } from "@/components/RemotePanels/PC/pcConstants";
 import { usePlatform } from "@/hooks/usePlatform";
+import {LinuxAudioModeCommand, LinuxDisplayModeCommand} from "@/constants/htpcControls";
 
 const remote = REMOTE.PC;
 
@@ -150,7 +151,7 @@ function AudioVideoPresets() {
         setSelectedDisplayMode(preset.displayModeHTPC);
 
         if (isLinux) {
-          await setLinuxDisplayMode(preset.displayModeHTPC.value);
+          await setLinuxDisplayMode(preset.displayModeHTPC.value as LinuxDisplayModeCommand);
         } else {
           await sendEventToHTPCEventGhost({ value: htpcEventGhostCommand });
         }
@@ -163,7 +164,7 @@ function AudioVideoPresets() {
       if (preset.audioMode) {
         setSelectedAudioMode(preset.audioMode);
         if (isLinux) {
-          await setLinuxAudioMode(preset.audioMode.value);
+          await setLinuxAudioMode(preset.audioMode.value as LinuxAudioModeCommand);
         } else {
           await sendEventToHTPCEventGhost({ value: preset.audioMode.value });
         }

@@ -6,6 +6,7 @@ import {faCheck, faChevronDown} from "@fortawesome/free-solid-svg-icons";
 import {AUDIO_MODES_FOR_SELECT} from "@/utilities/constants";
 import {AUDIO_MODES_FOR_SELECT_EG, AUDIO_MODES_FOR_SELECT_LINUX, SelectOption} from "@/components/RemotePanels/PC/pcConstants";
 import { usePlatform } from "@/hooks/usePlatform";
+import {LinuxAudioModeCommand} from "@/constants/htpcControls";
 
 interface AudioModeSelectProps {
   selectedAudioMode: SelectOption;
@@ -19,7 +20,7 @@ function AudioModeSelect({ selectedAudioMode, setSelectedAudioMode }: AudioModeS
 
   const handleSelect = (newAudioMode: SelectOption) => {
     setSelectedAudioMode(newAudioMode);
-    isLinux ? setLinuxAudioMode(newAudioMode.value) : sendEventToHTPCEventGhost({ value: newAudioMode.value });
+    isLinux ? setLinuxAudioMode(newAudioMode.value as LinuxAudioModeCommand) : sendEventToHTPCEventGhost({ value: newAudioMode.value });
 
     if (newAudioMode.denonCmd) {
       sendDenonCommand({ value: newAudioMode.denonCmd });

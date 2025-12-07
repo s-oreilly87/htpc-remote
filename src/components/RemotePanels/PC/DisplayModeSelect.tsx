@@ -6,6 +6,7 @@ import {Fragment} from "react";
 import {DISPLAY_MODES_FOR_SELECT_EG} from "@/utilities/constants";
 import {DISPLAY_MODES_FOR_SELECT_LINUX, SelectOption} from "@/components/RemotePanels/PC/pcConstants";
 import { usePlatform } from "@/hooks/usePlatform";
+import {LinuxDisplayModeCommand} from "@/constants/htpcControls";
 
 interface DisplayModeSelectProps {
   selectedDisplayMode: SelectOption;
@@ -19,7 +20,7 @@ function DisplayModeSelect({ selectedDisplayMode, setSelectedDisplayMode }: Disp
   const handleSelect = (newDisplayMode: SelectOption) => {
     setSelectedDisplayMode(newDisplayMode);
 
-    isLinux ? setLinuxDisplayMode(newDisplayMode.value) : sendEventToHTPCEventGhost({ value: newDisplayMode.value });
+    isLinux ? setLinuxDisplayMode(newDisplayMode.value as LinuxDisplayModeCommand) : sendEventToHTPCEventGhost({ value: newDisplayMode.value });
 
     if (newDisplayMode.rokuChannel) {
       sendRokuLaunchCommand({ value: newDisplayMode.rokuChannel.id });
