@@ -25,6 +25,12 @@ export enum LinuxLaunchAppCommand {
   Kodi = "kodi",
   Plexamp = "plexamp",
   Moonlight = "moonlight",
+  Qobuz = 'qobuz',
+}
+
+export enum LinuxListenCommand {
+  Plexamp = "plexamp",
+  Qobuz = "qobuz",
 }
 
 export enum LinuxDisplayModeCommand {
@@ -48,5 +54,6 @@ export interface ApiResponse {
 
 export const VALID_KEY_ACTIONS: readonly LinuxKeyAction[] = Object.values(LinuxKeyAction);
 export const VALID_LAUNCH_APPS: readonly LinuxLaunchAppCommand[] = Object.values(LinuxLaunchAppCommand);
+export const VALID_LISTEN_COMMANDS: readonly LinuxListenCommand[] = Object.values(LinuxListenCommand);
 export const VALID_DISPLAY_MODES: readonly LinuxDisplayModeCommand[] = Object.values(LinuxDisplayModeCommand);
 export const VALID_AUDIO_MODES: readonly LinuxAudioModeCommand[] = Object.values(LinuxAudioModeCommand);

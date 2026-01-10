@@ -80,6 +80,7 @@ export function getLaunchAppFromValue(value: string): LinuxLaunchAppCommand | un
     launchKodi: LinuxLaunchAppCommand.Kodi,
     launchMoonlight: LinuxLaunchAppCommand.Moonlight,
     launchPlexamp: LinuxLaunchAppCommand.Plexamp,
+    launchQobuz: LinuxLaunchAppCommand.Qobuz,
   };
 
   return launchMap[value];

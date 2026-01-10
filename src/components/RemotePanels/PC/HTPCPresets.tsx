@@ -15,7 +15,7 @@ import {
   setLinuxDisplayMode,
 } from "@/utilities/http";
 import { useMemo, useState } from "react";
-import { openPlexampAndroidApp } from "@/utilities/utils";
+import {openPlexampAndroidApp, openQobuzAndroidApp} from "@/utilities/utils";
 import {
   AUDIO_MODES_FOR_SELECT_LINUX,
   DISPLAY_MODES_FOR_SELECT_LINUX,
@@ -101,6 +101,14 @@ function AudioVideoPresets() {
         killApp: "launchKodi",
         androidApp: "plexamp",
       },
+      presetQobuzUpmix: {
+        audioMode: isLinux
+            ? AUDIO_MODES_FOR_SELECT_LINUX.DOLBY_UPMIX
+            : AUDIO_MODES_FOR_SELECT.DOLBY_UPMIX,
+        launchApp: "launchQobuz",
+        killApp: "launchKodi",
+        androidApp: "qobuz",
+      },
     }),
     [isLinux],
   );
@@ -133,7 +141,13 @@ function AudioVideoPresets() {
       // 1. Android app
       if (preset.androidApp) {
         try {
-          openPlexampAndroidApp();
+          if (preset.androidApp === 'plexamp') {
+            openPlexampAndroidApp();
+          } else if (preset.androidApp === 'qobuz') {
+            openQobuzAndroidApp();
+          } else {
+            console.error('Android app: ' + preset.androidApp + ' is not registered in HTPCPresets.tsx');
+          }
         } catch (e) {
           console.log(e);
         }
@@ -241,7 +255,7 @@ function AudioVideoPresets() {
           <FontAwesomeIcon icon={faTv} className="h-8 w-8" />
           Watch
           <br />
-          Plex
+          Kodi
         </KeypressButton>
         <KeypressButton
           remote={remote}
@@ -253,17 +267,29 @@ function AudioVideoPresets() {
           <FontAwesomeIcon icon={faMusic} className="h-8 w-8" />
           Plexamp
           <br />
-          (Stereo)
+          (Stereo/5.1)
         </KeypressButton>
+        {/*<KeypressButton*/}
+        {/*    remote={remote}*/}
+        {/*    id="preset-plexamp-upmix"*/}
+        {/*    className="btn btn-primary-pc w-1/4 flex flex-col justify-center items-center"*/}
+        {/*    value="presetPlexampUpmix"*/}
+        {/*    onClick={handleClick}*/}
+        {/*>*/}
+        {/*  <FontAwesomeIcon icon={faMusic} className="h-8 w-8" />*/}
+        {/*  Plexamp*/}
+        {/*  <br />*/}
+        {/*  (Upmix)*/}
+        {/*</KeypressButton>*/}
         <KeypressButton
             remote={remote}
-            id="preset-plexamp-upmix"
+            id="preset-qobuz-upmix"
             className="btn btn-primary-pc w-1/4 flex flex-col justify-center items-center"
-            value="presetPlexampUpmix"
+            value="presetQobuzUpmix"
             onClick={handleClick}
         >
           <FontAwesomeIcon icon={faMusic} className="h-8 w-8" />
-          Plexamp
+          Qobuz
           <br />
           (Upmix)
         </KeypressButton>

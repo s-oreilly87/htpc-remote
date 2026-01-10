@@ -5,6 +5,11 @@ export function openPlexampAndroidApp() {
     "intent://home#Intent;scheme=plexamp-auth;package=tv.plex.labs.plexamp;end;";
 }
 
+export function openQobuzAndroidApp() {
+  window.location.href =
+      "intent:#Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;package=com.qobuz.music;end;";
+}
+
 export function useHasChanged<T>(val: T) {
   const prevVal = usePrevious(val);
   return prevVal !== val;
