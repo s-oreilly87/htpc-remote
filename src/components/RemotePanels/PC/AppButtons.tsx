@@ -39,6 +39,14 @@ function AppButtons(): JSX.Element {
           <FontAwesomeIcon icon={faMusic} className="w-1/3 mx-auto" />
           Plexamp
         </KeypressButton>
+        <KeypressButton
+            remote={Constants.REMOTE.PC}
+            className="btn btn-primary-pc w-1/4 flex flex-col items-center justify-center gap-1"
+            value="launchQobuz"
+        >
+          <FontAwesomeIcon icon={faMusic} className="w-1/3 mx-auto" />
+          Qobuz
+        </KeypressButton>
       </div>
     </div>
   );
