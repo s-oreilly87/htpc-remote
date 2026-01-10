@@ -10,7 +10,7 @@ import {
     sendRokuKeypress,
     setLinuxDisplayMode,
 } from "@/utilities/http";
-import {buttonPress, openPlexampAndroidApp, sleep} from "@/utilities/utils";
+import {buttonPress, openPlexampAndroidApp, openQobuzAndroidApp, sleep} from "@/utilities/utils";
 import {LinuxDisplayModeCommand, LinuxLaunchAppCommand} from "@/constants/htpcControls";
 import { usePlatform } from "@/hooks/usePlatform";
 
@@ -43,6 +43,12 @@ const RemoteButton: React.FC<RemoteButtonProps> = ({ remote, children, ...props 
                 await killLinuxApp(LinuxLaunchAppCommand.Kodi)
                 await sleep(2000)
                 openPlexampAndroidApp();
+            }
+
+            if (launchAppName === LinuxLaunchAppCommand.Qobuz) {
+                await killLinuxApp(LinuxLaunchAppCommand.Kodi)
+                await sleep(2000)
+                openQobuzAndroidApp();
             }
 
             await launchLinuxApp(launchAppName);
