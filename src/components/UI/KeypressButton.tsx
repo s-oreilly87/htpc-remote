@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-import {REMOTE} from "@/utilities/constants";
+import { RemoteType } from "@/constants/remotes";
 import {
     killLinuxApp,
     launchLinuxApp,
@@ -11,11 +11,11 @@ import {
     setLinuxDisplayMode,
 } from "@/utilities/http";
 import {buttonPress, openPlexampAndroidApp, openQobuzAndroidApp, sleep} from "@/utilities/utils";
-import {LinuxDisplayModeCommand, LinuxLaunchAppCommand} from "@/constants/htpcControls";
+import { LinuxDisplayModeCommand, LinuxLaunchAppCommand } from "@/constants/htpcControls";
 import { usePlatform } from "@/hooks/usePlatform";
 
 interface RemoteButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  remote: (typeof REMOTE)[keyof typeof REMOTE];
+  remote: RemoteType;
 }
 
 const RemoteButton: React.FC<RemoteButtonProps> = ({ remote, children, ...props }) => {
@@ -23,9 +23,9 @@ const RemoteButton: React.FC<RemoteButtonProps> = ({ remote, children, ...props 
   const { isLinux } = usePlatform();
 
   const handleClick = async (event: React.MouseEvent<HTMLButtonElement>) => {
-    if (remote === REMOTE.ROKU) {
+    if (remote === RemoteType.ROKU) {
       sendRokuKeypress(event.currentTarget);
-    } else if (remote === REMOTE.PC) {
+    } else if (remote === RemoteType.PC) {
       if (event.currentTarget.value.startsWith("KEYSTROKE")) {
         sendKeystrokeToHtpc(event.currentTarget.value);
       } else {
@@ -60,7 +60,7 @@ const RemoteButton: React.FC<RemoteButtonProps> = ({ remote, children, ...props 
           }
         }
       }
-    } else if (remote === REMOTE.DENON) {
+    } else if (remote === RemoteType.DENON) {
       sendDenonCommand(event.currentTarget);
     }
     buttonPress(event.currentTarget, buttonPressTimerId ?? null, (timerId) =>

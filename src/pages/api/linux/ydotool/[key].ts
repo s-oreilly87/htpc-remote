@@ -1,7 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 
-import { ApiResponse, LinuxKeyAction } from "@/constants/htpcControls";
-import { KEYSTROKE } from "@/utilities/constants";
+import type { ApiResponse } from "@/types/api";
+import { LinuxKeyAction } from "@/constants/htpcControls";
+import { KEYSTROKE } from "@/constants/remotes";
 
 import { runCommand } from "../../lib/command";
 

@@ -6,12 +6,8 @@ import {
   useCallback,
   useMemo,
 } from "react";
-import {
-  DENON_INPUTS,
-  DENON_SOUND_MODES,
-  AudioModeOption,
-  DenonState,
-} from "@/components/RemotePanels/Denon/denonConstants";
+import { DENON_INPUTS, DENON_SOUND_MODES } from "@/constants/denon";
+import type { DenonSoundMode, DenonState } from "@/types/remote";
 import { fetchMainZoneData, sendDenonQuery } from "@/utilities/http";
 
 export interface DenonRefreshers {
@@ -170,7 +166,7 @@ export function DenonProvider({ children }: { children: ReactNode }) {
       console.info(`Unknown Input: ${data.inputFuncSelect}`);
     }
 
-    let soundMode: typeof DENON_SOUND_MODES[keyof typeof DENON_SOUND_MODES] =
+    let soundMode: DenonSoundMode | undefined =
       Object.values(DENON_SOUND_MODES).find((mode) =>
         mode.selectSurround.includes(data.selectSurround as string),
       );

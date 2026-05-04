@@ -1,8 +1,8 @@
+import { RemoteType } from "@/constants/remotes";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faClapperboard, faGamepad, faMusic} from "@fortawesome/free-solid-svg-icons";
 
 import KeypressButton from "@/components/UI/KeypressButton";
-import Constants from "@/utilities/constants";
 import {JSX} from "react";
 import { usePlatform } from "@/hooks/usePlatform";
 
@@ -16,7 +16,7 @@ function AppButtons(): JSX.Element {
     <div className="flex mx-auto w-full">
       <div className="w-full flex gap-2 justify-center">
         <KeypressButton
-          remote={Constants.REMOTE.PC}
+          remote={RemoteType.PC}
           className="btn btn-primary-pc w-1/4 flex flex-col items-center justify-center gap-1"
           value={videoApp.value}
         >
@@ -24,7 +24,7 @@ function AppButtons(): JSX.Element {
           {videoApp.label}
         </KeypressButton>
         <KeypressButton
-          remote={Constants.REMOTE.PC}
+          remote={RemoteType.PC}
           className="btn btn-primary-pc w-1/4 flex flex-col items-center justify-center gap-1"
           value="launchMoonlight"
         >
@@ -32,7 +32,7 @@ function AppButtons(): JSX.Element {
           Moonlight
         </KeypressButton>
         <KeypressButton
-          remote={Constants.REMOTE.PC}
+          remote={RemoteType.PC}
           className="btn btn-primary-pc w-1/4 flex flex-col items-center justify-center gap-1"
           value="launchPlexamp"
         >
@@ -40,7 +40,7 @@ function AppButtons(): JSX.Element {
           Plexamp
         </KeypressButton>
         <KeypressButton
-            remote={Constants.REMOTE.PC}
+            remote={RemoteType.PC}
             className="btn btn-primary-pc w-1/4 flex flex-col items-center justify-center gap-1"
             value="launchQobuz"
         >

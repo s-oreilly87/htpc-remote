@@ -1,7 +1,7 @@
 import {Key, keyboard} from "@nut-tree/nut-js";
 import type {NextApiRequest, NextApiResponse} from "next";
 
-import {KEYSTROKE} from "@/utilities/constants";
+import { KEYSTROKE } from "@/constants/remotes";
 import { getPlatformInfo } from "@/hooks/usePlatform";
 
 const { platform: PLATFORM } = getPlatformInfo();

@@ -1,12 +1,11 @@
-import Constants from "@/utilities/constants";
+import { RemoteType, KEYSTROKE } from "@/constants/remotes";
 import KeypressButton from "@/components/UI/KeypressButton";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faPowerOff} from "@fortawesome/free-solid-svg-icons";
 import {sendDenonCommand} from "@/utilities/http";
 import {useDenonContext} from "@/context/denon";
 
-const remote = Constants.REMOTE.DENON;
-const KEYSTROKE = Constants.KEYSTROKE;
+const remote = RemoteType.DENON;
 
 function DenonBottomLeftButtons({}) {
   const [denonState, updateDenonState, refreshDenonState] = useDenonContext();

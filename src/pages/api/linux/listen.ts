@@ -1,10 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 
-import {
-  ApiResponse,
-  LinuxLaunchAppCommand, LinuxListenCommand,
-  VALID_LISTEN_COMMANDS,
-} from "@/constants/htpcControls";
+import type { ApiResponse } from "@/types/api";
+import { LinuxLaunchAppCommand, LinuxListenCommand, VALID_LISTEN_COMMANDS } from "@/constants/htpcControls";
 import { runCommand } from "../lib/command";
 
 type ListenBody = {

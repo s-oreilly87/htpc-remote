@@ -1,5 +1,5 @@
 import client from '@/api-modules/tplink/tplink-client'
-import {LIGHTSWITCHES, PLUGS} from "@/utilities/constants";
+import { LIGHTSWITCHES, PLUGS } from "@/constants/smartHome";
 
 export default function handleToggleSwitch(req, res) {
   let { params } = req.query;

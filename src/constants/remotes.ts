@@ -98,6 +98,3 @@ export const KEYSTROKE = {
   KEY_COMBOS: KeyCombo,
 } as const;
 
-export type PcKeystrokeKey = keyof typeof PcKeystroke;
-export type RokuKeystrokeKey = keyof typeof RokuKeystroke;
-export type DenonKeystrokeKey = keyof typeof DenonKeystroke;

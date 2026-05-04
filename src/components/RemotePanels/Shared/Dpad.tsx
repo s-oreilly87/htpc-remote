@@ -7,7 +7,7 @@ import {
   faArrowRight,
   faArrowUp,
 } from "@fortawesome/free-solid-svg-icons";
-import { KEYSTROKE } from "@/utilities/constants";
+import { KEYSTROKE } from "@/constants/remotes";
 
 const Dpad = ({ remote }) => {
   return (
