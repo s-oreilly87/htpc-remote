@@ -165,14 +165,20 @@ EOF
 
 echo "    Written htpc-remote.service, ydotoold.service, denon-remap.service"
 
-# ── 5. Enable user services ───────────────────────────────────────────────────
+# ── 5. Copy update timer units ────────────────────────────────────────────────
+cp "$SCRIPT_DIR/systemd/htpc-update.service" "$SERVICE_DIR/"
+cp "$SCRIPT_DIR/systemd/htpc-update.timer"   "$SERVICE_DIR/"
+echo "    Copied htpc-update.service, htpc-update.timer"
+
+# ── 6. Enable user services ───────────────────────────────────────────────────
 echo "==> Enabling user services..."
 systemctl --user daemon-reload
 systemctl --user enable --now ydotoold
 systemctl --user enable --now denon-remap
-systemctl --user enable htpc-remote    # don't start now — requires graphical session
+systemctl --user enable htpc-remote         # don't start now — requires graphical session
+systemctl --user enable --now htpc-update.timer
 
-# ── 6. Enable Caddy system service (requires sudo) ────────────────────────────
+# ── 7. Enable Caddy system service (requires sudo) ────────────────────────────
 echo "==> Enabling Caddy (requires sudo)..."
 sudo systemctl daemon-reload
 sudo systemctl enable --now caddy
@@ -181,8 +187,12 @@ echo ""
 echo "✓  Install complete"
 echo ""
 echo "   htpc-remote.service will start automatically on next graphical login."
-echo "   Start manually: systemctl --user start htpc-remote"
-echo "   Logs:           journalctl --user -u htpc-remote -f"
+echo "   Start manually:  systemctl --user start htpc-remote"
+echo "   Logs:            journalctl --user -u htpc-remote -f"
+echo ""
+echo "   htpc-update.timer will pull master and restart the app at 2am daily."
+echo "   Trigger manually: systemctl --user start htpc-update"
+echo "   Logs:             journalctl --user -u htpc-update -f"
 echo ""
 echo "   ⚠  denon-remap.service hardcodes ALSA card ID 'alsa_card.pci-0000_00_1f.3'."
 echo "      Verify with: pactl list cards short"

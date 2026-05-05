@@ -198,18 +198,34 @@ All service files are in `linux/systemd/`. The install scripts generate and enab
 # User services (run as your login user)
 cp linux/systemd/htpc-agent.service    ~/.config/systemd/user/   # HTPC-only
 cp linux/systemd/htpc-remote.service   ~/.config/systemd/user/   # Host
+cp linux/systemd/htpc-update.service   ~/.config/systemd/user/   # Host
+cp linux/systemd/htpc-update.timer     ~/.config/systemd/user/   # Host
 cp linux/systemd/ydotoold.service      ~/.config/systemd/user/
 cp linux/systemd/denon-remap.service   ~/.config/systemd/user/
 systemctl --user daemon-reload
-systemctl --user enable --now htpc-agent      # or htpc-remote
+systemctl --user enable --now htpc-agent           # or htpc-remote
 systemctl --user enable --now ydotoold
 systemctl --user enable --now denon-remap
+systemctl --user enable --now htpc-update.timer
 
 # System service (requires sudo — normally installed by Caddy apt package)
 sudo systemctl enable --now caddy
 ```
 
 > `htpc-agent.service` and `htpc-remote.service` in `linux/systemd/` are reference files — the install scripts generate versions with correct absolute paths substituted in.
+
+### Auto-update timer
+
+`htpc-update.timer` fires `htpc-update.service` at 2am daily. The service runs `git pull origin master && npm install --omit=dev`, then restarts `htpc-remote`. `Persistent=true` means if the machine was off at 2am, the update runs on next boot.
+
+```bash
+# Check next scheduled run
+systemctl --user list-timers htpc-update
+
+# Trigger manually (e.g. to apply a fix without waiting for 2am)
+systemctl --user start htpc-update
+journalctl --user -u htpc-update -f
+```
 
 ---
 
@@ -242,6 +258,8 @@ linux/
   systemd/                      # Reference systemd unit files
     htpc-agent.service          # Agent service (install scripts generate from this)
     htpc-remote.service         # Next.js app service (install scripts generate from this)
+    htpc-update.service         # Oneshot: git pull + npm install + restart htpc-remote
+    htpc-update.timer           # Triggers htpc-update.service daily at 2am
     ydotoold.service            # ydotool daemon
     denon-remap.service         # PipeWire remap sink setup at login
     caddy.service               # Caddy system service reference

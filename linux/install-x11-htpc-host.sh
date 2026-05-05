@@ -128,13 +128,19 @@ EOF
 
 echo "    Written htpc-remote.service, ydotoold.service"
 
-# ── 5. Enable user services ───────────────────────────────────────────────────
+# ── 5. Copy update timer units ────────────────────────────────────────────────
+cp "$SCRIPT_DIR/systemd/htpc-update.service" "$SERVICE_DIR/"
+cp "$SCRIPT_DIR/systemd/htpc-update.timer"   "$SERVICE_DIR/"
+echo "    Copied htpc-update.service, htpc-update.timer"
+
+# ── 6. Enable user services ───────────────────────────────────────────────────
 echo "==> Enabling user services..."
 systemctl --user daemon-reload
 systemctl --user enable --now ydotoold
-systemctl --user enable htpc-remote    # don't start now — requires graphical session
+systemctl --user enable htpc-remote         # don't start now — requires graphical session
+systemctl --user enable --now htpc-update.timer
 
-# ── 6. Enable Caddy system service (requires sudo) ────────────────────────────
+# ── 7. Enable Caddy system service (requires sudo) ────────────────────────────
 echo "==> Enabling Caddy (requires sudo)..."
 sudo systemctl daemon-reload
 sudo systemctl enable --now caddy
@@ -143,8 +149,12 @@ echo ""
 echo "✓  Install complete"
 echo ""
 echo "   htpc-remote.service will start automatically on next graphical login."
-echo "   Start manually: systemctl --user start htpc-remote"
-echo "   Logs:           journalctl --user -u htpc-remote -f"
+echo "   Start manually:  systemctl --user start htpc-remote"
+echo "   Logs:            journalctl --user -u htpc-remote -f"
+echo ""
+echo "   htpc-update.timer will pull master and restart the app at 2am daily."
+echo "   Trigger manually: systemctl --user start htpc-update"
+echo "   Logs:             journalctl --user -u htpc-update -f"
 echo ""
 echo "   Note: Display-switching (htpc-res) is not available on X11."
 echo "   Set NEXT_PUBLIC_HTPC_PLATFORM=LINUX_X11 in .env.local."
