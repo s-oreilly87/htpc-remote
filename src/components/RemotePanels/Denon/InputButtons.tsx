@@ -5,7 +5,7 @@ import {sendDenonCommand} from "@/utilities/http";
 import {useDenonContext} from "@/context/denon";
 
 const InputButtons = ({}) => {
-  const [denonState, updateDenonState, refreshDenonState] = useDenonContext();
+  const { denonState, updateDenonState, refreshDenonState } = useDenonContext();
 
   const handleClick = async (event) => {
     // For responsiveness, update denonState.input before sending command.
@@ -34,7 +34,7 @@ const InputButtons = ({}) => {
           <KeypressButton
             remote={RemoteType.DENON}
             key={input.value}
-            className={`btn z-50 ${
+            className={`btn text-sm z-50 ${
               denonState.input?.value === input.value
                 ? "btn-primary-denon"
                 : "btn-secondary"

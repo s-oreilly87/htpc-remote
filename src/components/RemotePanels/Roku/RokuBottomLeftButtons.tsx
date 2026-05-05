@@ -23,7 +23,7 @@ function RokuBottomLeftButtons({ rokuPowerOn, setRokuPowerOn }) {
   return (
     <div className="relative z-50">
       <button
-        className="w-12 h-12 p-3 bg-red-600 text-white rounded-full aspect-square flex justify-center items-center z-50 shadow-inner shadow-red-500"
+        className="size-12 p-3 bg-red-600 text-white rounded-full flex justify-center items-center shadow-inner shadow-red-400/70 select-none"
         value="powerButton"
         onClick={handleClickPower}
       >

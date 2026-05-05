@@ -11,19 +11,13 @@ function PCBottomLeftButtons() {
 
     return (
       <div className="flex flex-col gap-2 w-full relative justify-evenly">
-          <div className="flex flex-col -translate-y-9">
-              <KeypressButton
-                  remote={RemoteType.PC}
-                  className="w-8 h-8 bg-red-600 shadow-inner shadow-red-500 text-white rounded-md flex justify-center items-center translate-x-2"
-                  value={isLinux ? KEYSTROKE.PC.CLOSE_WINDOW : "closeWindow"}
-              >
-                  <FontAwesomeIcon
-                      width={16}
-                      height={16}
-                      icon={faX}
-                  />
-              </KeypressButton>
-          </div>
+          <KeypressButton
+              remote={RemoteType.PC}
+              className="size-9 bg-red-600 shadow-inner shadow-red-400/70 text-white rounded-md flex justify-center items-center self-start -translate-y-9"
+              value={isLinux ? KEYSTROKE.PC.CLOSE_WINDOW : "closeWindow"}
+          >
+              <FontAwesomeIcon width={14} height={14} icon={faX} />
+          </KeypressButton>
           {/*<div className="flex flex-col -translate-y-9">*/}
           {/*    <KeypressButton*/}
           {/*        remote={RemoteType.PC}*/}

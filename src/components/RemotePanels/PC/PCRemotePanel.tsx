@@ -15,7 +15,6 @@ function PCRemote() {
   const { isLinux, isLinuxWayland } = usePlatform();
 
   const showAirMouse = !isLinuxWayland;
-  const showKodiButtons = isLinux;
 
   return (
     <div
@@ -29,8 +28,8 @@ function PCRemote() {
 
         {showAirMouse && <AirMouse />}
       </div>
-      <div className="h-50 items-end">
-        {showKodiButtons && <KodiButtons />}
+      <div className="shrink-0">
+        {isLinux && <KodiButtons />}
         <BottomSection remote={remote} />
       </div>
     </div>
@@ -41,8 +40,8 @@ export default PCRemote;
 
 function KodiButtons() {
     return (
-        <div className="flex flex-col gap-4 justify-between items-center mb-10 border border-gray-600 rounded-lg mx-auto p-3 w-fit">
-            <span className="text-white text-md">Kodi</span>
+        <div className="flex flex-col gap-3 justify-between items-center mb-6 border border-gray-600/50 rounded-lg mx-auto p-3 w-fit">
+            <span className="text-white text-sm">Kodi</span>
             <div className="flex gap-2 justify-center">
                 <KeypressButton
                     remote={RemoteType.PC}

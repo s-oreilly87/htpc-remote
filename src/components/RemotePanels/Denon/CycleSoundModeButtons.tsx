@@ -9,7 +9,7 @@ const RESPONSE_TIMEOUT = 2000;
 const remote = RemoteType.DENON;
 
 function CycleSoundModes({ cycleTimeout, setCycleTimeout }) {
-  const [denonState, updateDenonState, refreshDenonState] = useDenonContext();
+  const { updateDenonState } = useDenonContext();
 
   const handleCycleClick = async (event) => {
     // The first click of a cycle button brings up current sound mode on display - no response from denon
@@ -121,11 +121,11 @@ function CycleSoundModes({ cycleTimeout, setCycleTimeout }) {
   };
 
   return (
-    <div className="w-full row mx-auto flex flex-col">
+    <div className="w-full mx-auto flex flex-col">
       <div className="flex gap-2 w-4/5 mx-auto justify-center">
         <KeypressButton
           remote={remote}
-          className="btn h-10 w-1/4 bg-green-700 hover:bg-green-600"
+          className="btn h-10 w-1/4 bg-green-700 hover:bg-green-600 shadow-inner shadow-green-500/60"
           value="MSMOVIE"
           onClick={handleCycleClick}
         >
@@ -133,7 +133,7 @@ function CycleSoundModes({ cycleTimeout, setCycleTimeout }) {
         </KeypressButton>
         <KeypressButton
           remote={remote}
-          className="btn h-10 w-1/4 bg-red-700 hover:bg-red-600"
+          className="btn h-10 w-1/4 bg-red-700 hover:bg-red-600 shadow-inner shadow-red-500/60"
           value="MSMUSIC"
           onClick={handleCycleClick}
         >
@@ -141,7 +141,7 @@ function CycleSoundModes({ cycleTimeout, setCycleTimeout }) {
         </KeypressButton>
         <KeypressButton
           remote={remote}
-          className="btn h-10 w-1/4 bg-blue-700 hover:bg-blue-600"
+          className="btn h-10 w-1/4 bg-indigo-700 hover:bg-indigo-600 shadow-inner shadow-indigo-500/60"
           value="MSGAME"
           onClick={handleCycleClick}
         >
@@ -149,7 +149,7 @@ function CycleSoundModes({ cycleTimeout, setCycleTimeout }) {
         </KeypressButton>
         <KeypressButton
           remote={remote}
-          className="btn h-10 w-1/4 bg-yellow-500 hover:bg-yellow-400"
+          className="btn h-10 w-1/4 bg-amber-600 hover:bg-amber-500 shadow-inner shadow-amber-400/60"
           value="MSDIRECT"
           onClick={handleClick}
         >
