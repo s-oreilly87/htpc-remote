@@ -1,23 +1,18 @@
 import { RemoteType } from "@/constants/remotes";
 import KeyboardGroup from "../Shared/KeyboardGroup";
-import {faPowerOff} from "@fortawesome/free-solid-svg-icons";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {fetchRokuDeviceInfo, sendRokuKeypress} from "@/utilities/http";
+import { faPowerOff } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { sendRokuKeypress } from "@/utilities/http";
+import { useRokuContext } from "@/context/roku";
 
-function RokuBottomLeftButtons({ rokuPowerOn, setRokuPowerOn }) {
+function RokuBottomLeftButtons() {
+  const { rokuState, updateRokuState, invalidateRokuState } = useRokuContext();
+
   const handleClickPower = () => {
-    setRokuPowerOn(!rokuPowerOn);
+    updateRokuState({ powerOn: !rokuState.powerOn });
     sendRokuKeypress({ value: "Power" });
-
-    // Confirm power state after a sec and update state if needed
-    setTimeout(async () => {
-      const response = await fetchRokuDeviceInfo();
-      if (response.data["powerMode"] === "PowerOn") {
-        setRokuPowerOn(true);
-      } else {
-        setRokuPowerOn(false);
-      }
-    }, 1000);
+    // Confirm actual power state after the TV has had time to respond
+    setTimeout(invalidateRokuState, 1000);
   };
 
   return (
@@ -29,7 +24,7 @@ function RokuBottomLeftButtons({ rokuPowerOn, setRokuPowerOn }) {
       >
         <FontAwesomeIcon icon={faPowerOff} />
       </button>
-      {rokuPowerOn && <KeyboardGroup remote={RemoteType.ROKU} />}
+      {rokuState.powerOn && <KeyboardGroup remote={RemoteType.ROKU} />}
     </div>
   );
 }

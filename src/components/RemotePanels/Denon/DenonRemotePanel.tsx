@@ -2,7 +2,6 @@ import { RemoteType } from "@/constants/remotes";
 import InputButtons from "./InputButtons";
 import AdvancedVolumeControl from "./AdvancedVolumeControl";
 import BottomSection from "../Shared/BottomSection";
-import { useEffect } from "react";
 import Overlay from "@/components/UI/Overlay";
 import { useDenonContext } from "@/context/denon";
 import SoundModes from "@/components/RemotePanels/Denon/SoundModes";
@@ -10,12 +9,7 @@ import SoundModes from "@/components/RemotePanels/Denon/SoundModes";
 const remote = RemoteType.DENON;
 
 function DenonRemote() {
-  const { denonState, refreshDenonState } = useDenonContext();
-
-  // On render, query the amp for its current state (some data from MainZone HTTP request, levels data over telnet)
-  useEffect(() => {
-    refreshDenonState.all();
-  }, [refreshDenonState]);
+  const { denonState } = useDenonContext();
 
   return (
     <>

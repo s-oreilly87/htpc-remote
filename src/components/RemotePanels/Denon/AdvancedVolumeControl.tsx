@@ -18,7 +18,7 @@ const DIALOGUE_ADJUST_DISABLED_MODES = [
   DENON_SOUND_MODES.PURE_DIRECT,
 ];
 const AdvancedVolumeControl = ({}) => {
-  const { denonState, updateDenonState } = useDenonContext();
+  const { denonState, isLoading, updateDenonState } = useDenonContext();
 
   const [buttonPressTimerId, setButtonPressTimerId] = useState<number>(null);
 
@@ -68,7 +68,7 @@ const AdvancedVolumeControl = ({}) => {
           label={"Dialogue Adjust"}
           labelColor={"teal-500"}
           labelPos={"above"}
-          color={denonState.loading ? "teal-600" : "teal-500"}
+          color={isLoading ? "teal-600" : "teal-500"}
           enabled={
             denonState.psDilOn &&
             !DIALOGUE_ADJUST_DISABLED_MODES.includes(denonState.soundMode)
@@ -94,14 +94,14 @@ const AdvancedVolumeControl = ({}) => {
             className="btn-secondary w-1/3 items-center justify-center"
             value="PSDIL DOWN"
             onClick={handleClick}
-            disabled={denonState.loading}
+            disabled={isLoading}
           >
             <FontAwesomeIcon icon={faMinus} />
           </KeypressButton>
           <div className={"flex w-1/3 justify-center items-center"}>
             <span
               className={`text-teal-500 ${dot_matrix.className} ${
-                denonState.loading ? "opacity-50 animate-pulse" : ""
+                isLoading ? "opacity-50 animate-pulse" : ""
               }`}
             >
               {denonState.PSDIL > 0
@@ -115,7 +115,7 @@ const AdvancedVolumeControl = ({}) => {
             className="btn-secondary w-1/3 items-center justify-center"
             value="PSDIL UP"
             onClick={handleClick}
-            disabled={denonState.loading}
+            disabled={isLoading}
           >
             <FontAwesomeIcon icon={faPlus} />
           </KeypressButton>
@@ -137,7 +137,7 @@ const AdvancedVolumeControl = ({}) => {
               className={`${denonState.PSDYNVOL === "OFF" ? "btn-primary-denon" : "btn-secondary"} w-1/4 items-center justify-center`}
               value="PSDYNVOL OFF"
               onClick={handleClick}
-              disabled={denonState.loading}
+              disabled={isLoading}
             >
               Off
             </KeypressButton>
@@ -146,7 +146,7 @@ const AdvancedVolumeControl = ({}) => {
               className={`${denonState.PSDYNVOL === "LIT" ? "btn-primary-denon" : "btn-secondary"} w-1/4 items-center justify-center`}
               value="PSDYNVOL LIT"
               onClick={handleClick}
-              disabled={denonState.loading}
+              disabled={isLoading}
             >
               Low
             </KeypressButton>
@@ -155,7 +155,7 @@ const AdvancedVolumeControl = ({}) => {
               className={`${denonState.PSDYNVOL === "MED" ? "btn-primary-denon" : "btn-secondary"} w-1/4 items-center justify-center`}
               value="PSDYNVOL MED"
               onClick={handleClick}
-              disabled={denonState.loading}
+              disabled={isLoading}
             >
               Med
             </KeypressButton>
@@ -164,7 +164,7 @@ const AdvancedVolumeControl = ({}) => {
               className={`${denonState.PSDYNVOL === "HEV" ? "btn-primary-denon" : "btn-secondary"} w-1/4 items-center justify-center`}
               value="PSDYNVOL HEV"
               onClick={handleClick}
-              disabled={denonState.loading}
+              disabled={isLoading}
             >
               High
             </KeypressButton>
@@ -175,7 +175,7 @@ const AdvancedVolumeControl = ({}) => {
           <Toggle
             label={"Dynamic EQ"}
             labelColor={"teal-500"}
-            color={denonState.loading ? "teal-600" : "teal-500"}
+            color={isLoading ? "teal-600" : "teal-500"}
             enabled={denonState.psDynEqOn}
             onToggle={handleDynEqToggle}
           />
@@ -195,7 +195,7 @@ const AdvancedVolumeControl = ({}) => {
               }`}
               value="PSREFLEV 0"
               onClick={handleClick}
-              disabled={denonState.loading}
+              disabled={isLoading}
             >
               0db
             </KeypressButton>
@@ -208,7 +208,7 @@ const AdvancedVolumeControl = ({}) => {
               }`}
               value="PSREFLEV 5"
               onClick={handleClick}
-              disabled={denonState.loading}
+              disabled={isLoading}
             >
               5db
             </KeypressButton>
@@ -221,7 +221,7 @@ const AdvancedVolumeControl = ({}) => {
               }`}
               value="PSREFLEV 10"
               onClick={handleClick}
-              disabled={denonState.loading}
+              disabled={isLoading}
             >
               10db
             </KeypressButton>
@@ -234,7 +234,7 @@ const AdvancedVolumeControl = ({}) => {
               }`}
               value="PSREFLEV 15"
               onClick={handleClick}
-              disabled={denonState.loading}
+              disabled={isLoading}
             >
               15db
             </KeypressButton>

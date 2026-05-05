@@ -9,8 +9,10 @@ import { buttonPress } from "@/utilities/utils";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import MoreChannelsModal from "@/components/RemotePanels/Roku/MoreChannelsModal";
+import { useRokuContext } from "@/context/roku";
 
-function RokuChannels({ setPowerOn }) {
+function RokuChannels() {
+  const { updateRokuState } = useRokuContext();
   const [iconsLoaded, setIconsLoaded] = useState(false);
   const [moreChannels, setMoreChannels] = useState<{ id: string, label: string }[]>([]);
   const [isMoreChannelsModalOpen, setIsMoreChannelsModalOpen] = useState<boolean>(false);
@@ -94,7 +96,7 @@ function RokuChannels({ setPowerOn }) {
 
   const handleClick = (event) => {
     sendRokuLaunchCommand(event.currentTarget);
-    setPowerOn(true);
+    updateRokuState({ powerOn: true });
     buttonPress(event.currentTarget, buttonPressTimerId, setButtonPressTimerId);
   };
 
@@ -109,7 +111,6 @@ function RokuChannels({ setPowerOn }) {
         setIsOpen={setIsMoreChannelsModalOpen}
         moreChannels={moreChannels}
         fetchIcons={fetchIcons}
-        setPowerOn={setPowerOn}
       />
       <div
         id="roku-channels"

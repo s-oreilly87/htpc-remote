@@ -4,14 +4,22 @@ import { sendRokuLaunchCommand } from "@/utilities/http";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import { buttonPress } from "@/utilities/utils";
+import { useRokuContext } from "@/context/roku";
+
+interface MoreChannelsModalProps {
+  isOpen: boolean;
+  setIsOpen: (open: boolean) => void;
+  moreChannels: { id: string; label: string }[];
+  fetchIcons: (selector: string) => Promise<void>;
+}
 
 export default function MoreChannelsModal({
   isOpen,
   setIsOpen,
   moreChannels,
   fetchIcons,
-  setPowerOn,
-}) {
+}: MoreChannelsModalProps) {
+  const { updateRokuState } = useRokuContext();
   const [areIconsLoaded, setAreIconsLoaded] = useState<boolean>(false);
   const [buttonPressTimerId, setButtonPressTimerId] = useState<number | null>(null);
 
@@ -25,7 +33,7 @@ export default function MoreChannelsModal({
 
   const handleClick = (event) => {
     sendRokuLaunchCommand(event.currentTarget);
-    setPowerOn(true);
+    updateRokuState({ powerOn: true });
     buttonPress(event.currentTarget, buttonPressTimerId, setButtonPressTimerId);
     closeModal();
   };

@@ -10,7 +10,7 @@ import { dot_matrix } from "@/styles/fonts";
 import { useDenonContext } from "@/context/denon";
 
 const SelectSoundMode = ({ cycleTimeout }) => {
-  const { denonState, updateDenonState, refreshDenonState } = useDenonContext();
+  const { denonState, isLoading, updateDenonState, invalidateDenonState } = useDenonContext();
 
   //TODO: update this component to use a similar pattern to AudioModeSelect and DisplayModeSelect
 
@@ -30,7 +30,7 @@ const SelectSoundMode = ({ cycleTimeout }) => {
     if (response.error) {
       return console.error(response.error);
     }
-    refreshDenonState.all();
+    invalidateDenonState();
   };
 
   return (
@@ -42,7 +42,7 @@ const SelectSoundMode = ({ cycleTimeout }) => {
       >
         <div className="relative mt-1 w-full ">
           <Listbox.Button className="relative w-full h-10 cursor-default rounded-lg bg-slate-800 pt-1 pb-2 pl-3 pr-10 text-center shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm">
-            {!denonState.loading && (
+            {!isLoading && (
               <span
                 className={`block truncate text-teal-400 text-xl ${
                   dot_matrix.className
@@ -51,7 +51,7 @@ const SelectSoundMode = ({ cycleTimeout }) => {
                 {selectedSoundMode.label}
               </span>
             )}
-            {denonState.loading && <LoadingSpinner color={"teal-500"} />}
+            {isLoading && <LoadingSpinner color={"teal-500"} />}
             <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
               <FontAwesomeIcon
                 icon={faChevronDown}

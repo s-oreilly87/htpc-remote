@@ -1,36 +1,20 @@
 import { RemoteType } from "@/constants/remotes";
 import ChannelButtons from "./ChannelButtons";
 import HDMIInputButtons from "./HDMIInputButtons";
-import MediaButtons from "../Shared//MediaButtons";
+import MediaButtons from "../Shared/MediaButtons";
 import BackHomeOption from "./BackHomeOption";
 import BottomSection from "../Shared/BottomSection";
-import {useCallback, useEffect} from "react";
-import {fetchRokuDeviceInfo} from "@/utilities/http";
 import Overlay from "@/components/UI/Overlay";
+import { useRokuContext } from "@/context/roku";
 
 const remote = RemoteType.ROKU;
-function RokuRemote({ rokuState, setRokuState, setSelectedRemote }) {
-  const setRokuPowerOn = useCallback(
-    (powerOn) => {
-      setRokuState((prevState) => ({
-        ...prevState,
-        powerOn: powerOn,
-      }));
-    },
-    [setRokuState],
-  );
 
-  useEffect(() => {
-    async function fetchPowerState() {
-      const response = await fetchRokuDeviceInfo();
+interface RokuRemotePanelProps {
+  setSelectedRemote: (remote: RemoteType) => void;
+}
 
-      if (response.error) {
-        return;
-      }
-      setRokuPowerOn(response.data["powerMode"] === "PowerOn");
-    }
-    fetchPowerState();
-  }, [setRokuPowerOn]);
+function RokuRemotePanel({ setSelectedRemote }: RokuRemotePanelProps) {
+  const { rokuState } = useRokuContext();
 
   return (
     <>
@@ -41,8 +25,8 @@ function RokuRemote({ rokuState, setRokuState, setSelectedRemote }) {
       >
         <div className="flex flex-col flex-grow pb-[10%] gap-4 justify-between">
           <div className="flex flex-col gap-3">
-            <ChannelButtons setPowerOn={setRokuPowerOn} />
-            <HDMIInputButtons setPowerOn={setRokuPowerOn} setSelectedRemote={setSelectedRemote}/>
+            <ChannelButtons />
+            <HDMIInputButtons setSelectedRemote={setSelectedRemote} />
           </div>
           <div className="flex flex-col flex-grow gap-3 justify-center">
             <MediaButtons remote={remote} />
@@ -50,15 +34,11 @@ function RokuRemote({ rokuState, setRokuState, setSelectedRemote }) {
           </div>
         </div>
         <div className="shrink-0">
-          <BottomSection
-            remote={remote}
-            rokuState={rokuState}
-            setRokuPowerOn={setRokuPowerOn}
-          />
+          <BottomSection remote={remote} />
         </div>
       </div>
     </>
   );
 }
 
-export default RokuRemote;
+export default RokuRemotePanel;
