@@ -18,6 +18,7 @@
 # misc
 .DS_Store
 *.pem
+tsconfig.tsbuildinfo
 
 # debug
 npm-debug.log*
@@ -39,3 +40,14 @@ yarn-error.log*
 # Next-Pwa
 public/sw.js
 public/workbox-*
+
+# htpc-agent standalone dependencies
+/linux/htpc-agent/node_modules/
+/linux/htpc-agent/package-lock.json
+
+# backup of nutjs node module
+.nutjs-backup
+/vendor/@nut-tree/libnut/package-lock.json
+/vendor/@nut-tree/libnut/node_modules/
+/vendor/@nut-tree/nut-js/package-lock.json
+/vendor/@nut-tree/nut-js/node_modules/

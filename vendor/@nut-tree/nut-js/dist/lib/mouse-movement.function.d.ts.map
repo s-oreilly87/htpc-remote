@@ -1,0 +1,1 @@
+{"version":3,"file":"mouse-movement.function.d.ts","sourceRoot":"","sources":["../../lib/mouse-movement.function.ts"],"names":[],"mappings":"AAAA;;;;GAIG;AACH,MAAM,WAAW,cAAc;IAC7B,CAAC,kBAAkB,EAAE,MAAM,GAAG,MAAM,CAAC;CACtC;AAID,eAAO,MAAM,qBAAqB,2BAA4B,MAAM,WACf,CAAC;AAEtD,eAAO,MAAM,0BAA0B,kBACtB,MAAM,0BACG,MAAM,mBACd,cAAc,KAC7B,MAAM,EAYR,CAAC;AAEF,eAAO,MAAM,MAAM,EAAE,cAEpB,CAAC"}

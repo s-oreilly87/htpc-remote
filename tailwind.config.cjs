@@ -23,7 +23,7 @@ module.exports = {
             inter: ['var(--font-inter)'],
             roboto: ['var(--font-roboto-mono)'],
             dotMatrix: ['var(--font-dot-matrix)']
-        }
+        },
     },
   },
   plugins: [],

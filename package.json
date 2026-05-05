@@ -1,14 +1,17 @@
 {
-  "name": "remote-nextjs",
+  "name": "htpc-remote",
   "version": "0.1.0",
+  "description": "Mobile-first PWA remote control for a home theater PC setup — Denon AVR, Roku, and HTPC unified in one swipeable interface.",
+  "author": "Sean O'Reilly <seanoreilly00@proton.me>",
+  "license": "MIT",
   "type": "module",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "proxy": "npx local-ssl-proxy --key ./certificates/remote-app-key.pem --cert ./certificates/remote-app-cert.pem --source 4000 --target 3000"
+    "deploy": "next build && next start",
+    "lint": "next lint"
   },
   "dependencies": {
     "@achingbrain/ssdp": "^4.0.1",
@@ -17,7 +20,8 @@
     "@fortawesome/free-solid-svg-icons": "^6.3.0",
     "@fortawesome/react-fontawesome": "^0.2.0",
     "@headlessui/react": "^1.7.13",
-    "@nut-tree/nut-js": "^3.1.2-next.20230310000145",
+    "@nut-tree/nut-js": "file:./vendor/@nut-tree/nut-js",
+    "@tanstack/react-query": "^5.100.9",
     "cors": "^2.8.5",
     "eslint": "8.35.0",
     "eslint-config-next": "13.2.3",
@@ -46,7 +50,9 @@
     "xml2js": "^0.4.23"
   },
   "devDependencies": {
+    "@types/react": "19.2.7",
     "autoprefixer": "^10.4.13",
+    "concurrently": "^8.2.2",
     "postcss": "^8.4.21",
     "tailwindcss": "^3.2.7"
   }

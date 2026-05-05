@@ -1,0 +1,1 @@
+{"version":3,"file":"jimp-image-reader.class.d.ts","sourceRoot":"","sources":["../../../../lib/provider/io/jimp-image-reader.class.ts"],"names":[],"mappings":"AACA,OAAO,EAAE,WAAW,EAAE,MAAM,sBAAsB,CAAC;AACnD,OAAO,EAAE,KAAK,EAAE,MAAM,mBAAmB,CAAC;AAG1C,MAAM,CAAC,OAAO,MAAO,YAAW,WAAW;IACzC,IAAI,CAAC,UAAU,EAAE,MAAM,GAAG,OAAO,CAAC,KAAK,CAAC;CAmCzC"}

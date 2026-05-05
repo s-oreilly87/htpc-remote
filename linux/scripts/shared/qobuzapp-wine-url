@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+LOG="/tmp/qobuzapp-handler.log"
+echo "[$(date --iso-8601=seconds)] args: $*" >> "$LOG"
+
+export WINEPREFIX="$HOME/.wine-qobuz"
+
+URL="${1:-}"
+if [[ -z "$URL" ]]; then
+  exit 0
+fi
+
+# Use Squirrel's Update.exe to forward args to the running instance properly
+exec wine "C:\\users\\sean\\AppData\\Local\\Qobuz\\Update.exe" \
+  --processStart Qobuz.exe \
+  --process-start-args "$URL"
