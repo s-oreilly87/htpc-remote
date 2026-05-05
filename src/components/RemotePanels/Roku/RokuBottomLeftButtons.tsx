@@ -1,4 +1,4 @@
-import Constants from "@/utilities/constants";
+import { RemoteType } from "@/constants/remotes";
 import KeyboardGroup from "../Shared/KeyboardGroup";
 import {faPowerOff} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
@@ -29,7 +29,7 @@ function RokuBottomLeftButtons({ rokuPowerOn, setRokuPowerOn }) {
       >
         <FontAwesomeIcon icon={faPowerOff} />
       </button>
-      {rokuPowerOn && <KeyboardGroup remote={Constants.REMOTE.ROKU} />}
+      {rokuPowerOn && <KeyboardGroup remote={RemoteType.ROKU} />}
     </div>
   );
 }

@@ -1,16 +1,25 @@
 import { Fragment } from "react";
 import { Popover, Transition } from "@headlessui/react";
-import AudioModeSelect from "./AudioModeSelect";
-import DisplayModeSelect from "./DisplayModeSelect";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
 
+import AudioModeSelect from "./AudioModeSelect";
+import DisplayModeSelect from "./DisplayModeSelect";
+import type { AudioMode, DisplayMode } from "@/types/remote";
+
+interface CustomModesCollapseProps {
+  selectedAudioMode: AudioMode;
+  setSelectedAudioMode: (mode: AudioMode) => void;
+  selectedDisplayMode: DisplayMode;
+  setSelectedDisplayMode: (mode: DisplayMode) => void;
+}
+
 function CustomModesCollapse({
-  selectedDisplayMode,
-  setSelectedDisplayMode,
   selectedAudioMode,
   setSelectedAudioMode,
-}) {
+  selectedDisplayMode,
+  setSelectedDisplayMode,
+}: CustomModesCollapseProps) {
   return (
     <div>
       <Popover className="relative">
@@ -23,9 +32,7 @@ function CustomModesCollapse({
               Custom Audio/Video Modes
               <FontAwesomeIcon
                 icon={faChevronDown}
-                className={`absolute right-6 ${
-                  open ? "rotate-180 transform" : ""
-                }`}
+                className={`absolute right-6 ${open ? "rotate-180 transform" : ""}`}
               />
             </Popover.Button>
 

@@ -2,7 +2,7 @@ import KeypressButton from "@/components/UI/KeypressButton";
 import PressAndHoldButton from "@/components/UI/PressAndHoldButton";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faVolumeHigh, faVolumeLow, faVolumeXmark,} from "@fortawesome/free-solid-svg-icons";
-import {KEYSTROKE, REMOTE} from "@/utilities/constants";
+import { KEYSTROKE, RemoteType } from "@/constants/remotes";
 import {dot_matrix} from "@/styles/fonts";
 import {useDenonContext} from "@/context/denon";
 
@@ -10,7 +10,7 @@ function VolumeControls({ remote }) {
   const [denonState, updateDenonState, refreshDenonState] = useDenonContext();
   return (
     <div className="flex flex-col relative h-full w-full">
-      {remote === REMOTE.DENON && (
+      {remote === RemoteType.DENON && (
         <div
           className={
             "absolute w-3/4 -top-12 right-0 flex justify-center items-center text-center self-center bg-gray-800 rounded-lg border-slate-700 p-1"

@@ -1,4 +1,4 @@
-import Constants from "@/utilities/constants";
+import { RemoteType } from "@/constants/remotes";
 import ChannelButtons from "./ChannelButtons";
 import HDMIInputButtons from "./HDMIInputButtons";
 import MediaButtons from "../Shared//MediaButtons";
@@ -8,7 +8,7 @@ import {useCallback, useEffect} from "react";
 import {fetchRokuDeviceInfo} from "@/utilities/http";
 import Overlay from "@/components/UI/Overlay";
 
-const remote = Constants.REMOTE.ROKU;
+const remote = RemoteType.ROKU;
 function RokuRemote({ rokuState, setRokuState, setSelectedRemote }) {
   const setRokuPowerOn = useCallback(
     (powerOn) => {

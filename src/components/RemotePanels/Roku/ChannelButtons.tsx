@@ -1,4 +1,4 @@
-import { ROKU_APPS } from "@/utilities/constants";
+import { ROKU_APPS } from "@/constants/roku";
 import { useCallback, useEffect, useState } from "react";
 import {
   fetchRokuChannels,

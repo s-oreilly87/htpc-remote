@@ -1,4 +1,5 @@
-import Constants, {DENON_SOUND_MODES} from "@/utilities/constants";
+import { RemoteType } from "@/constants/remotes";
+import { DENON_SOUND_MODES } from "@/constants/denon";
 import KeypressButton from "@/components/UI/KeypressButton";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faMinus, faPlus} from "@fortawesome/free-solid-svg-icons";
@@ -9,7 +10,7 @@ import Toggle from "@/components/UI/Toggle";
 import {dot_matrix} from "@/styles/fonts";
 import {parseDialogueAdjustLevel, useDenonContext} from "@/context/denon";
 
-const remote = Constants.REMOTE.DENON;
+const remote = RemoteType.DENON;
 
 const DIALOGUE_ADJUST_DISABLED_MODES = [
   DENON_SOUND_MODES.STEREO,
@@ -89,7 +90,7 @@ const AdvancedVolumeControl = ({}) => {
           role="group"
         >
           <KeypressButton
-            remote={Constants.REMOTE.DENON}
+            remote={RemoteType.DENON}
             className="btn-secondary w-1/3 items-center justify-center"
             value="PSDIL DOWN"
             onClick={handleClick}
@@ -110,7 +111,7 @@ const AdvancedVolumeControl = ({}) => {
           </div>
 
           <KeypressButton
-            remote={Constants.REMOTE.DENON}
+            remote={RemoteType.DENON}
             className="btn-secondary w-1/3 items-center justify-center"
             value="PSDIL UP"
             onClick={handleClick}

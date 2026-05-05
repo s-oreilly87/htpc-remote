@@ -1,7 +1,7 @@
 import {NextApiRequest, NextApiResponse} from "next";
 
 import client from "@/api-modules/tplink/tplink-client";
-import {LIGHTSWITCHES, PLUGS} from "@/utilities/constants";
+import { LIGHTSWITCHES, PLUGS } from "@/constants/smartHome";
 
 interface KasaChildSysInfo {
   alias: string;

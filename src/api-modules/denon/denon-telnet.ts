@@ -13,7 +13,7 @@
 import net from "net";
 import { TelnetSocket } from "telnet-stream";
 import DenonTelnetWrapper from "./denon-telnet-wrapper";
-import { DENON_IP } from "@/components/RemotePanels/Denon/denonConstants";
+import { DENON_IP } from "@/constants/denon";
 
 const DENON_PORT = 23;
 

@@ -1,10 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 
-import {
-  ApiResponse,
-  LinuxDisplayModeCommand,
-  VALID_DISPLAY_MODES,
-} from "@/constants/htpcControls";
+import type { ApiResponse } from "@/types/api";
+import { LinuxDisplayModeCommand, VALID_DISPLAY_MODES } from "@/constants/htpcControls";
 import { runCommand } from "../lib/command";
 
 type DisplayBody = {

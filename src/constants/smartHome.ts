@@ -1,15 +1,4 @@
-export interface PlugConfig {
-  id: string;
-  ip: string;
-  childId: string;
-  label: string;
-}
-
-export interface LightSwitchConfig {
-  id: string;
-  ip: string;
-  label: string;
-}
+import type { LightSwitchConfig, PlugConfig } from "@/types/remote";
 
 export const PLUGS: Record<string, PlugConfig> = {
   YARD_FENCE: {
@@ -27,7 +16,7 @@ export const PLUGS: Record<string, PlugConfig> = {
 };
 
 export const LIGHTSWITCHES: Record<string, LightSwitchConfig> = {
-  BEDROOM: { id: "bedroom", ip: "192.168.1.200", label: "Bedroom" },
+  BEDROOM:  { id: "bedroom",  ip: "192.168.1.200", label: "Bedroom" },
   STAIRWAY: { id: "stairway", ip: "192.168.1.201", label: "Stairway" },
   BASEMENT: { id: "basement", ip: "192.168.1.202", label: "Basement" },
 };

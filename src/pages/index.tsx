@@ -5,7 +5,7 @@ import Head from "next/head";
 import RemotePanelSlideScroll from "@/components/RemotePanels/RemotePanelSlideScroll";
 import Navbar from "@/components/UI/Navbar";
 import SwipeDetector from "@/components/UI/SwipeDetector";
-import { ROKU_STATE_DEFAULTS } from "@/components/RemotePanels/Roku/rokuConstants";
+import { ROKU_STATE_DEFAULTS } from "@/constants/roku";
 import { RemoteType, REMOTE_INDEX } from "@/constants/remotes";
 import { archivo_narrow } from "@/styles/fonts";
 import { getKeyByValue, usePrevious } from "@/utilities/utils";

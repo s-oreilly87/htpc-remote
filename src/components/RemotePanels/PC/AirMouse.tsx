@@ -8,7 +8,7 @@ import AirMouseCalibrationModal from "@/components/RemotePanels/PC/AirMouseCalib
 import RelativeOrientationSensor from "@/components/Sensors/RelativeOrientationSensor";
 import {io, type Socket} from "socket.io-client";
 import {sendClickToNutJS, sendDisableCommandToNutJS,} from "@/utilities/http";
-import {CLICK_TYPE} from "@/utilities/constants";
+import { ClickType } from "@/constants/remotes";
 
 const AirMouse = () => {
   const [socket, setSocket] = useState<Socket | null>(null);
@@ -84,15 +84,15 @@ const AirMouse = () => {
   };
 
   const handleLeftClick = () => {
-    sendClickToNutJS(CLICK_TYPE.LEFT);
+    sendClickToNutJS(ClickType.LEFT);
   };
 
   const handleRightClick = () => {
-    sendClickToNutJS(CLICK_TYPE.RIGHT);
+    sendClickToNutJS(ClickType.RIGHT);
   };
 
   const handleDoubleClick = () => {
-    sendClickToNutJS(CLICK_TYPE.DOUBLE);
+    sendClickToNutJS(ClickType.DOUBLE);
   };
 
   const handleSetTopLeft = () => {

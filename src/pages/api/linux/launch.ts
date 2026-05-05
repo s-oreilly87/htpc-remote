@@ -1,10 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 
-import {
-  ApiResponse,
-  LinuxLaunchAppCommand,
-  VALID_LAUNCH_APPS,
-} from "@/constants/htpcControls";
+import type { ApiResponse } from "@/types/api";
+import { LinuxLaunchAppCommand, VALID_LAUNCH_APPS } from "@/constants/htpcControls";
 import { runCommand } from "../lib/command";
 
 type LaunchBody = {

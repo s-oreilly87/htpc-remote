@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { promisify } from "util";
 
 import denon from "@/api-modules/denon/denon-telnet";
-import { KEYSTROKE } from "@/utilities/constants";
+import { KEYSTROKE } from "@/constants/remotes";
 
 const getZonePowerStateAsync = promisify(denon.getZonePowerState).bind(denon);
 const setZonePowerStateAsync = promisify(denon.setZonePowerState).bind(denon);
