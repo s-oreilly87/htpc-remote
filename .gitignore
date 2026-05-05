@@ -41,6 +41,10 @@ yarn-error.log*
 public/sw.js
 public/workbox-*
 
+# htpc-agent standalone dependencies
+/linux/htpc-agent/node_modules/
+/linux/htpc-agent/package-lock.json
+
 # backup of nutjs node module
 .nutjs-backup
 /vendor/@nut-tree/libnut/package-lock.json

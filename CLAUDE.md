@@ -29,12 +29,15 @@ Panel switching uses swipe gestures and a navbar. `RemotePanelSlideScroll` handl
 
 ### Platform routing
 
-`NEXT_PUBLIC_PLATFORM` env var determines HTPC backend:
+`NEXT_PUBLIC_HTPC_PLATFORM` env var determines HTPC backend:
 - `PC` → EventGhost HTTP events
-- `LINUX` → NutJS + shell scripts
-- `LINUX_WAYLAND` → ydotool instead of NutJS
+- `LINUX_WAYLAND` → ydotool + shell scripts (full control)
+- `LINUX_X11` → NutJS + shell scripts (keystroke/mouse only when remote)
+- `MACOS` → NutJS (keystroke/mouse only, must run on HTPC itself)
 
-`src/hooks/usePlatform.ts` exports `usePlatform()` (hook) and `getPlatformInfo()` (non-hook, safe to call at module level).
+`NEXT_PUBLIC_HOST_IP` vs `NEXT_PUBLIC_HTPC_IP` determines local vs remote execution. When they differ, Linux commands are proxied to `linux/htpc-agent` on the HTPC.
+
+`src/hooks/usePlatform.ts` exports `usePlatform()` (hook) and `getPlatformInfo()` (non-hook, safe to call at module level). Key flags: `isRemoteHtpc`, `hasFullHtpcControl`.
 
 ### API layer
 

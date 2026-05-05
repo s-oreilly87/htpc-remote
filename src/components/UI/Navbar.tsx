@@ -37,7 +37,8 @@ function Navbar({ className, selectedRemote, onClickHandler }: NavbarProps) {
               src={"/icons/app-icon.png"}
               alt="Remote"
               width={60}
-              height={50}
+              height={60}
+              className="w-auto"
               onClick={handleIconClick}
             />
           </div>

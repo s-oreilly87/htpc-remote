@@ -16,15 +16,15 @@ function RokuBottomLeftButtons() {
   };
 
   return (
-    <div className="relative z-50">
+    <div className="relative">
       <button
-        className="size-12 p-3 bg-red-600 text-white rounded-full flex justify-center items-center shadow-inner shadow-red-400/70 select-none"
+        className="relative z-50 size-12 p-3 bg-red-600 text-white rounded-full flex justify-center items-center shadow-inner shadow-red-400/70 select-none"
         value="powerButton"
         onClick={handleClickPower}
       >
         <FontAwesomeIcon icon={faPowerOff} />
       </button>
-      {rokuState.powerOn && <KeyboardGroup remote={RemoteType.ROKU} />}
+      <KeyboardGroup remote={RemoteType.ROKU} />
     </div>
   );
 }

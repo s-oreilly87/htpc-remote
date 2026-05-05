@@ -1,0 +1,83 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+OUTPUT="HDMI-A-1"  # from kscreen-doctor -o
+
+# Find mode ID by resolution + refresh rate
+# e.g. 3840x2160 + 60 -> "1" from 1:3840x2160@60.00*!
+get_mode_id() {
+  local res="$1"   #eg 3840x2160
+  local rate="$2"  #eg  60
+
+  kscreen-doctor -o \
+   | tr ' ' '\n' \
+   | grep "${res}@${rate}" \
+   | head -n1 \
+   | cut -d: -f1
+}
+
+# Set mode, then scale, then HDR/WCG as separate steps
+# $1 = label (for errors)
+# $2 = res (e.g. 3840x2160)
+# $3 = rate (e.g. 60)
+# $4 = scale (e.g. 2 or 1.5)
+# $5 = hdr_mode: "hdr", "sdr", or "none"
+set_mode_res() {
+  local label="$1"
+  local res="$2"
+  local rate="$3"
+  local scale="$4"
+  local hdr_mode="$5"
+
+  local mode_id
+  mode_id="$(get_mode_id "$res" "$rate" || true)"
+
+  if [[ -z "${mode_id:-}" ]]; then
+    echo "Error: Could not find mode ${res}@${rate}Hz on ${OUTPUT} for ${label}" 1>&2
+    exit 1
+  fi
+
+  # 1) Switch mode (this is the part we know works)
+  kscreen-doctor "output.${OUTPUT}.mode.${mode_id}"
+
+  # 2) Set scale
+  kscreen-doctor "output.${OUTPUT}.scale.${scale}"
+
+  # 3) HDR / SDR toggle (best-effort; ignore failure)
+  case "$hdr_mode" in
+    hdr)
+      kscreen-doctor "output.${OUTPUT}.hdr.enable" || true
+      kscreen-doctor "output.${OUTPUT}.wcg.enable" || true
+      ;;
+    sdr)
+      kscreen-doctor "output.${OUTPUT}.hdr.disable" || true
+      kscreen-doctor "output.${OUTPUT}.wcg.disable" || true
+      ;;
+    *)
+      # no HDR change
+      ;;
+  esac
+}
+
+case "${1:-}" in
+  4k60)
+    # 4K60 HDR, scale 3
+    set_mode_res "4k60" "3840x2160" 60 "3" "hdr"
+    ;;
+  4k60SDR)
+    # 4K60 SDR, scale 3
+    set_mode_res "4k60SDR" "3840x2160" 60 "3" "sdr"
+    ;;
+  1440p120)
+    # 1440p120 HDR, scale 2 (TV is 119)
+    set_mode_res "1440p120" "2560x1440" 119 "2" "hdr"
+    ;;
+  1440p120SDR)
+    # 1440p120 SDR, scale 2 (TV is 119)
+    set_mode_res "1440p120SDR" "2560x1440" 119 "2" "sdr"
+    ;;
+  *)
+    echo "Usage: htpc-res {4k60|4k60SDR|1440p120|1440p120SDR}" 1>&2
+    exit 1
+    ;;
+esac
