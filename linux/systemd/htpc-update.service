@@ -6,5 +6,5 @@ After=network-online.target
 [Service]
 Type=oneshot
 WorkingDirectory=%h/WebstormProjects/htpc-remote
-ExecStart=/usr/bin/bash -lc 'git pull origin master && npm install --omit=dev'
+ExecStart=/usr/bin/bash -lc 'git pull origin master && git diff HEAD@{1} --name-only | grep -q "^package\\.json$" && npm install --omit=dev || true'
 ExecStartPost=/usr/bin/systemctl --user restart htpc-remote
