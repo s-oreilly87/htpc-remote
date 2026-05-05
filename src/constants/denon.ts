@@ -1,37 +1,9 @@
 import { DenonKeystroke, RemoteType } from "@/constants/remotes";
+import type { DenonInput, DenonSoundMode } from "@/types/remote";
 
 export const DENON_IP = process.env.NEXT_PUBLIC_DENON_IP ?? "";
 export const DENON_HTTP_COMMAND_URL = "goform/formiPhoneAppDirect.xml";
 export const DENON_HTTP_QUERY_URL = "goform/formMainZone_MainZoneXml.xml";
-
-export interface DenonInput {
-  label: string;
-  value: string;
-  inputFuncSelect: string[];
-}
-
-export interface AudioModeOption {
-  key: string;
-  label: string;
-  value: string;
-  disabled?: boolean;
-  denonCmd?: string;
-}
-
-export interface DenonState {
-  powerOn: boolean;
-  muteOn: boolean;
-  input: DenonInput | null;
-  soundMode: (typeof DENON_SOUND_MODES)[keyof typeof DENON_SOUND_MODES];
-  loading: boolean;
-  dynComp: string;
-  psDilOn: boolean;
-  psDynEqOn: boolean;
-  MV: number | undefined;
-  PSDIL: number;
-  PSREFLEV: string | undefined;
-  PSDYNVOL: string | undefined;
-}
 
 export const DENON_INPUTS: Record<string, DenonInput> = {
   PC: {
@@ -66,52 +38,7 @@ export const DENON_INPUTS: Record<string, DenonInput> = {
   },
 };
 
-export const AUDIO_MODES_FOR_SELECT: Record<string, AudioModeOption> = {
-  PLACEHOLDER: {
-    key: "PLACEHOLDER",
-    label: "Select Audio Mode",
-    value: "",
-    disabled: true,
-  },
-  PURE: {
-    key: "PURE",
-    label: "Pure Stereo 24/192 (no sub)",
-    value: "audioModeStereo",
-    denonCmd: "MSQUICK1",
-  },
-  STEREO: {
-    key: "STEREO",
-    label: "Stereo (Atmos w/ sub)",
-    value: "audioModeStereoAtmosSub",
-    denonCmd: "MSQUICK2",
-  },
-  DOLBY_UPMIX: {
-    key: "DOLBY_UPMIX",
-    label: "Stereo (Dolby Surround Upmix)",
-    value: "audioModeStereoSurround",
-    denonCmd: "MSQUICK2",
-  },
-  SURROUND51: {
-    key: "SURROUND51",
-    label: "5.1 Surround",
-    value: "audioMode5.1",
-    denonCmd: "MSQUICK3",
-  },
-  ATMOS: {
-    key: "ATMOS",
-    label: "Dolby Atmos",
-    value: "audioModeAtmos",
-    denonCmd: "MSQUICK4",
-  },
-  DTS_X: {
-    key: "DTS_X",
-    label: "DTS:X",
-    value: "audioModeDtsX",
-    denonCmd: "MSQUICK4",
-  },
-};
-
-export const DOLBY_MODES = [
+export const DOLBY_MODES: string[] = [
   "DOLBY_SURROUND",
   "DOLBY_DIGITAL",
   "DOLBY_ATMOS",
@@ -119,7 +46,7 @@ export const DOLBY_MODES = [
   "DOLBY_HD_+_DOLBY_SURROUND",
 ];
 
-export const DTS_MODES = [
+export const DTS_MODES: string[] = [
   "DTS_NEURAL:X",
   "DOLBY_DIGITAL_+_NEURAL:X",
   "NEURAL:X",
@@ -128,12 +55,8 @@ export const DTS_MODES = [
   "DTS-HD_MSTR",
 ];
 
-export const DENON_SOUND_MODES = {
-  NONE: {
-    label: "Select Sound Mode",
-    value: "placeholder",
-    selectSurround: [],
-  },
+export const DENON_SOUND_MODES: Record<string, DenonSoundMode> = {
+  NONE: { label: "Select Sound Mode", value: "placeholder", selectSurround: [] },
   STEREO: { label: "Stereo", value: "MSSTEREO", selectSurround: ["STEREO"] },
   DOLBY: {
     label: "Dolby Surround",
@@ -171,11 +94,7 @@ export const DENON_SOUND_MODES = {
     value: "MSVIDEO GAME",
     selectSurround: ["VIDEO_GAME"],
   },
-  VIRTUAL: {
-    label: "Virtual",
-    value: "MSVIRTUAL",
-    selectSurround: ["VIRTUAL"],
-  },
+  VIRTUAL: { label: "Virtual", value: "MSVIRTUAL", selectSurround: ["VIRTUAL"] },
   DIRECT: { label: "Direct", value: "MSDIRECT", selectSurround: ["DIRECT"] },
   PURE_DIRECT: {
     label: "Pure Direct",
@@ -195,4 +114,4 @@ export const DENON_REMOTE_META = {
   httpCommandUrl: DENON_HTTP_COMMAND_URL,
   httpQueryUrl: DENON_HTTP_QUERY_URL,
   keystrokes: DenonKeystroke,
-};
+} as const;

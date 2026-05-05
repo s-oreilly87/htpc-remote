@@ -1,4 +1,4 @@
-import {REMOTE, REMOTE_INDEX} from "@/utilities/constants";
+import { RemoteType, REMOTE_INDEX } from "@/constants/remotes";
 import {KeepAlive} from "react-fiber-keep-alive";
 import PCRemotePanel from "@/components/RemotePanels/PC/PCRemotePanel";
 import RokuRemotePanel from "@/components/RemotePanels/Roku/RokuRemotePanel";
@@ -18,21 +18,21 @@ function RemotePanel({
     <DenonProvider>
       <div className={className}>
         <SlideScrollTransition
-          show={selectedRemote === REMOTE.PC}
+          show={selectedRemote === RemoteType.PC}
           selectedComponentIndex={REMOTE_INDEX[selectedRemote]}
           prevComponentIndex={REMOTE_INDEX[prevRemote]}
         >
-          <KeepAlive name={REMOTE.PC}>
+          <KeepAlive name={RemoteType.PC}>
             <PCRemotePanel />
           </KeepAlive>
         </SlideScrollTransition>
 
         <SlideScrollTransition
-          show={selectedRemote === REMOTE.ROKU}
+          show={selectedRemote === RemoteType.ROKU}
           selectedComponentIndex={REMOTE_INDEX[selectedRemote]}
           prevComponentIndex={REMOTE_INDEX[prevRemote]}
         >
-          <KeepAlive name={REMOTE.ROKU}>
+          <KeepAlive name={RemoteType.ROKU}>
             <RokuRemotePanel
               rokuState={rokuState}
               setRokuState={setRokuState}
@@ -42,7 +42,7 @@ function RemotePanel({
         </SlideScrollTransition>
 
         <SlideScrollTransition
-          show={selectedRemote === REMOTE.DENON}
+          show={selectedRemote === RemoteType.DENON}
           selectedComponentIndex={REMOTE_INDEX[selectedRemote]}
           prevComponentIndex={REMOTE_INDEX[prevRemote]}
         >

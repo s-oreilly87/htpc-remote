@@ -1,4 +1,4 @@
-import Constants from "@/utilities/constants";
+import { RemoteType } from "@/constants/remotes";
 import HTPCPresets from "./HTPCPresets";
 import AppButtons from "./AppButtons";
 import MediaButtons from "../Shared/MediaButtons";
@@ -9,7 +9,7 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faStar, faCircleInfo, faBars} from "@fortawesome/free-solid-svg-icons";
 import { usePlatform } from "@/hooks/usePlatform";
 
-const remote = Constants.REMOTE.PC;
+const remote = RemoteType.PC;
 
 function PCRemote() {
   const { isLinux, isLinuxWayland } = usePlatform();
@@ -45,21 +45,21 @@ function KodiButtons() {
             <span className="text-white text-md">Kodi</span>
             <div className="flex gap-2 justify-center">
                 <KeypressButton
-                    remote={Constants.REMOTE.PC}
+                    remote={RemoteType.PC}
                     className="btn btn-secondary w-20 flex flex-col items-center justify-center gap-1"
                     value="KEYSTROKE_i"
                 >
                     <FontAwesomeIcon icon={faCircleInfo} className="w-1/3 mx-auto" />
                 </KeypressButton>
                 <KeypressButton
-                    remote={Constants.REMOTE.PC}
+                    remote={RemoteType.PC}
                     className="btn btn-secondary w-20 flex flex-col items-center justify-center gap-1"
                     value="KEYSTROKE_c"
                 >
                     <FontAwesomeIcon icon={faBars} className="w-1/3 mx-auto" />
                 </KeypressButton>
                 <KeypressButton
-                    remote={Constants.REMOTE.PC}
+                    remote={RemoteType.PC}
                     className="btn btn-secondary w-20 flex flex-col items-center justify-center gap-1"
                     value="KEYSTROKE_o"
                 >

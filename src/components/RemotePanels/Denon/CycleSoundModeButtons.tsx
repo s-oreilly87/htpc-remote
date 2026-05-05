@@ -1,16 +1,12 @@
-import {
-  DENON_SOUND_MODES,
-  DOLBY_MODES,
-  DTS_MODES,
-  REMOTE,
-} from "@/utilities/constants";
+import { RemoteType } from "@/constants/remotes";
+import { DENON_SOUND_MODES, DOLBY_MODES, DTS_MODES } from "@/constants/denon";
 import KeypressButton from "@/components/UI/KeypressButton";
 import { sendDenonCommand, sendDenonQuery } from "@/utilities/http";
 import { useDenonContext } from "@/context/denon";
 
 const CYCLE_TIMEOUT = 5000;
 const RESPONSE_TIMEOUT = 2000;
-const remote = REMOTE.DENON;
+const remote = RemoteType.DENON;
 
 function CycleSoundModes({ cycleTimeout, setCycleTimeout }) {
   const [denonState, updateDenonState, refreshDenonState] = useDenonContext();

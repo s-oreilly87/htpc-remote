@@ -8,14 +8,14 @@ import {
   faPause,
   faPlay,
 } from "@fortawesome/free-solid-svg-icons";
-import { KEYSTROKE, REMOTE } from "@/utilities/constants";
+import { KEYSTROKE, RemoteType } from "@/constants/remotes";
 import PressAndHoldButton from "@/components/UI/PressAndHoldButton";
 
 function MediaButtons({ remote }) {
   return (
     <div id="media-buttons" className="w-full flex gap-2 h-12 max-h-12">
       <div className="flex w-full h-full place-content-center gap-2">
-        {remote === REMOTE.PC && (
+        {remote === RemoteType.PC && (
           <KeypressButton
             remote={remote}
             className="btn-secondary flex w-1/6 h-full items-center place-content-center"
@@ -24,7 +24,7 @@ function MediaButtons({ remote }) {
             <FontAwesomeIcon icon={faBackwardStep} className="h-1/2" />
           </KeypressButton>
         )}
-        {remote === REMOTE.PC && (
+        {remote === RemoteType.PC && (
           <PressAndHoldButton
             remote={remote}
             className="btn-secondary flex w-1/6 h-full items-center place-content-center"
@@ -33,7 +33,7 @@ function MediaButtons({ remote }) {
             <FontAwesomeIcon icon={faBackward} className="h-1/2" />
           </PressAndHoldButton>
         )}
-        {remote === REMOTE.ROKU && (
+        {remote === RemoteType.ROKU && (
           <KeypressButton
             remote={remote}
             className="btn-secondary flex w-1/6 h-full items-center place-content-center"
@@ -54,7 +54,7 @@ function MediaButtons({ remote }) {
           </div>
         </KeypressButton>
 
-        {remote === REMOTE.PC && (
+        {remote === RemoteType.PC && (
           <PressAndHoldButton
             remote={remote}
             className="btn-secondary items-center place-content-center flex w-1/6 h-full"
@@ -64,7 +64,7 @@ function MediaButtons({ remote }) {
           </PressAndHoldButton>
         )}
 
-        {remote === REMOTE.ROKU && (
+        {remote === RemoteType.ROKU && (
           <KeypressButton
             remote={remote}
             className="btn-secondary items-center place-content-center flex w-1/6 h-full"
@@ -74,7 +74,7 @@ function MediaButtons({ remote }) {
           </KeypressButton>
         )}
 
-        {remote === REMOTE.PC && (
+        {remote === RemoteType.PC && (
           <KeypressButton
             remote={remote}
             className="btn-secondary flex w-1/6 h-full items-center place-content-center"

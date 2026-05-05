@@ -1,7 +1,7 @@
 import net from "net";
 import { TelnetSocket } from "telnet-stream";
 import createDenonEventBus, { type DenonEventBus } from "./denon-telnet-wrapper";
-import { DENON_IP } from "@/components/RemotePanels/Denon/denonConstants";
+import { DENON_IP } from "@/constants/denon";
 
 // ─── Parameters ────────────────────────────────────────────────────────────────
 

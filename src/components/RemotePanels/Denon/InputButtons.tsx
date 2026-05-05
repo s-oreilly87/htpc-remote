@@ -1,4 +1,5 @@
-import {DENON_INPUTS, REMOTE} from "@/utilities/constants";
+import { RemoteType } from "@/constants/remotes";
+import { DENON_INPUTS } from "@/constants/denon";
 import KeypressButton from "@/components/UI/KeypressButton";
 import {sendDenonCommand} from "@/utilities/http";
 import {useDenonContext} from "@/context/denon";
@@ -31,7 +32,7 @@ const InputButtons = ({}) => {
       <div className="grid grid-cols-3 grid-rows-2 gap-2 w-full">
         {Object.values(DENON_INPUTS).map((input) => (
           <KeypressButton
-            remote={REMOTE.DENON}
+            remote={RemoteType.DENON}
             key={input.value}
             className={`btn z-50 ${
               denonState.input?.value === input.value
