@@ -1,0 +1,10 @@
+[Unit]
+Description=Update htpc-remote from git and restart
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/WebstormProjects/htpc-remote
+ExecStart=/usr/bin/bash -lc 'git pull origin master && npm install --omit=dev'
+ExecStartPost=/usr/bin/systemctl --user restart htpc-remote
