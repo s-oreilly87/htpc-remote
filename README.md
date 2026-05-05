@@ -145,9 +145,13 @@ The app uses Denon Quick-presets (MSQUICK) for sound modes. Save them as follows
 - **MSQUICK3** — Multi-ch In
 - **MSQUICK4** — Dolby Surround (Atmos/DTS-X)
 
+> **Protocol reference:** Denon publishes model-specific command PDFs on their asset server. The command set is largely consistent across the X-series lineup — search for your model at [assets.denon.com](https://assets.denon.com) or use the [AVR-X2300W / X-series compatible protocol sheet (Ver 8.6.0)](https://assets.denon.com/documentmaster/uk/avr1713_avr1613_protocol_v860.pdf) as a reference. Commands cover volume, input selection, sound modes, zone control, and more.
+
 #### Roku
 
 Enable ECP in **Settings → System → Advanced system settings → External control → ECP**. Assign a static IP or DHCP reservation.
+
+> **Protocol reference:** [Roku External Control Protocol (ECP) — official developer docs](https://developer.roku.com/dev/docs/external-control-api). Covers keypress, app launch, media playback, device query, and input switching endpoints — all used over HTTP on port 8060.
 
 #### PC — Linux (Wayland / X11)
 
