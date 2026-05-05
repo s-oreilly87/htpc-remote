@@ -5,14 +5,12 @@ import Head from "next/head";
 import RemotePanelSlideScroll from "@/components/RemotePanels/RemotePanelSlideScroll";
 import Navbar from "@/components/UI/Navbar";
 import SwipeDetector from "@/components/UI/SwipeDetector";
-import { ROKU_STATE_DEFAULTS } from "@/constants/roku";
 import { RemoteType, REMOTE_INDEX } from "@/constants/remotes";
 import { archivo_narrow } from "@/styles/fonts";
 import { getKeyByValue, usePrevious } from "@/utilities/utils";
 
 const App = () => {
   const [selectedRemote, setSelectedRemote] = useState<RemoteType>(RemoteType.ROKU);
-  const [rokuState, setRokuState] = useState(ROKU_STATE_DEFAULTS);
   const resetDocHeight = () => {
     const vh = window.innerHeight * 0.01;
     document.documentElement.style.setProperty("--vh", `${vh}px`);
@@ -102,8 +100,6 @@ const App = () => {
                   selectedRemote={selectedRemote}
                   setSelectedRemote={setSelectedRemote}
                   prevRemote={prevRemote}
-                  rokuState={rokuState}
-                  setRokuState={setRokuState}
                 />
               </SwipeDetector>
             </div>

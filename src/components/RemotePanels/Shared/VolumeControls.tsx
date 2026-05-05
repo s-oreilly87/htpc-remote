@@ -7,7 +7,7 @@ import {dot_matrix} from "@/styles/fonts";
 import {useDenonContext} from "@/context/denon";
 
 function VolumeControls({ remote }: { remote: RemoteType }) {
-  const { denonState } = useDenonContext();
+  const { denonState, isLoading } = useDenonContext();
   return (
     <div className="flex flex-col relative h-full w-full">
       {remote === RemoteType.DENON && (
@@ -18,7 +18,7 @@ function VolumeControls({ remote }: { remote: RemoteType }) {
         >
           <span
             className={`text-teal-500 text-2xl ${dot_matrix.className} ${
-              denonState.loading ? "opacity-50 animate-pulse" : ""
+              isLoading ? "opacity-50 animate-pulse" : ""
             }`}
           >
             {denonState.MV}

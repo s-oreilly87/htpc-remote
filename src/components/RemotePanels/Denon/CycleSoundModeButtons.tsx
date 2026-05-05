@@ -29,28 +29,20 @@ function CycleSoundModes({ cycleTimeout, setCycleTimeout }) {
   };
 
   const handleClick = async (event) => {
-    updateDenonState({ loading: true });
-
-    let responseTimeout = setResponseTimeout();
     const response = await sendDenonCommand(event.currentTarget);
-    clearTimeout(responseTimeout);
 
     if (response.error) {
       return console.error(response.error);
     }
 
-    let soundMode = await parseSoundModeFromResponseData(response.data);
+    const soundMode = await parseSoundModeFromResponseData(response.data);
     if (soundMode) {
-      updateDenonState({ soundMode: soundMode });
+      updateDenonState({ soundMode });
     }
-
-    updateDenonState({ loading: false });
-
-    // refreshDenonState.all()
   };
 
   const setNewCycleTimeout = () => {
-    let newCycleTimeout = setTimeout(() => {
+    const newCycleTimeout = setTimeout(() => {
       setCycleTimeout(null);
     }, CYCLE_TIMEOUT);
 
@@ -60,12 +52,6 @@ function CycleSoundModes({ cycleTimeout, setCycleTimeout }) {
   const resetCycleTimeout = () => {
     clearTimeout(cycleTimeout);
     setNewCycleTimeout();
-  };
-
-  const setResponseTimeout = () => {
-    return setTimeout(() => {
-      updateDenonState({ loading: false });
-    }, RESPONSE_TIMEOUT);
   };
 
   const parseSoundModeFromResponseData = async (denonResponse) => {

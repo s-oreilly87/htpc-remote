@@ -31,7 +31,7 @@ const PressAndHoldButton: React.FC<PressAndHoldButtonProps> = ({
   const [sendKeyInterval, setSendKeyInterval] = useState<NodeJS.Timeout | null>(null);
   const [buttonPressTimerId, setButtonPressTimerId] = useState<number | null>(null);
 
-  const { updateDenonState, setDenonState } = useDenonContext();
+  const { updateDenonState } = useDenonContext();
 
   const pressAndHoldVibration = () => {
     setVibrateInterval(setInterval(() => navigator.vibrate(1), 75));
@@ -119,15 +119,9 @@ const PressAndHoldButton: React.FC<PressAndHoldButtonProps> = ({
 
   const maybeChangeVolDisplay = (button: ValueButton) => {
     if (button.value === "MVUP") {
-      setDenonState((prevState) => ({
-        ...prevState,
-        MV: prevState.MV + 0.5,
-      }));
+      updateDenonState((prev) => ({ MV: (prev.MV ?? 50) + 0.5 }));
     } else if (button.value === "MVDOWN") {
-      setDenonState((prevState) => ({
-        ...prevState,
-        MV: prevState.MV - 0.5,
-      }));
+      updateDenonState((prev) => ({ MV: (prev.MV ?? 50) - 0.5 }));
     }
   };
 

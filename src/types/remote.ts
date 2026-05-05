@@ -58,7 +58,6 @@ export interface DenonState {
   muteOn: boolean;
   input: DenonInput | null;
   soundMode: DenonSoundMode;
-  loading: boolean;
   dynComp: string;
   psDilOn: boolean;
   psDynEqOn: boolean;
@@ -69,6 +68,10 @@ export interface DenonState {
 }
 
 // ── Roku ─────────────────────────────────────────────────────────────────────
+
+export interface RokuState {
+  powerOn: boolean;
+}
 
 export interface RokuChannel {
   id: string;

@@ -18,6 +18,7 @@
     "@fortawesome/react-fontawesome": "^0.2.0",
     "@headlessui/react": "^1.7.13",
     "@nut-tree/nut-js": "file:./vendor/@nut-tree/nut-js",
+    "@tanstack/react-query": "^5.100.9",
     "cors": "^2.8.5",
     "eslint": "8.35.0",
     "eslint-config-next": "13.2.3",
