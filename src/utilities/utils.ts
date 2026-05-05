@@ -54,8 +54,8 @@ export function buttonPress(
     clearTimeout(buttonPressTimerId);
   }
 
-  if (Object.hasOwn(navigator, 'vibrate')) {
-      navigator.vibrate(5);
+  if (typeof navigator.vibrate === 'function') {
+    navigator.vibrate(5);
   }
 
   button.classList.add("text-blue-400");
