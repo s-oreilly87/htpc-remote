@@ -1,6 +1,6 @@
 import client from '@/api-modules/tplink/tplink-client'
 import {toNumber} from "lodash";
-import {LIGHTSWITCHES} from "@/utilities/constants";
+import { LIGHTSWITCHES } from "@/constants/smartHome";
 import {Plug} from "tplink-smarthome-api";
 
 export default function handleBrightness(req, res) {

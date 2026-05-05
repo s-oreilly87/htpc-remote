@@ -7,8 +7,18 @@ import {hasRelativeOrientationSensor, type OrientationReading} from "@/utilities
 import AirMouseCalibrationModal from "@/components/RemotePanels/PC/AirMouseCalibrationModal";
 import RelativeOrientationSensor from "@/components/Sensors/RelativeOrientationSensor";
 import {io, type Socket} from "socket.io-client";
-import {sendClickToNutJS, sendDisableCommandToNutJS,} from "@/utilities/http";
-import {CLICK_TYPE} from "@/utilities/constants";
+import {sendClickToNutJS, sendDisableCommandToNutJS} from "@/utilities/http";
+import { ClickType } from "@/constants/remotes";
+import { getPlatformInfo } from "@/hooks/usePlatform";
+
+const htpcIp = process.env.NEXT_PUBLIC_HTPC_IP ?? "";
+const agentPort = process.env.NEXT_PUBLIC_LINUX_HTPC_AGENT_PORT ?? "3001";
+
+const { isRemoteHtpc } = getPlatformInfo();
+
+/** When the Next.js server is on a different machine, AirMouse connects directly
+ *  to the htpc-agent socket.io server rather than the Next.js server. */
+const agentUrl = isRemoteHtpc ? `http://${htpcIp}:${agentPort}` : null;
 
 const AirMouse = () => {
   const [socket, setSocket] = useState<Socket | null>(null);
@@ -16,12 +26,7 @@ const AirMouse = () => {
   const [hasRelOrientationSensor, setHasRelOrientationSensor] = useState(false);
   const [showCalibration, setShowCalibration] = useState(false);
 
-  // Wakelock to keep screen alive while airMouse is enabled
-  const { isSupported, released, request, release, type } = useWakeLock({
-    // onRequest: () => alert('Screen Wake Lock: requested!'),
-    // onError: () => alert('An error happened 💥'),
-    // onRelease: () => alert('Screen Wake Lock: released!'),
-  });
+  const { isSupported, released, request, release, type } = useWakeLock({});
   useEffect(() => {
     if (type !== undefined) {
       if (enabled) {
@@ -58,11 +63,17 @@ const AirMouse = () => {
   };
 
   const initializeSocket = async () => {
-    await fetch(`api/nutjs/initializeSocket`);
-    const newSocket = io();
-    newSocket.on("connect", () => {
-      console.log("Socket connected");
-    });
+    let newSocket: Socket;
+    if (agentUrl) {
+      // Remote HTPC: connect directly to the htpc-agent socket.io server.
+      // No need to call /api/nutjs/initializeSocket — the agent manages its own socket.
+      newSocket = io(agentUrl);
+    } else {
+      // Same machine: initialize socket.io on the Next.js server and connect same-origin.
+      await fetch(`api/nutjs/initializeSocket`);
+      newSocket = io();
+    }
+    newSocket.on("connect", () => console.log("AirMouse socket connected"));
     setSocket(newSocket);
   };
 
@@ -72,8 +83,7 @@ const AirMouse = () => {
     setSocket(null);
   }, [socket]);
 
-  const handleEnable = (isEnabled) => {
-    // Create websocket connection
+  const handleEnable = (isEnabled: boolean) => {
     if (isEnabled) {
       closeSocket().then(() => initializeSocket());
     } else {
@@ -83,22 +93,12 @@ const AirMouse = () => {
     setEnabled(isEnabled);
   };
 
-  const handleLeftClick = () => {
-    sendClickToNutJS(CLICK_TYPE.LEFT);
-  };
-
-  const handleRightClick = () => {
-    sendClickToNutJS(CLICK_TYPE.RIGHT);
-  };
-
-  const handleDoubleClick = () => {
-    sendClickToNutJS(CLICK_TYPE.DOUBLE);
-  };
+  const handleLeftClick = () => sendClickToNutJS(ClickType.LEFT);
+  const handleRightClick = () => sendClickToNutJS(ClickType.RIGHT);
+  const handleDoubleClick = () => sendClickToNutJS(ClickType.DOUBLE);
 
   const handleSetTopLeft = () => {
-    if (!currentOrientation.current) {
-      return;
-    }
+    if (!currentOrientation.current) return;
     socket?.emit("setTopLeft", {
       x: currentOrientation.current.quaternion[2],
       y: currentOrientation.current.quaternion[0],
@@ -106,9 +106,7 @@ const AirMouse = () => {
   };
 
   const handleSetBottomRight = () => {
-    if (!currentOrientation.current) {
-      return;
-    }
+    if (!currentOrientation.current) return;
     socket?.emit("setBottomRight", {
       x: currentOrientation.current.quaternion[2],
       y: currentOrientation.current.quaternion[0],
@@ -170,7 +168,7 @@ const AirMouse = () => {
                         enabled
                           ? "translate-x-6 bg-white"
                           : "translate-x-1 bg-blue-600"
-                      } inline-block h-4 w-4 transform rounded-full  transition`}
+                      } inline-block h-4 w-4 transform rounded-full transition`}
                     />
                   </Switch>
                 </div>

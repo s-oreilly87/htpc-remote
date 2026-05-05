@@ -1,29 +1,29 @@
-import {DENON_INPUTS, REMOTE} from "@/utilities/constants";
+import { RemoteType } from "@/constants/remotes";
+import { DENON_INPUTS } from "@/constants/denon";
 import KeypressButton from "@/components/UI/KeypressButton";
-import {sendDenonCommand} from "@/utilities/http";
-import {useDenonContext} from "@/context/denon";
+import { sendDenonCommand } from "@/utilities/http";
+import { useDenonContext } from "@/context/denon";
 
 const InputButtons = ({}) => {
-  const [denonState, updateDenonState, refreshDenonState] = useDenonContext();
+  const { denonState, updateDenonState, invalidateDenonState } = useDenonContext();
 
   const handleClick = async (event) => {
-    // For responsiveness, update denonState.input before sending command.
-    // State will be refreshed afterwards to pick up resulting changes/confirm
+    // Optimistically reflect the input switch immediately for responsiveness.
+    // The delayed invalidation will sync the full AVR state once it settles.
     updateDenonState({
       input: Object.values(DENON_INPUTS).find(
         (input) => input.value === event.target.value,
       ),
       powerOn: true,
-      loading: true,
     });
 
     const response = await sendDenonCommand(event.target);
     if (response.error) {
-      updateDenonState({ loading: false });
       return console.error(response.error);
     }
 
-    setTimeout(refreshDenonState.all, 2500);
+    // AVR takes ~2.5s to finish switching inputs before state is stable
+    setTimeout(invalidateDenonState, 2500);
   };
 
   return (
@@ -31,9 +31,9 @@ const InputButtons = ({}) => {
       <div className="grid grid-cols-3 grid-rows-2 gap-2 w-full">
         {Object.values(DENON_INPUTS).map((input) => (
           <KeypressButton
-            remote={REMOTE.DENON}
+            remote={RemoteType.DENON}
             key={input.value}
-            className={`btn z-50 ${
+            className={`btn text-sm z-50 ${
               denonState.input?.value === input.value
                 ? "btn-primary-denon"
                 : "btn-secondary"

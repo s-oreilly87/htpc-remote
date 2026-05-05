@@ -1,13 +1,9 @@
 import { parseString } from "xml2js";
 
-import { DENON_INPUTS } from "@/components/RemotePanels/Denon/denonConstants";
-import {
-  LinuxAudioModeCommand,
-  LinuxDisplayModeCommand,
-  LinuxLaunchAppCommand,
-  ApiResponse,
-} from "@/constants/htpcControls";
+import { DENON_INPUTS } from "@/constants/denon";
+import { LinuxAudioModeCommand, LinuxDisplayModeCommand, LinuxLaunchAppCommand } from "@/constants/htpcControls";
 import { DenonKeystroke } from "@/constants/remotes";
+import type { ApiResponse } from "@/types/api";
 import { convertKebabToCamel } from "@/utilities/utils";
 import { getPlatformInfo } from "@/hooks/usePlatform";
 

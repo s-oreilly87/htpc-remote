@@ -1,0 +1,587 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<EventGhost Version="0.5.0-rc6" Guid="{6333A3BA-A4DD-47B0-91CD-2C05E7B89623}" Time="1682192051.21">
+    <Autostart Name="Autostart" XML_Guid="{89E867B7-6B13-45FC-B924-3A3423A1A082}" Expanded="True">
+        <Plugin XML_Guid="{9EBBCE3B-B532-43F1-9E0B-8C606CF963CF}" Identifier="HID3" Guid="{05A690D9-27C2-4AC5-B0DD-2F562619E922}" File="HID">
+            gAIoWAAAAABxAImIiVVeXFw/XGhpZCN2aWRfMTkxNSZwaWRfMTAzMiZtaV8wMyZjb2wwMiM4JjJjMDUzODc1JjAmMDAwMSN7NGQxZTU1YjItZjE2Zi0xMWNmLTg4Y2ItMDAxMTExMDAwMDMwfXEBTRUZWAYAAABaWS5MdGRxAk0yEFgRAAAAWlkgQ29udHJvbCBNaWMxNmtxA00GAYlLAHRxBC4=
+        </Plugin>
+        <Plugin XML_Guid="{503B620C-91FD-44D9-9676-B12EBBED559C}" Identifier="Keyboard" Guid="{59CBD10F-C1D8-4ADB-999B-9B76BA360F1F}" File="Keyboard">
+            gAKIhXEALg==
+        </Plugin>
+        <Plugin XML_Guid="{05DB4F39-C8BA-4D97-A5A8-87A3F5DB914C}" Identifier="Webserver" Guid="{E4305D8E-A3D3-4672-B06E-4EA1F0F6C673}" File="Webserver">
+            gAIoWAQAAABIVFRQcQBNvQtYMAAAAEM6XFByb2dyYW0gRmlsZXMgKHg4NilcRXZlbnRHaG9zdFxTZWFuXHdlYnNlcnZlcnEBWAoAAABFdmVudEdob3N0cQJYAAAAAHEDaAN9cQSJWAEAAAAscQVYAgAAADs7cQZoA2gDiXRxBy4=
+        </Plugin>
+        <Action XML_Guid="{16E3DA75-DE9E-48CD-94ED-D58CF3298927}">
+            System.SetIdleTime(300.0)
+        </Action>
+        <Action XML_Guid="{6A735579-6D12-4299-B95A-C2B32BB3D0DD}">
+            System.Execute(u'C:\\Program Files (x86)\\EventGhost\\htpc-remote\\start-remote-app-hidden-keepalive.bat', u'', 3, True, 4, u'', False, False, u'', False, False, False, False)
+        </Action>
+    </Autostart>
+    <Macro Name="Initialize on Boot" XML_Guid="{2B15F689-C116-41F2-822E-20426969413C}">
+        <Event Name="Main.OnInitAfterBoot" XML_Guid="{E2A48E8E-6986-4C18-9D25-DA418CEFE49A}" />
+        <Action XML_Guid="{A7BA75B8-08DC-4ACB-8894-26AB7C297CBC}">
+            System.Execute(u'C:\\Program Files (x86)\\EventGhost\\htpc-remote\\utilities\\soundkeeper\\SoundKeeper64OpenOnly.exe', u'', 3, False, 2, u'', False, False, u'', False, False, False, False)
+        </Action>
+        <Action Name="Would be good to check if its already display mode PC" XML_Guid="{107A8B5E-22E0-4E94-A31E-4C9A910A2183}">
+            EventGhost.Comment()
+        </Action>
+        <Action Enabled="False" XML_Guid="{524A0513-7162-49D2-818C-5E78F007C487}">
+            EventGhost.NewJumpIf(XmlIdLink(115), 2, True)
+        </Action>
+    </Macro>
+    <Folder Name="State" XML_Guid="{E9205311-4ACF-4CBA-8536-733FD6FE5CA6}">
+        <Macro Name="State" XML_Guid="{15025F5B-2079-4400-A3B5-2432174819B6}">
+            <Action Name="Display: PC Screen Enabled" id="15" Enabled="False" XML_Guid="{FABC497F-77DB-4B8A-A6E9-2E537A9795D0}">
+                EventGhost.Comment()
+            </Action>
+            <Action Name="Display: TV 4K60 selected" id="16" Enabled="False" XML_Guid="{FABC497F-77DB-4B8A-A6E9-2E537A9795D0}">
+                EventGhost.Comment()
+            </Action>
+            <Action Name="Display: TV 1440p120 selected" id="17" Enabled="False" XML_Guid="{FABC497F-77DB-4B8A-A6E9-2E537A9795D0}">
+                EventGhost.Comment()
+            </Action>
+            <Action Name="Display: TV Enabled" id="18" Enabled="False" XML_Guid="{7872049C-2D8B-457F-873D-4BC70E17217C}">
+                EventGhost.Comment()
+            </Action>
+            <Action Name="Audio: Stereo Output Enabled" id="19" XML_Guid="{CBDB4E4D-3BC2-42ED-89F9-7C379B2EFE33}">
+                EventGhost.Comment()
+            </Action>
+            <Action Name="Audio: Stereo -&gt; DOLBY SURROUND Enabled" id="20" Enabled="False" XML_Guid="{C23B85E8-AD90-4780-A0A0-111E8CA783D2}">
+                EventGhost.Comment()
+            </Action>
+            <Action Name="Audio: 5.1 Output Enabled" id="21" Enabled="False" XML_Guid="{54AE651F-F02B-4736-A3E8-918FBAB33DB5}">
+                EventGhost.Comment()
+            </Action>
+            <Action Name="Audio: Atmos Output Enabled" id="22" Enabled="False" XML_Guid="{3EFDF072-3CD8-4083-910F-C93270121F77}">
+                EventGhost.Comment()
+            </Action>
+            <Action Name="PC monitor: Power On" id="23" XML_Guid="{1B47C6EC-1A66-41FD-B730-1FDD8F22D23F}">
+                EventGhost.Comment()
+            </Action>
+            <Action Name="Monitor Input: PC (not MBP)" id="24" Enabled="False" XML_Guid="{4128292A-06E7-40F1-BCCC-6E5C810A4F04}">
+                EventGhost.Comment()
+            </Action>
+        </Macro>
+        <Macro Name="Set State: PC Monitor" id="25" XML_Guid="{51269E2E-AA33-4C97-B4DB-C9FAFD0A9F90}">
+            <Action XML_Guid="{5B674F6E-E46E-4F31-8C93-A2CB90F2D0F9}">
+                EventGhost.EnableItem(XmlIdLink(17))
+            </Action>
+            <Action XML_Guid="{C4B28E75-ABBC-4B9A-9868-6D554E629B1F}">
+                EventGhost.DisableItem(XmlIdLink(18))
+            </Action>
+            <Action XML_Guid="{C4B28E75-ABBC-4B9A-9868-6D554E629B1F}">
+                EventGhost.DisableItem(XmlIdLink(16))
+            </Action>
+            <Action XML_Guid="{C4B28E75-ABBC-4B9A-9868-6D554E629B1F}">
+                EventGhost.DisableItem(XmlIdLink(17))
+            </Action>
+        </Macro>
+        <Macro Name="Set State: TV 4K60 " XML_Guid="{E66A5665-7384-42AF-8A6D-B371B320491F}">
+            <Action XML_Guid="{A3E752FB-17D4-46F4-BCC0-48D3B2C93945}">
+                EventGhost.EnableItem(XmlIdLink(18))
+            </Action>
+            <Action XML_Guid="{A3E752FB-17D4-46F4-BCC0-48D3B2C93945}">
+                EventGhost.EnableItem(XmlIdLink(16))
+            </Action>
+            <Action XML_Guid="{4DF0165B-85ED-411A-A3BA-775D2B4B9E49}">
+                EventGhost.DisableItem(XmlIdLink(17))
+            </Action>
+            <Action XML_Guid="{4DF0165B-85ED-411A-A3BA-775D2B4B9E49}">
+                EventGhost.DisableItem(XmlIdLink(15))
+            </Action>
+        </Macro>
+        <Macro Name="Set State: TV 1440p120" id="35" XML_Guid="{E66A5665-7384-42AF-8A6D-B371B320491F}">
+            <Action XML_Guid="{A3E752FB-17D4-46F4-BCC0-48D3B2C93945}">
+                EventGhost.EnableItem(XmlIdLink(18))
+            </Action>
+            <Action XML_Guid="{A3E752FB-17D4-46F4-BCC0-48D3B2C93945}">
+                EventGhost.EnableItem(XmlIdLink(17))
+            </Action>
+            <Action XML_Guid="{4DF0165B-85ED-411A-A3BA-775D2B4B9E49}">
+                EventGhost.DisableItem(XmlIdLink(16))
+            </Action>
+            <Action XML_Guid="{4DF0165B-85ED-411A-A3BA-775D2B4B9E49}">
+                EventGhost.DisableItem(XmlIdLink(15))
+            </Action>
+        </Macro>
+        <Macro Name="Set State: AudioMode - Stereo" id="40" XML_Guid="{546309BD-F68A-411A-904A-8D350A345D86}">
+            <Action XML_Guid="{3D166C8E-FFDD-4E57-9BB5-486BA32E501C}">
+                EventGhost.EnableItem(XmlIdLink(19))
+            </Action>
+            <Action XML_Guid="{0BFB5558-2B19-497B-927F-3A2DD92E363C}">
+                EventGhost.DisableItem(XmlIdLink(20))
+            </Action>
+            <Action XML_Guid="{0BFB5558-2B19-497B-927F-3A2DD92E363C}">
+                EventGhost.DisableItem(XmlIdLink(21))
+            </Action>
+            <Action XML_Guid="{00E69D11-A46A-4E1E-AE47-CD813F66C7BA}">
+                EventGhost.DisableItem(XmlIdLink(22))
+            </Action>
+        </Macro>
+        <Macro Name="Set State: AudioMode - Stereo -&gt; Surround" id="45" XML_Guid="{546309BD-F68A-411A-904A-8D350A345D86}">
+            <Action XML_Guid="{3D166C8E-FFDD-4E57-9BB5-486BA32E501C}">
+                EventGhost.EnableItem(XmlIdLink(20))
+            </Action>
+            <Action XML_Guid="{749ECF63-E4D3-4A86-872D-A74CE1B24DEE}">
+                EventGhost.DisableItem(XmlIdLink(19))
+            </Action>
+            <Action XML_Guid="{0BFB5558-2B19-497B-927F-3A2DD92E363C}">
+                EventGhost.DisableItem(XmlIdLink(21))
+            </Action>
+            <Action XML_Guid="{00E69D11-A46A-4E1E-AE47-CD813F66C7BA}">
+                EventGhost.DisableItem(XmlIdLink(22))
+            </Action>
+        </Macro>
+        <Macro Name="Set State: AudioMode - 5.1 Surround" id="50" XML_Guid="{546309BD-F68A-411A-904A-8D350A345D86}">
+            <Action XML_Guid="{E89E0AC3-224F-41BF-8AB2-4738E4AAD65D}">
+                EventGhost.EnableItem(XmlIdLink(21))
+            </Action>
+            <Action XML_Guid="{749ECF63-E4D3-4A86-872D-A74CE1B24DEE}">
+                EventGhost.DisableItem(XmlIdLink(19))
+            </Action>
+            <Action XML_Guid="{0BFB5558-2B19-497B-927F-3A2DD92E363C}">
+                EventGhost.DisableItem(XmlIdLink(20))
+            </Action>
+            <Action XML_Guid="{00E69D11-A46A-4E1E-AE47-CD813F66C7BA}">
+                EventGhost.DisableItem(XmlIdLink(22))
+            </Action>
+        </Macro>
+        <Macro Name="Set State: AudioMode - Atmos" id="55" XML_Guid="{546309BD-F68A-411A-904A-8D350A345D86}">
+            <Action XML_Guid="{B3A7369D-5B6C-458C-9B40-FCE3F5ADD09B}">
+                EventGhost.EnableItem(XmlIdLink(22))
+            </Action>
+            <Action XML_Guid="{749ECF63-E4D3-4A86-872D-A74CE1B24DEE}">
+                EventGhost.DisableItem(XmlIdLink(19))
+            </Action>
+            <Action XML_Guid="{0BFB5558-2B19-497B-927F-3A2DD92E363C}">
+                EventGhost.DisableItem(XmlIdLink(20))
+            </Action>
+            <Action XML_Guid="{0BFB5558-2B19-497B-927F-3A2DD92E363C}">
+                EventGhost.DisableItem(XmlIdLink(21))
+            </Action>
+        </Macro>
+    </Folder>
+    <Folder Name="Monitor Control" XML_Guid="{6A8D3866-D5B8-4CAF-828E-4223EF42A8B3}" Expanded="True">
+        <Macro Name="Turn On PC Monitor" id="61" XML_Guid="{7B4E92C0-6391-4A1A-9901-CC51AFA1B80E}" Expanded="True">
+            <Event Name="System.UnIdle" XML_Guid="{7FC5420E-95C6-4A34-9B05-0EB518AFF6C0}" />
+            <Action Name="Spam Monitor On" XML_Guid="{133BCB62-8822-4F58-985E-0061F7DAE6FA}">
+                EventGhost.PythonScript(u'\ndef main():\n    for i in range(15):\n        eg.plugins.System.Execute(u\'C:\\\\Program Files (x86)\\\\EventGhost\\\\htpc-remote\\\\utilities\\\\ControlMyMonitor.exe\', u\'/SetValueIfNeeded "Acer XFA240" D6 1\', 3, False, 5, u\'\', False, False, u\'\', False, True, False, False)\nmain()')
+            </Action>
+            <Action XML_Guid="{1C74AFF9-7B85-4F86-BE2A-85227FB12B9D}">
+                Window.SendKeys(u'{MediaPlayPause}', False, 2)
+            </Action>
+            <Action XML_Guid="{7A134416-E199-4605-B7E3-778FEE5713A7}">
+                EventGhost.Wait(1.0)
+            </Action>
+            <Action XML_Guid="{1C74AFF9-7B85-4F86-BE2A-85227FB12B9D}">
+                Window.SendKeys(u'{MediaPlayPause}', False, 2)
+            </Action>
+            <Action XML_Guid="{55944529-086E-4D12-972B-413F35C32949}">
+                EventGhost.EnableItem(XmlIdLink(23))
+            </Action>
+        </Macro>
+        <Macro Name="Turn Off PC Monitor" id="67" XML_Guid="{7B4E92C0-6391-4A1A-9901-CC51AFA1B80E}" Expanded="True">
+            <Action Name="Spam Monitor Off" XML_Guid="{133BCB62-8822-4F58-985E-0061F7DAE6FA}">
+                EventGhost.PythonScript(u'\ndef main():\n    for i in range(12):\n        eg.plugins.System.Execute(u\'C:\\\\Program Files (x86)\\\\EventGhost\\\\htpc-remote\\\\utilities\\\\ControlMyMonitor.exe\', u\'/SetValueIfNeeded "Acer XFA240" D6 4\', 3, False, 5, u\'\', False, False, u\'\', False, True, False, False)\nmain()')
+            </Action>
+            <Action XML_Guid="{BB24BAD5-8ED0-49E5-BF97-0ECC9E0D0516}">
+                EventGhost.DisableItem(XmlIdLink(23))
+            </Action>
+        </Macro>
+        <Macro Name="Turn Off PC Monitor if current input is PC" id="70" XML_Guid="{7B4E92C0-6391-4A1A-9901-CC51AFA1B80E}" Expanded="True">
+            <Event Name="System.Idle" XML_Guid="{F16EB18D-4F57-4916-B55E-4E29ACC4BB60}" />
+            <Action Name="Check: Is Monitor input = PC" XML_Guid="{33980256-C1D4-40BF-AF53-19960FC6DCCA}">
+                EventGhost.PythonScript(u'def main():\n    monitor_input = eg.plugins.System.Execute(u\'C:\\\\Program Files (x86)\\\\EventGhost\\\\htpc-remote\\\\utilities\\\\ControlMyMonitor.exe\', u\'/GetValue "Acer XFA240" 60\', 0, True, 2, u\'\', False, False, u\'\', False, True, False, False)\n    if (monitor_input == 15):\n        eg.result = True\n    else:\n        eg.result = False\n\nmain()')
+            </Action>
+            <Action XML_Guid="{3AA52257-6808-418E-B7AF-737ADDEEF2E2}">
+                EventGhost.NewJumpIf(XmlIdLink(67), 0, False)
+            </Action>
+        </Macro>
+        <Macro Name="Toggle PC Monitor On/Off" id="74" XML_Guid="{7B4E92C0-6391-4A1A-9901-CC51AFA1B80E}" Expanded="True">
+            <Action XML_Guid="{2944146E-8F42-4736-9BF0-20B8C31A6DC3}">
+                EventGhost.GetItemState(XmlIdLink(23))
+            </Action>
+            <Action XML_Guid="{7A37C8E4-2C64-43FD-9FB0-6B814B5EB184}">
+                EventGhost.JumpIfElse(XmlIdLink(70), 0, False, XmlIdLink(61), False)
+            </Action>
+        </Macro>
+        <Macro Name="Switch to HDMI Monitor Input" id="77" XML_Guid="{705C88A3-DF29-4F63-A759-9091E362585A}" Expanded="True">
+            <Event Name="Keyboard.Shift+Ctrl+W" XML_Guid="{4E7822E2-3627-40B2-A44C-D0AE199D89B5}" />
+            <Action XML_Guid="{3055CB1F-A3CC-4888-8F92-F3952B4BA368}">
+                EventGhost.DisableItem(XmlIdLink(24))
+            </Action>
+            <Action XML_Guid="{C64951FF-E963-4088-9436-437D210DE60F}">
+                System.Execute(u'C:\\Program Files (x86)\\EventGhost\\htpc-remote\\utilities\\ControlMyMonitor.exe', u'/SetValue "Acer XFA240" 60 17', 3, False, 5, u'', False, False, u'', False, True, False, False)
+            </Action>
+        </Macro>
+        <Macro Name="Switch to DP Monitor Input" id="81" XML_Guid="{705C88A3-DF29-4F63-A759-9091E362585A}" Expanded="True">
+            <Event Name="Keyboard.Shift+Ctrl+E" XML_Guid="{4E7822E2-3627-40B2-A44C-D0AE199D89B5}" />
+            <Action XML_Guid="{5DC7D679-72C4-42D3-9F05-AB762F97E9EA}">
+                EventGhost.EnableItem(XmlIdLink(24))
+            </Action>
+            <Action XML_Guid="{C64951FF-E963-4088-9436-437D210DE60F}">
+                System.Execute(u'C:\\Program Files (x86)\\EventGhost\\htpc-remote\\utilities\\ControlMyMonitor.exe', u'/SetValue "Acer XFA240" 60 15', 3, False, 5, u'', False, False, u'', False, True, False, False)
+            </Action>
+        </Macro>
+        <Macro Name="Toggle DP/HDMI Monitor Input" XML_Guid="{705C88A3-DF29-4F63-A759-9091E362585A}" Expanded="True">
+            <Event Name="Keyboard.Shift+Ctrl+Tabulator" XML_Guid="{4E7822E2-3627-40B2-A44C-D0AE199D89B5}" />
+            <Action XML_Guid="{98D0A312-555A-4275-85F9-00A471BF3094}">
+                EventGhost.GetItemState(XmlIdLink(24))
+            </Action>
+            <Action XML_Guid="{16C6BD27-41D9-4D06-9CB3-E39591A0D5CA}">
+                EventGhost.JumpIfElse(XmlIdLink(77), 0, False, XmlIdLink(81), False)
+            </Action>
+        </Macro>
+    </Folder>
+    <Folder Name="AudioModes" XML_Guid="{877C1D39-7EE0-4CD2-90EA-F46863F30B9E}">
+        <Macro Name="AudioMode: Stereo Out(24/192) -&gt; DENON" id="90" XML_Guid="{0ED96D4B-818D-47B4-990B-AD06C0772666}" Expanded="True">
+            <Action XML_Guid="{01BCAC0A-EA0F-441F-B723-2A5E16608F9A}">
+                EventGhost.NewJumpIf(XmlIdLink(40), 2, True)
+            </Action>
+            <Action XML_Guid="{49737C25-0306-416E-A88B-42E45EE96206}">
+                EventGhost.ShowOSD(u'Audio Output: Stereo 24bit/192kHz', u'0;-24;0;0;0;700;0;0;0;0;3;2;1;34;Microsoft YaHei UI', (255, 255, 0), (0, 0, 0), 3, (15, 50), 1, 3.0, u'Default')
+            </Action>
+            <Action Name="SoundVolumeView: Set DENON Stereo - 24-192.bat" XML_Guid="{74DCAC4A-41DC-457B-9773-480FD01536D2}">
+                System.Execute(u'C:\\Program Files (x86)\\EventGhost\\htpc-remote\\utilities\\soundvolumeviewGUI\\Set DENON Stereo - 24-192.bat', u'', 3, True, 5, u'', False, False, u'', False, False, False, False)
+            </Action>
+            <Action XML_Guid="{1C74AFF9-7B85-4F86-BE2A-85227FB12B9D}">
+                Window.SendKeys(u'{MediaPlayPause}', False, 2)
+            </Action>
+            <Action XML_Guid="{1C74AFF9-7B85-4F86-BE2A-85227FB12B9D}">
+                Window.SendKeys(u'{MediaPlayPause}', False, 2)
+            </Action>
+        </Macro>
+        <Macro Name="AudioMode: Stereo Out(24/192) -&gt; DENON" id="96" XML_Guid="{0ED96D4B-818D-47B4-990B-AD06C0772666}">
+            <Action XML_Guid="{E4EF1B8D-28B7-4A74-B210-28C97385B678}">
+                EventGhost.NewJumpIf(XmlIdLink(45), 2, True)
+            </Action>
+            <Action XML_Guid="{49737C25-0306-416E-A88B-42E45EE96206}">
+                EventGhost.ShowOSD(u'Audio Output: Stereo 24bit/192kHz + Dolby Surround', u'0;-24;0;0;0;700;0;0;0;0;3;2;1;34;Microsoft YaHei UI', (255, 255, 0), (0, 0, 0), 3, (15, 50), 1, 3.0, u'Default')
+            </Action>
+            <Action Name="SoundVolumeView: Set DENON Stereo - 24-192.bat" XML_Guid="{74DCAC4A-41DC-457B-9773-480FD01536D2}">
+                System.Execute(u'C:\\Program Files (x86)\\EventGhost\\htpc-remote\\utilities\\soundvolumeviewGUI\\Set DENON Stereo - 24-192.bat', u'', 3, True, 5, u'', False, False, u'', False, False, False, False)
+            </Action>
+            <Action XML_Guid="{1C74AFF9-7B85-4F86-BE2A-85227FB12B9D}">
+                Window.SendKeys(u'{MediaPlayPause}', False, 2)
+            </Action>
+            <Action XML_Guid="{1C74AFF9-7B85-4F86-BE2A-85227FB12B9D}">
+                Window.SendKeys(u'{MediaPlayPause}', False, 2)
+            </Action>
+        </Macro>
+        <Macro Name="AudioMode: 5.1 Out(24/192) -&gt; DENON" id="102" XML_Guid="{DEB1C1BC-0964-4ACB-89AA-507B93BBDBCC}">
+            <Action XML_Guid="{AD3D6302-703A-4349-9F83-DB7D24FE5724}">
+                EventGhost.NewJumpIf(XmlIdLink(50), 2, True)
+            </Action>
+            <Action XML_Guid="{49737C25-0306-416E-A88B-42E45EE96206}">
+                EventGhost.ShowOSD(u'Audio Output: 5.1ch 24bit/192kHz', u'0;-24;0;0;0;700;0;0;0;0;3;2;1;34;Microsoft YaHei UI', (255, 255, 0), (0, 0, 0), 3, (15, 50), 1, 3.0, u'Default')
+            </Action>
+            <Action Name="SoundVolumeView: Set DENON 5.1 - 24-192.bat" XML_Guid="{46A13D51-D918-4F62-BDD3-5D11FD59CBF4}">
+                System.Execute(u'C:\\Program Files (x86)\\EventGhost\\htpc-remote\\utilities\\soundvolumeviewGUI\\Set DENON 5.1 - 24-192.bat', u'', 3, True, 5, u'', False, False, u'', False, False, False, False)
+            </Action>
+            <Action XML_Guid="{1C74AFF9-7B85-4F86-BE2A-85227FB12B9D}">
+                Window.SendKeys(u'{MediaPlayPause}', False, 2)
+            </Action>
+            <Action XML_Guid="{1C74AFF9-7B85-4F86-BE2A-85227FB12B9D}">
+                Window.SendKeys(u'{MediaPlayPause}', False, 2)
+            </Action>
+        </Macro>
+        <Macro Name="AudioMode: Atmos Out -&gt; DENON" id="108" XML_Guid="{DE1466D5-E1E7-429A-BA13-6B8CA6A80576}">
+            <Action XML_Guid="{49737C25-0306-416E-A88B-42E45EE96206}">
+                EventGhost.ShowOSD(u'Audio Output: Dolby Atmos', u'0;-24;0;0;0;700;0;0;0;0;3;2;1;34;Microsoft YaHei UI', (255, 255, 0), (0, 0, 0), 3, (15, 50), 1, 3.0, u'Default')
+            </Action>
+            <Action XML_Guid="{92763325-CDC5-4C10-8A5E-80E253990E44}">
+                EventGhost.NewJumpIf(XmlIdLink(55), 2, True)
+            </Action>
+            <Action Name="SoundVolumeView: Set DENON Atmos - 24-192.bat" XML_Guid="{C8E1CDEF-1282-4935-BE6D-41814E536A07}">
+                System.Execute(u'C:\\Program Files (x86)\\EventGhost\\htpc-remote\\utilities\\soundvolumeviewGUI\\Set DENON Atmos - 24-192.bat', u'', 3, True, 5, u'', False, False, u'', False, False, False, False)
+            </Action>
+            <Action XML_Guid="{1C74AFF9-7B85-4F86-BE2A-85227FB12B9D}">
+                Window.SendKeys(u'{MediaPlayPause}', False, 2)
+            </Action>
+            <Action XML_Guid="{1C74AFF9-7B85-4F86-BE2A-85227FB12B9D}">
+                Window.SendKeys(u'{MediaPlayPause}', False, 2)
+            </Action>
+        </Macro>
+    </Folder>
+    <Folder Name="DisplayModes" XML_Guid="{1332ED1B-0B13-4D1F-B341-154BA94516BE}" Expanded="True">
+        <Macro Name="DisplayMode: PC" id="115" XML_Guid="{D8E94C64-239F-4FA2-B2DB-8C2EC8AC015C}">
+            <Action XML_Guid="{BD7000DA-0BC7-4D80-A211-60FC0358ADEE}">
+                System.Execute(u'C:\\Program Files (x86)\\EventGhost\\htpc-remote\\utilities\\DisplaySwitch.exe', u'/extend', 3, False, 5, u'', False, False, u'', False, False, False, False)
+            </Action>
+            <Action XML_Guid="{FF7BF98A-E5D0-485F-BB86-8DB4968F2C36}">
+                EventGhost.NewJumpIf(XmlIdLink(61), 2, True)
+            </Action>
+            <Action XML_Guid="{621015DE-88CD-41A4-8C1C-358744095447}">
+                EventGhost.Wait(0.8)
+            </Action>
+            <Action XML_Guid="{8E5F2DF3-76DC-43C6-BA3F-254572F7514D}">
+                EventGhost.NewJumpIf(XmlIdLink(129), 2, True)
+            </Action>
+            <Action XML_Guid="{968E658A-E717-43E6-97BA-B3993AD32842}">
+                EventGhost.NewJumpIf(XmlIdLink(25), 2, False)
+            </Action>
+        </Macro>
+        <Macro Name="DisplayMode: TV 4K60" id="121" XML_Guid="{B8CB5D70-D62F-4D56-B457-744C774F6E89}">
+            <Action XML_Guid="{C63013DB-683B-4A0D-B04E-83752E74ADDE}">
+                EventGhost.NewJumpIf(XmlIdLink(136), 2, True)
+            </Action>
+            <Action XML_Guid="{D7F75140-1398-43D3-9F86-A1E419DAC9AD}">
+                EventGhost.NewJumpIf(XmlIdLink(70), 2, True)
+            </Action>
+            <Action XML_Guid="{D2E1DC92-50BD-4356-80A8-C214BCE1C87C}">
+                EventGhost.NewJumpIf(XmlIdLink(35), 2, False)
+            </Action>
+        </Macro>
+        <Macro Name="DisplayMode: TV 1440p120" id="125" XML_Guid="{B8CB5D70-D62F-4D56-B457-744C774F6E89}">
+            <Action XML_Guid="{C63013DB-683B-4A0D-B04E-83752E74ADDE}">
+                EventGhost.NewJumpIf(XmlIdLink(140), 2, True)
+            </Action>
+            <Action XML_Guid="{D7F75140-1398-43D3-9F86-A1E419DAC9AD}">
+                EventGhost.NewJumpIf(XmlIdLink(70), 2, True)
+            </Action>
+            <Action XML_Guid="{D2E1DC92-50BD-4356-80A8-C214BCE1C87C}">
+                EventGhost.NewJumpIf(XmlIdLink(35), 2, False)
+            </Action>
+        </Macro>
+        <Macro Name="Display Preset: PC Monitor ON 1080p144Hz / AVR ON 720p / TV OFF" id="129" XML_Guid="{D6EDACFC-9985-433A-B6B0-FFBF1C6DFEFC}">
+            <Action Name="MultiMonitorTool.exe  Enable PC Monitor" XML_Guid="{A631297F-1F88-493D-BDE5-9B6B84E2908A}">
+                System.Execute(u'C:\\Program Files (x86)\\EventGhost\\htpc-remote\\utilities\\multimonitortool\\MultiMonitorTool.exe', u'/enable MONITOR\\ACR062C\\{4d36e96e-e325-11ce-bfc1-08002be10318}\\0003', 3, True, 2, u'', False, False, u'', False, True, False, False)
+            </Action>
+            <Action Name="MultiMonitorTool.exe  Disable TV" XML_Guid="{A631297F-1F88-493D-BDE5-9B6B84E2908A}">
+                System.Execute(u'C:\\Program Files (x86)\\EventGhost\\htpc-remote\\utilities\\multimonitortool\\MultiMonitorTool.exe', u'/disable MONITOR\\TCL0000\\{4d36e96e-e325-11ce-bfc1-08002be10318}\\0006', 3, True, 2, u'', False, False, u'', False, True, False, False)
+            </Action>
+            <Action XML_Guid="{2561F290-083D-4595-A55E-DAFBB7D4FCAC}">
+                EventGhost.Wait(0.8)
+            </Action>
+            <Action Name="MultiMonitorTool.exe Set Resolutions" XML_Guid="{C05FB386-4805-42F1-92A1-93261C3EA9B0}">
+                System.Execute(u'C:\\Program Files (x86)\\EventGhost\\htpc-remote\\utilities\\multimonitortool\\MultiMonitorTool.exe', u'/SetMonitors "Name=MONITOR\\DON004C\\{4d36e96e-e325-11ce-bfc1-08002be10318}\\0007 BitsPerPixel=32 Width=1920 Height=1080 DisplayFlags=0 DisplayFrequency=60 DisplayOrientation=0 PositionX=4294965376 PositionY=1080" "Name=MONITOR\\ACR062C\\{4d36e96e-e325-11ce-bfc1-08002be10318}\\0003 Primary=1 BitsPerPixel=32 Width=1920 Height=1080 DisplayFlags=0 DisplayFrequency=120 DisplayOrientation=0 PositionX=0 PositionY=0" "Name=MONITOR\\TCL0000\\{4d36e96e-e325-11ce-bfc1-08002be10318}\\0006 BitsPerPixel=0 Width=0 Height=0 DisplayFlags=0 DisplayFrequency=0 DisplayOrientation=0 PositionX=0 PositionY=0"', 2, True, 2, u'', False, False, u'', False, True, False, False)
+            </Action>
+            <Action Name="MultiMonitorTool.exe  Move All Windows To Primary Monitor" Enabled="False" XML_Guid="{A631297F-1F88-493D-BDE5-9B6B84E2908A}">
+                System.Execute(u'C:\\Program Files (x86)\\EventGhost\\htpc-remote\\utilities\\multimonitortool\\MultiMonitorTool.exe', u'/MoveWindow Primary All', 3, True, 2, u'', False, False, u'', False, True, False, False)
+            </Action>
+            <Action XML_Guid="{FF7BF98A-E5D0-485F-BB86-8DB4968F2C36}">
+                EventGhost.NewJumpIf(XmlIdLink(61), 2, True)
+            </Action>
+        </Macro>
+        <Macro Name="Display Preset: TV ON 4K60Hz / AVR ON 720p / PC Monitor OFF" id="136" XML_Guid="{D6EDACFC-9985-433A-B6B0-FFBF1C6DFEFC}" Expanded="True">
+            <Action Name="MultiMonitorTool.exe  Enable TV" XML_Guid="{A631297F-1F88-493D-BDE5-9B6B84E2908A}">
+                System.Execute(u'C:\\Program Files (x86)\\EventGhost\\htpc-remote\\utilities\\multimonitortool\\MultiMonitorTool.exe', u'/enable MONITOR\\TCL0000\\{4d36e96e-e325-11ce-bfc1-08002be10318}\\0006', 3, True, 2, u'', False, False, u'', False, True, False, False)
+            </Action>
+            <Action Name="MultiMonitorTool.exe  Disable PC Monitor" XML_Guid="{A631297F-1F88-493D-BDE5-9B6B84E2908A}">
+                System.Execute(u'C:\\Program Files (x86)\\EventGhost\\htpc-remote\\utilities\\multimonitortool\\MultiMonitorTool.exe', u'/disable MONITOR\\ACR062C\\{4d36e96e-e325-11ce-bfc1-08002be10318}\\0003', 3, True, 2, u'', False, False, u'', False, True, False, False)
+            </Action>
+            <Action Name="MultiMonitorTool.exe Set Resolutions" XML_Guid="{C05FB386-4805-42F1-92A1-93261C3EA9B0}">
+                System.Execute(u'C:\\Program Files (x86)\\EventGhost\\htpc-remote\\utilities\\multimonitortool\\MultiMonitorTool.exe', u'/SetMonitors "Name=MONITOR\\TCL0000\\{4d36e96e-e325-11ce-bfc1-08002be10318}\\0006 Primary=1 BitsPerPixel=32 Width=3840 Height=2160 DisplayFlags=0 DisplayFrequency=60 DisplayOrientation=0 PositionX=0 PositionY=0" "Name=MONITOR\\DON004C\\{4d36e96e-e325-11ce-bfc1-08002be10318}\\0007 BitsPerPixel=32 Width=1920 Height=1080 DisplayFlags=0 DisplayFrequency=60 DisplayOrientation=0 PositionX=4294965376 PositionY=2160" "Name=MONITOR\\ACR062C\\{4d36e96e-e325-11ce-bfc1-08002be10318}\\0003 BitsPerPixel=0 Width=0 Height=0 DisplayFlags=0 DisplayFrequency=0 DisplayOrientation=0 PositionX=0 PositionY=0"', 3, True, 5, u'', False, False, u'', False, True, False, False)
+            </Action>
+        </Macro>
+        <Macro Name="Display Preset: TV ON 1440p120Hz / AVR ON 720p / PC Monitor OFF" id="140" XML_Guid="{D6EDACFC-9985-433A-B6B0-FFBF1C6DFEFC}" Expanded="True">
+            <Action Name="MultiMonitorTool.exe  Enable TV" XML_Guid="{A631297F-1F88-493D-BDE5-9B6B84E2908A}">
+                System.Execute(u'C:\\Program Files (x86)\\EventGhost\\htpc-remote\\utilities\\multimonitortool\\MultiMonitorTool.exe', u'/enable MONITOR\\TCL0000\\{4d36e96e-e325-11ce-bfc1-08002be10318}\\0006', 3, True, 2, u'', False, False, u'', False, True, False, False)
+            </Action>
+            <Action Name="MultiMonitorTool.exe  Disable PC Monitor" XML_Guid="{A631297F-1F88-493D-BDE5-9B6B84E2908A}">
+                System.Execute(u'C:\\Program Files (x86)\\EventGhost\\htpc-remote\\utilities\\multimonitortool\\MultiMonitorTool.exe', u'/disable MONITOR\\ACR062C\\{4d36e96e-e325-11ce-bfc1-08002be10318}\\0003', 3, True, 2, u'', False, False, u'', False, True, False, False)
+            </Action>
+            <Action Name="MultiMonitorTool.exe Set Resolutions" XML_Guid="{C05FB386-4805-42F1-92A1-93261C3EA9B0}">
+                System.Execute(u'C:\\Program Files (x86)\\EventGhost\\htpc-remote\\utilities\\multimonitortool\\MultiMonitorTool.exe', u'/SetMonitors "Name=MONITOR\\TCL0000\\{4d36e96e-e325-11ce-bfc1-08002be10318}\\0006 Primary=1 BitsPerPixel=32 Width=2560 Height=1440 DisplayFlags=0 DisplayFrequency=120 DisplayOrientation=0 PositionX=0 PositionY=0" "Name=MONITOR\\DON004C\\{4d36e96e-e325-11ce-bfc1-08002be10318}\\0007 BitsPerPixel=32 Width=1920 Height=1080 DisplayFlags=0 DisplayFrequency=60 DisplayOrientation=0 PositionX=4294965376 PositionY=1440" "Name=MONITOR\\ACR062C\\{4d36e96e-e325-11ce-bfc1-08002be10318}\\0003 BitsPerPixel=0 Width=0 Height=0 DisplayFlags=0 DisplayFrequency=0 DisplayOrientation=0 PositionX=0 PositionY=0"', 3, True, 5, u'', False, False, u'', False, True, False, False)
+            </Action>
+        </Macro>
+        <Macro Name="Toggle HDR" XML_Guid="{546F97C8-A6D3-4BD0-9749-735F3E745A02}">
+            <Action XML_Guid="{1CC923A6-392C-4295-96CD-DFF505BED191}">
+                Window.SendKeys(u'{Alt+Win+B}', False, 2)
+            </Action>
+        </Macro>
+    </Folder>
+    <Folder Name="AirMouse Control" XML_Guid="{24EB675A-F48B-4087-83B2-BA4458248C3D}">
+        <Macro Name='"Mag -" Button: Set TV - 1440p 120Hz' XML_Guid="{B280CCA8-B5DA-46AE-B40A-0459C386E542}">
+            <Event Name="HID.032E02" XML_Guid="{CA4CF056-1988-45E4-BCAA-5B8266D54781}" />
+            <Action XML_Guid="{C2879911-EFB5-4855-B537-6BD6D3BECDCC}">
+                EventGhost.GetItemState(XmlIdLink(18))
+            </Action>
+            <Action XML_Guid="{C73BFB5B-05B8-48F8-913A-EFE8C7B186F4}">
+                EventGhost.NewJumpIf(XmlIdLink(140), 0, False)
+            </Action>
+        </Macro>
+        <Macro Name='"Mag +" Button: Set TV - 4K 60Hz' XML_Guid="{31E4E1D1-73AB-4111-98E1-179442CE404F}">
+            <Event Name="HID.032D02" XML_Guid="{2D9715AF-7F97-4862-9075-A3601046A0FF}" />
+            <Action XML_Guid="{567A319C-B3C7-4777-BD87-6F98EEE5CEB3}">
+                EventGhost.GetItemState(XmlIdLink(18))
+            </Action>
+            <Action XML_Guid="{2D0C1512-D856-4288-A37D-6077FF052131}">
+                EventGhost.NewJumpIf(XmlIdLink(136), 0, False)
+            </Action>
+        </Macro>
+        <Macro Name='"Menu" Button: Windows Key' XML_Guid="{8C5D4A65-11E9-454A-90C5-F852601249C8}">
+            <Event Name="Keyboard.Apps" XML_Guid="{C0D9AE26-846C-4A5E-96E2-B21D12E82128}" />
+            <Action XML_Guid="{BA5A7649-37A0-4102-ACC7-E4CB66AFFB33}">
+                Window.SendKeys(u'{Win}', False, 2)
+            </Action>
+        </Macro>
+        <Macro Name='"Media" Button: Display: TV 4K60 - Audio: Atmos' XML_Guid="{FBF8D916-7685-4F0E-AA71-2C49ACDD2608}">
+            <Event Name="HID.038301" XML_Guid="{48412833-89DA-4A90-97AF-E1322B424952}" />
+            <Action XML_Guid="{6FA20C09-A091-435C-BE1E-BDE620D20A5A}">
+                EventGhost.NewJumpIf(XmlIdLink(121), 2, True)
+            </Action>
+            <Action XML_Guid="{644E5F74-FB93-4FE8-ADAB-D234D6E62CBB}">
+                EventGhost.NewJumpIf(XmlIdLink(108), 2, False)
+            </Action>
+        </Macro>
+        <Macro Name='"!" Button:  Cycle Audio Output' XML_Guid="{FD97E388-AB19-4FC4-9383-9AF03E0D1D1D}">
+            <Event Name="HID.038A01" XML_Guid="{C64384FE-4477-40D3-AF55-75EFD554302A}" />
+            <Action XML_Guid="{D8FB5592-4DF6-479B-BC68-C97AC9EAF2C2}">
+                EventGhost.GetItemState(XmlIdLink(19))
+            </Action>
+            <Action XML_Guid="{79853962-5A23-446B-B026-79B9B301782C}">
+                EventGhost.NewJumpIf(XmlIdLink(96), 0, False)
+            </Action>
+            <Action XML_Guid="{D8FB5592-4DF6-479B-BC68-C97AC9EAF2C2}">
+                EventGhost.GetItemState(XmlIdLink(20))
+            </Action>
+            <Action XML_Guid="{79853962-5A23-446B-B026-79B9B301782C}">
+                EventGhost.NewJumpIf(XmlIdLink(102), 0, False)
+            </Action>
+            <Action XML_Guid="{AA68D5B7-9D7B-472D-BC02-D7E57639CCF8}">
+                EventGhost.GetItemState(XmlIdLink(21))
+            </Action>
+            <Action XML_Guid="{00981E5A-4D67-46E5-9D9B-41EEFC721A5C}">
+                EventGhost.NewJumpIf(XmlIdLink(108), 0, False)
+            </Action>
+            <Action XML_Guid="{0CB88E66-7F12-4301-B330-A16B881373AB}">
+                EventGhost.GetItemState(XmlIdLink(22))
+            </Action>
+            <Action XML_Guid="{C72FBB5E-E02E-41DD-A7E3-561B192168E3}">
+                EventGhost.NewJumpIf(XmlIdLink(90), 0, False)
+            </Action>
+        </Macro>
+        <Macro Name='"4square" Button: Display: PC - Audio: Stereo' XML_Guid="{4452B1F7-3F18-425E-8522-DB6776197E56}">
+            <Event Name="Keyboard.F2" XML_Guid="{3F7CB66A-26DD-4EFD-84D3-B4A75D2AD711}" />
+            <Action XML_Guid="{8839E077-1412-410D-B958-C51FD27B4F7E}">
+                EventGhost.NewJumpIf(XmlIdLink(115), 2, True)
+            </Action>
+            <Action XML_Guid="{517E83BA-6136-4A42-82B9-0076FA8D6865}">
+                EventGhost.NewJumpIf(XmlIdLink(90), 2, True)
+            </Action>
+        </Macro>
+    </Folder>
+    <Folder Name="WebApp Control" XML_Guid="{748833BF-0AB4-4878-8485-A2D6066CD4A0}" Expanded="True">
+        <Folder Name="Audio/Video Presets" XML_Guid="{74EE165D-749F-4F6F-8BC2-2E5C10689B75}" Expanded="True">
+            <Macro Name="Preset: Display: PC - Audio: Stereo" XML_Guid="{4452B1F7-3F18-425E-8522-DB6776197E56}" Expanded="True">
+                <Event Name="HTTP.presetPCStereo" XML_Guid="{DDC68DD1-EB89-4BD7-B9D8-6DC43D91EF12}" />
+                <Action XML_Guid="{8839E077-1412-410D-B958-C51FD27B4F7E}">
+                    EventGhost.NewJumpIf(XmlIdLink(115), 2, True)
+                </Action>
+                <Action XML_Guid="{517E83BA-6136-4A42-82B9-0076FA8D6865}">
+                    EventGhost.NewJumpIf(XmlIdLink(90), 2, True)
+                </Action>
+            </Macro>
+            <Macro Name="Preset: Display: PC - Audio: Dolby Surround" XML_Guid="{4452B1F7-3F18-425E-8522-DB6776197E56}">
+                <Event Name="HTTP.presetPCSurround" XML_Guid="{67A76F91-53A0-4E8C-9FA8-6AB4B0C7F3BA}" />
+                <Action XML_Guid="{8839E077-1412-410D-B958-C51FD27B4F7E}">
+                    EventGhost.NewJumpIf(XmlIdLink(115), 2, True)
+                </Action>
+                <Action XML_Guid="{517E83BA-6136-4A42-82B9-0076FA8D6865}">
+                    EventGhost.NewJumpIf(XmlIdLink(96), 2, True)
+                </Action>
+            </Macro>
+            <Macro Name="Preset: Display: TV 4K60 - Audio: Atmos" XML_Guid="{FBF8D916-7685-4F0E-AA71-2C49ACDD2608}">
+                <Event Name="HTTP.presetTV4K" XML_Guid="{D28A19C2-EE9A-4B42-A736-5B45AFF99BCC}" />
+                <Action XML_Guid="{6FA20C09-A091-435C-BE1E-BDE620D20A5A}">
+                    EventGhost.NewJumpIf(XmlIdLink(121), 2, True)
+                </Action>
+                <Action XML_Guid="{BF92E77F-8B7D-4DAC-ABF5-9503D266F319}">
+                    EventGhost.Wait(1.0)
+                </Action>
+                <Action XML_Guid="{466490B3-6220-4974-9E5C-CFC32DD06651}">
+                    EventGhost.NewJumpIf(XmlIdLink(108), 2, False)
+                </Action>
+            </Macro>
+            <Macro Name="Preset: Display: TV 1440p120 - Audio: Atmos" XML_Guid="{FBF8D916-7685-4F0E-AA71-2C49ACDD2608}">
+                <Event Name="HTTP.presetTV1440" XML_Guid="{AEA0297A-E9BA-4D37-AB8D-ACEE403663A2}" />
+                <Action XML_Guid="{6FA20C09-A091-435C-BE1E-BDE620D20A5A}">
+                    EventGhost.NewJumpIf(XmlIdLink(125), 2, True)
+                </Action>
+                <Action XML_Guid="{BF92E77F-8B7D-4DAC-ABF5-9503D266F319}">
+                    EventGhost.Wait(1.0)
+                </Action>
+                <Action XML_Guid="{644E5F74-FB93-4FE8-ADAB-D234D6E62CBB}">
+                    EventGhost.NewJumpIf(XmlIdLink(108), 2, False)
+                </Action>
+            </Macro>
+        </Folder>
+        <Folder Name="Audio/Video Custom Modes" XML_Guid="{63C742AF-5AF6-4188-B9F8-5CFE96C114D2}">
+            <Macro Name="Set AudioMode: Stereo Out(24/192) -&gt; DENON Stereo" XML_Guid="{D8BAB38D-EBB4-41A7-8DF6-41D3BE6ED931}" Expanded="True">
+                <Event Name="HTTP.audioModeStereo" XML_Guid="{85DBD75C-3132-4125-BEB8-C61424BF97C3}" />
+                <Action XML_Guid="{BA0E1530-7C82-4D64-8E9C-9AC5F8BB5ABD}">
+                    EventGhost.NewJumpIf(XmlIdLink(90), 2, False)
+                </Action>
+            </Macro>
+            <Macro Name="Set AudioMode: Stereo Out(24/192)-&gt; DENON Dolby Srround" XML_Guid="{D8BAB38D-EBB4-41A7-8DF6-41D3BE6ED931}" Expanded="True">
+                <Event Name="HTTP.audioModeStereoSurround" XML_Guid="{614B960F-2157-4CF0-92A1-83CD8358DF16}" />
+                <Action XML_Guid="{BA0E1530-7C82-4D64-8E9C-9AC5F8BB5ABD}">
+                    EventGhost.NewJumpIf(XmlIdLink(96), 2, False)
+                </Action>
+            </Macro>
+            <Macro Name="Set AudioMode: 5.1 Out(24/192) -&gt; DENON Dolby Surround" XML_Guid="{D8BAB38D-EBB4-41A7-8DF6-41D3BE6ED931}" Expanded="True">
+                <Event Name="HTTP.audioMode5.1" XML_Guid="{9B494EB0-8CAA-492B-9A49-9EBB7322A608}" />
+                <Action XML_Guid="{BA0E1530-7C82-4D64-8E9C-9AC5F8BB5ABD}">
+                    EventGhost.NewJumpIf(XmlIdLink(102), 2, False)
+                </Action>
+            </Macro>
+            <Macro Name="Set AudioMode: Atmos Out -&gt;DENON Atmos" XML_Guid="{D8BAB38D-EBB4-41A7-8DF6-41D3BE6ED931}" Expanded="True">
+                <Event Name="HTTP.audioModeAtmos" XML_Guid="{5582F330-9186-4FF6-9660-1354050E259C}" />
+                <Action XML_Guid="{BA0E1530-7C82-4D64-8E9C-9AC5F8BB5ABD}">
+                    EventGhost.NewJumpIf(XmlIdLink(108), 2, False)
+                </Action>
+            </Macro>
+            <Macro Name="Set DisplayMode: PC + AVR" XML_Guid="{D8BAB38D-EBB4-41A7-8DF6-41D3BE6ED931}" Expanded="True">
+                <Event Name="HTTP.displayModePC" XML_Guid="{ACA41BD7-4D15-42AD-89E0-332F8138CD85}" />
+                <Action XML_Guid="{BA0E1530-7C82-4D64-8E9C-9AC5F8BB5ABD}">
+                    EventGhost.NewJumpIf(XmlIdLink(115), 2, False)
+                </Action>
+            </Macro>
+            <Macro Name="Set DisplayMode: TV 4K60" XML_Guid="{D8BAB38D-EBB4-41A7-8DF6-41D3BE6ED931}" Expanded="True">
+                <Event Name="HTTP.displayModeTV4K60" XML_Guid="{E9CF55E8-4F81-40B3-B0C0-A40BBD423B80}" />
+                <Action XML_Guid="{0E95E834-7E2F-49F8-9BD8-DF956C8A07EE}">
+                    EventGhost.NewJumpIf(XmlIdLink(121), 2, False)
+                </Action>
+            </Macro>
+            <Macro Name="Set DisplayMode: TV 1440p120" XML_Guid="{D8BAB38D-EBB4-41A7-8DF6-41D3BE6ED931}" Expanded="True">
+                <Event Name="HTTP.displayModeTV2K120" XML_Guid="{FC2E5173-9C00-48CF-8D0A-D594249C0B67}" />
+                <Action XML_Guid="{BA0E1530-7C82-4D64-8E9C-9AC5F8BB5ABD}">
+                    EventGhost.NewJumpIf(XmlIdLink(125), 2, False)
+                </Action>
+            </Macro>
+        </Folder>
+        <Folder Name="App Shortcuts" XML_Guid="{D5035D24-3837-48A5-886E-74E4327F8CE0}">
+            <Macro Name="Run Playnite" XML_Guid="{BB6186B2-EA8B-4ED5-AAF7-22CB3303CB57}">
+                <Event Name="HTTP.launchPlaynite" XML_Guid="{1659E09C-4125-4C94-900A-2ED000BCAF3F}" />
+                <Action XML_Guid="{C321D1D3-AF25-48C1-BDA9-BE5517B205B6}">
+                    System.Execute(u'C:\\Users\\nuff_\\AppData\\Local\\Playnite\\Playnite.FullscreenApp.exe', u'', 0, False, 2, u'', False, False, u'', False, False, False, False)
+                </Action>
+                <Action XML_Guid="{C67BB2CC-0354-43B5-A5D5-677F5C748120}">
+                    Window.BringToFront()
+                </Action>
+            </Macro>
+            <Macro Name="Run Kodi" XML_Guid="{BB6186B2-EA8B-4ED5-AAF7-22CB3303CB57}" Expanded="True">
+                <Event Name="HTTP.launchKodi" XML_Guid="{085F6863-9325-4A5B-AEEF-5B3A83F32191}" />
+                <Action XML_Guid="{C321D1D3-AF25-48C1-BDA9-BE5517B205B6}">
+                    System.Execute(u'C:\\Program Files\\Kodi\\kodi.exe', u'', 0, False, 2, u'', False, False, u'', False, False, False, False)
+                </Action>
+                <Action XML_Guid="{C67BB2CC-0354-43B5-A5D5-677F5C748120}">
+                    Window.BringToFront()
+                </Action>
+            </Macro>
+        </Folder>
+        <Macro Name="Toggle PC Monitor On/Off" XML_Guid="{7B4E92C0-6391-4A1A-9901-CC51AFA1B80E}" Expanded="True">
+            <Event Name="HTTP.powerButton" XML_Guid="{5805BEE2-CA15-42D9-9CFE-20467163A834}" />
+            <Action XML_Guid="{7A37C8E4-2C64-43FD-9FB0-6B814B5EB184}">
+                EventGhost.JumpIfElse(XmlIdLink(74), 2, False, None, False)
+            </Action>
+        </Macro>
+    </Folder>
+    <Macro Name="Show OSD: Webserver: Test Event Received!" XML_Guid="{75F4578B-207D-4378-B623-AF4CC6B53BCC}">
+        <Event Name="HTTPS.testEvent" XML_Guid="{F1414537-B7FE-4451-84A0-4D78880659FD}" />
+        <Action XML_Guid="{734C2092-CAC6-449C-BE90-47447D94EC70}">
+            EventGhost.ShowOSD(u'Webserver: Test Event Received!', u'0;-32;0;0;0;900;0;0;0;0;3;2;1;34;Arial Black', (255, 255, 0), (0, 0, 0), 3, (20, 20), 1, 3.0, u'Win10')
+        </Action>
+    </Macro>
+</EventGhost>

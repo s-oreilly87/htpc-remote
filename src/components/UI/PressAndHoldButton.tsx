@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-import { REMOTE } from "@/utilities/constants";
+import { RemoteType } from "@/constants/remotes";
 import {
   sendDenonCommand,
   sendDenonQuery,
@@ -15,7 +15,7 @@ import { buttonPress } from "@/utilities/utils";
 import { useDenonContext } from "@/context/denon";
 
 interface PressAndHoldButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  remote: (typeof REMOTE)[keyof typeof REMOTE];
+  remote: RemoteType;
   volumeButton?: boolean;
 }
 
@@ -31,7 +31,7 @@ const PressAndHoldButton: React.FC<PressAndHoldButtonProps> = ({
   const [sendKeyInterval, setSendKeyInterval] = useState<NodeJS.Timeout | null>(null);
   const [buttonPressTimerId, setButtonPressTimerId] = useState<number | null>(null);
 
-  const [_denonState, updateDenonState, _refreshDenonState, setDenonState] = useDenonContext();
+  const { updateDenonState } = useDenonContext();
 
   const pressAndHoldVibration = () => {
     setVibrateInterval(setInterval(() => navigator.vibrate(1), 75));
@@ -119,15 +119,9 @@ const PressAndHoldButton: React.FC<PressAndHoldButtonProps> = ({
 
   const maybeChangeVolDisplay = (button: ValueButton) => {
     if (button.value === "MVUP") {
-      setDenonState((prevState) => ({
-        ...prevState,
-        MV: prevState.MV + 0.5,
-      }));
+      updateDenonState((prev) => ({ MV: (prev.MV ?? 50) + 0.5 }));
     } else if (button.value === "MVDOWN") {
-      setDenonState((prevState) => ({
-        ...prevState,
-        MV: prevState.MV - 0.5,
-      }));
+      updateDenonState((prev) => ({ MV: (prev.MV ?? 50) - 0.5 }));
     }
   };
 
@@ -168,13 +162,13 @@ const PressAndHoldButton: React.FC<PressAndHoldButtonProps> = ({
 
   const handleStartPressAndHold = (event: React.MouseEvent<HTMLButtonElement> | React.TouchEvent<HTMLButtonElement>) => {
     switch (remote) {
-      case REMOTE.ROKU: {
+      case RemoteType.ROKU: {
         return rokuPressAndHoldStart(event.currentTarget);
       }
-      case REMOTE.PC: {
+      case RemoteType.PC: {
         return pcSimulatePressAndHoldStart(event.currentTarget);
       }
-      case REMOTE.DENON: {
+      case RemoteType.DENON: {
         return denonSimulatePressAndHoldStart(event.currentTarget);
       }
     }
@@ -183,13 +177,13 @@ const PressAndHoldButton: React.FC<PressAndHoldButtonProps> = ({
   const handleEndPressAndHold = (event: React.MouseEvent<HTMLButtonElement> | React.TouchEvent<HTMLButtonElement>) => {
     event.preventDefault();
     switch (remote) {
-      case REMOTE.ROKU: {
+      case RemoteType.ROKU: {
         return rokuPressAndHoldEnd(event.currentTarget);
       }
-      case REMOTE.PC: {
+      case RemoteType.PC: {
         return pcSimulatePressAndHoldEnd();
       }
-      case REMOTE.DENON: {
+      case RemoteType.DENON: {
         return denonSimulatePressAndHoldEnd(event.currentTarget);
       }
     }

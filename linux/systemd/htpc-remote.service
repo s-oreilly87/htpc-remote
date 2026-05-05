@@ -1,0 +1,29 @@
+[Unit]
+Description=HTPC Remote Next.js app
+After=import-plasma-env.service graphical-session.target network-online.target pipewire.service wireplumber.service
+Wants=import-plasma-env.service graphical-session.target network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/WebstormProjects/htpc-remote
+Environment=NODE_ENV=production
+PassEnvironment=DISPLAY WAYLAND_DISPLAY XAUTHORITY XDG_RUNTIME_DIR DBUS_SESSION_BUS_ADDRESS
+
+ExecStartPre=/usr/bin/bash -lc '\
+  for i in {1..120}; do \
+    /usr/bin/kscreen-doctor -o >/dev/null 2>&1 || { sleep 0.25; continue; }; \
+    [[ -n "${DISPLAY:-}" && -S "/tmp/.X11-unix/X${DISPLAY#:}" ]] || { sleep 0.25; continue; }; \
+    [[ -z "${XAUTHORITY:-}" || -r "${XAUTHORITY}" ]] || { sleep 0.25; continue; }; \
+    exit 0; \
+  done; \
+  echo "HTPC remote start blocked: KScreen/XWayland not ready" >&2; \
+  exit 1'
+
+
+ExecStart=/usr/bin/bash -lc 'npm run deploy'
+Restart=on-failure
+RestartSec=5
+KillMode=mixed
+
+[Install]
+WantedBy=graphical-session.target

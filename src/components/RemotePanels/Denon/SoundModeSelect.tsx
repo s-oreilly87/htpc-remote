@@ -3,14 +3,14 @@ import { Listbox, Transition } from "@headlessui/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheck, faChevronDown } from "@fortawesome/free-solid-svg-icons";
 import { sendDenonCommand } from "@/utilities/http";
-import { DENON_SOUND_MODES } from "@/utilities/constants";
+import { DENON_SOUND_MODES } from "@/constants/denon";
 import LoadingSpinner from "@/components/UI/LoadingSpinner";
 
 import { dot_matrix } from "@/styles/fonts";
 import { useDenonContext } from "@/context/denon";
 
 const SelectSoundMode = ({ cycleTimeout }) => {
-  const [denonState, updateDenonState, refreshDenonState] = useDenonContext();
+  const { denonState, isLoading, updateDenonState, invalidateDenonState } = useDenonContext();
 
   //TODO: update this component to use a similar pattern to AudioModeSelect and DisplayModeSelect
 
@@ -30,7 +30,7 @@ const SelectSoundMode = ({ cycleTimeout }) => {
     if (response.error) {
       return console.error(response.error);
     }
-    refreshDenonState.all();
+    invalidateDenonState();
   };
 
   return (
@@ -41,8 +41,8 @@ const SelectSoundMode = ({ cycleTimeout }) => {
         onChange={handleListBoxSelect}
       >
         <div className="relative mt-1 w-full ">
-          <Listbox.Button className="relative w-full h-[40px] cursor-default rounded-lg bg-slate-800 pt-1 pb-2 pl-3 pr-10 text-center shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm">
-            {!denonState.loading && (
+          <Listbox.Button className="relative w-full h-10 cursor-default rounded-lg bg-slate-800 pt-1 pb-2 pl-3 pr-10 text-center shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm">
+            {!isLoading && (
               <span
                 className={`block truncate text-teal-400 text-xl ${
                   dot_matrix.className
@@ -51,7 +51,7 @@ const SelectSoundMode = ({ cycleTimeout }) => {
                 {selectedSoundMode.label}
               </span>
             )}
-            {denonState.loading && <LoadingSpinner color={"teal-500"} />}
+            {isLoading && <LoadingSpinner color={"teal-500"} />}
             <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
               <FontAwesomeIcon
                 icon={faChevronDown}
@@ -66,7 +66,7 @@ const SelectSoundMode = ({ cycleTimeout }) => {
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <Listbox.Options className="absolute z-40 mt-1 max-h-72 w-full overflow-auto rounded-md bg-slate-700 py-1 text-base text-center shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+            <Listbox.Options className="absolute z-40 mt-1 max-h-72 w-full overflow-auto rounded-md bg-slate-700 py-1 text-base text-center shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm">
               {Object.values(DENON_SOUND_MODES).map((soundMode) => (
                 <Listbox.Option
                   key={soundMode.label}

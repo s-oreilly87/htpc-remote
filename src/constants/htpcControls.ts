@@ -47,11 +47,6 @@ export enum LinuxAudioModeCommand {
   Surround71 = "surround71-hdmi ",
 }
 
-export interface ApiResponse {
-  ok: boolean;
-  error?: string;
-}
-
 export const VALID_KEY_ACTIONS: readonly LinuxKeyAction[] = Object.values(LinuxKeyAction);
 export const VALID_LAUNCH_APPS: readonly LinuxLaunchAppCommand[] = Object.values(LinuxLaunchAppCommand);
 export const VALID_LISTEN_COMMANDS: readonly LinuxListenCommand[] = Object.values(LinuxListenCommand);

@@ -1,0 +1,10 @@
+[Unit]
+Description=ydotool daemon for Wayland automation
+After=graphical-session.target
+
+[Service]
+ExecStart=/usr/local/bin/ydotoold
+Restart=always
+
+[Install]
+WantedBy=default.target

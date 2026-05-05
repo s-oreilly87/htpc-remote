@@ -1,4 +1,5 @@
-import {KEYSTROKE, REMOTE, URL_ENCODED_SYMBOLS,} from "@/utilities/constants";
+import { KEYSTROKE, RemoteType } from "@/constants/remotes";
+import { URL_ENCODED_SYMBOLS } from "@/constants/encoding";
 import {useEffect, useRef, useState} from "react";
 import {Transition} from "@headlessui/react";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
@@ -8,11 +9,10 @@ import KeypressButton from "@/components/UI/KeypressButton";
 import {sendKeystrokeToHtpc, sendRokuKeypress, sendRokuSearchQuery,} from "@/utilities/http";
 import {sleep} from "@/utilities/utils";
 import {throttle} from "lodash";
-import {lowerCase} from "lodash/string";
 import { usePlatform } from "@/hooks/usePlatform";
 
 interface KeyboardGroupProps {
-  remote: (typeof REMOTE)[keyof typeof REMOTE];
+  remote: RemoteType;
 }
 
 function KeyboardGroup({ remote }: KeyboardGroupProps) {
@@ -44,7 +44,7 @@ function KeyboardGroup({ remote }: KeyboardGroupProps) {
       return;
     }
 
-    if (remote === REMOTE.PC) {
+    if (remote === RemoteType.PC) {
       if (!inputExpanded) {
         sendKeystrokeToHtpc(KEYSTROKE[remote].WIN_KEY);
         setInputExpanded(!inputExpanded);
@@ -64,11 +64,11 @@ function KeyboardGroup({ remote }: KeyboardGroupProps) {
   };
 
   const sendKey = (key) => {
-    if (remote === REMOTE.ROKU) {
+    if (remote === RemoteType.ROKU) {
       if (!rokuSearchOpen) {
         sendRokuKeypress({ value: key });
       }
-    } else if (remote === REMOTE.PC) {
+    } else if (remote === RemoteType.PC) {
       if (key === KEYSTROKE.KEYS.BACKSPACE) {
         key = KEYSTROKE[remote].BACKSPACE;
       } else if (key === KEYSTROKE.KEYS.WIN_KEY) {
@@ -87,7 +87,7 @@ function KeyboardGroup({ remote }: KeyboardGroupProps) {
       char = URL_ENCODED_SYMBOLS[char];
     }
 
-    if (remote === REMOTE.ROKU) {
+    if (remote === RemoteType.ROKU) {
       if (!rokuSearchOpen) {
         sendKey("Lit_" + char);
       }
@@ -168,11 +168,11 @@ function KeyboardGroup({ remote }: KeyboardGroupProps) {
   const handleKeyDown = (event) => {
     if (event.keyCode === 8 && event.target.value === "") {
       // handle backspace when input is empty
-      if (remote === REMOTE.ROKU) {
+      if (remote === RemoteType.ROKU) {
         if (!rokuSearchOpen) {
           sendRokuKeypress({ value: KEYSTROKE.ROKU.BACKSPACE });
         }
-      } else if (remote === REMOTE.PC) {
+      } else if (remote === RemoteType.PC) {
         sendKeystrokeToHtpc(KEYSTROKE.PC.BACKSPACE);
       }
     }
@@ -204,7 +204,7 @@ function KeyboardGroup({ remote }: KeyboardGroupProps) {
 
   const getInputPlaceholder = () => {
     let placeholder = "Type to ";
-    if (remote === REMOTE.PC) {
+    if (remote === RemoteType.PC) {
       placeholder += "PC . . .";
     } else {
       placeholder += "RokuTV . . .";
@@ -222,13 +222,13 @@ function KeyboardGroup({ remote }: KeyboardGroupProps) {
         id="keyboard-btn-group"
         autoComplete="off"
         onSubmit={handleSubmit}
-        className={`flex absolute bottom-0 justify-items-center h-12 ${
+        className={`flex absolute bottom-3 justify-items-center h-12 ${
           inputExpanded ? "panel-width z-40" : "w-12"
         }`}
       >
         <input type="hidden" value="needed-to-disable-autocomplete" />
         <div className="w-12 h-full">
-          {remote === REMOTE.PC && (
+          {remote === RemoteType.PC && (
             <button
               id="win-key"
               type="button"
@@ -250,7 +250,7 @@ function KeyboardGroup({ remote }: KeyboardGroupProps) {
               {inputExpanded && <FontAwesomeIcon icon={faXmark} />}
             </button>
           )}
-          {remote === REMOTE.ROKU && (
+          {remote === RemoteType.ROKU && (
             <button
               id="search"
               type="button"
@@ -284,7 +284,7 @@ function KeyboardGroup({ remote }: KeyboardGroupProps) {
             <input
               id="keyboard-input"
               ref={keyboardInput}
-              className={`h-full w-full px-3 py-1 z-50`}
+              className="h-full w-full px-3 py-1 z-50 bg-slate-700 text-white placeholder:text-slate-400"
               type="text"
               placeholder={getInputPlaceholder()}
               autoFocus
@@ -299,9 +299,7 @@ function KeyboardGroup({ remote }: KeyboardGroupProps) {
             <button
               id="keyboard-submit"
               type="submit"
-              className={`btn btn-primary-${lowerCase(
-                remote,
-              )} rounded-r-xl rounded-l-none h-full w-full z-10`}
+              className={`btn btn-primary-${remote.toLowerCase()} rounded-r-xl rounded-l-none h-full w-full z-10`}
               value={KEYSTROKE[remote].ENTER}
             >
               <FontAwesomeIcon
@@ -312,10 +310,10 @@ function KeyboardGroup({ remote }: KeyboardGroupProps) {
           </div>
         </Transition>
       </form>
-      {(remote === REMOTE.PC || remote === REMOTE.ROKU) && (
+      {(remote === RemoteType.PC || remote === RemoteType.ROKU) && (
         <KeypressButton
           id="toggle-keyboard"
-          className="btn-secondary absolute bottom-0 left-14 w-10"
+          className="btn-secondary absolute bottom-3 left-14 w-10"
           onClick={toggleInputExpanded}
           remote={remote}
         >

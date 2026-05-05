@@ -7,23 +7,23 @@ import {
   faArrowRight,
   faArrowUp,
 } from "@fortawesome/free-solid-svg-icons";
-import { KEYSTROKE } from "@/utilities/constants";
+import { KEYSTROKE, RemoteType } from "@/constants/remotes";
 
-const Dpad = ({ remote }) => {
+const Dpad = ({ remote }: { remote: RemoteType }) => {
   return (
     <div
       id="dpad"
-      className="flex flex-col w-full aspect-square drop-shadow-2xl bg-gray-800 [border-radius:30%;] mx-auto"
+      className="flex flex-col w-full aspect-square drop-shadow-2xl bg-gray-800 [border-radius:30%] mx-auto"
     >
       <div id="top-row" className="flex w-full h-1/3 place-content-center">
         <div className="flex h-full w-1/3 mx-auto place-content-center">
           <PressAndHoldButton
             remote={remote}
-            className="btn-secondary w-full rounded-t-3xl transform scale-y-125 z-10"
+            className="btn-secondary w-full rounded-t-3xl scale-y-125 z-10"
             value={KEYSTROKE[remote].UP}
           >
             <FontAwesomeIcon
-              className="mx-auto my-auto h-1/2 w-1/2 transform scale-y-90"
+              className="mx-auto my-auto h-1/2 w-1/2 scale-y-90"
               icon={faArrowUp}
             />
           </PressAndHoldButton>
@@ -33,11 +33,11 @@ const Dpad = ({ remote }) => {
         <div className="flex h-full w-1/3">
           <PressAndHoldButton
             remote={remote}
-            className="btn-secondary flex w-full rounded-l-3xl transform scale-x-125 z-10"
+            className="btn-secondary flex w-full rounded-l-3xl scale-x-125 z-10"
             value={KEYSTROKE[remote].LEFT}
           >
             <FontAwesomeIcon
-              className="mx-auto my-auto h-1/2 w-1/2 transform scale-x-90"
+              className="mx-auto my-auto h-1/2 w-1/2 scale-x-90"
               icon={faArrowLeft}
             />
           </PressAndHoldButton>
@@ -45,7 +45,7 @@ const Dpad = ({ remote }) => {
         <div className="flex h-full w-1/3">
           <KeypressButton
             remote={remote}
-            className={`btn btn-primary-${remote.toLowerCase()} z-20 transform scale-125 rounded-full w-screen drop-shadow-2xl`}
+            className={`btn btn-primary-${remote.toLowerCase()} z-20 scale-125 rounded-full w-full drop-shadow-2xl`}
             value={KEYSTROKE[remote].OK}
           >
             <span className="mx-auto my-auto h-1/2 w-1/2 text-xl">OK</span>
@@ -54,11 +54,11 @@ const Dpad = ({ remote }) => {
         <div className="flex h-full w-1/3">
           <PressAndHoldButton
             remote={remote}
-            className="btn-secondary w-full rounded-r-3xl transform scale-x-125 z-10"
+            className="btn-secondary w-full rounded-r-3xl scale-x-125 z-10"
             value={KEYSTROKE[remote].RIGHT}
           >
             <FontAwesomeIcon
-              className="mx-auto my-auto h-1/2 w-1/2 transform scale-x-90"
+              className="mx-auto my-auto h-1/2 w-1/2 scale-x-90"
               icon={faArrowRight}
             />
           </PressAndHoldButton>
@@ -68,11 +68,11 @@ const Dpad = ({ remote }) => {
         <div className="flex h-full w-1/3">
           <PressAndHoldButton
             remote={remote}
-            className="btn-secondary w-full rounded-b-3xl transform scale-y-125 z-10"
+            className="btn-secondary w-full rounded-b-3xl scale-y-125 z-10"
             value={KEYSTROKE[remote].DOWN}
           >
             <FontAwesomeIcon
-              className="mx-auto my-auto h-1/2 w-1/2 transform scale-y-90"
+              className="mx-auto my-auto h-1/2 w-1/2 scale-y-90"
               icon={faArrowDown}
             />
           </PressAndHoldButton>
