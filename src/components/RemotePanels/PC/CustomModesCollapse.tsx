@@ -46,7 +46,7 @@ function CustomModesCollapse({
               leaveTo="opacity-0 -translate-y-10 h-1/4"
             >
               <Popover.Panel className="absolute left-1/2 z-50 mt-3 w-screen max-w-[525px] -translate-x-1/2 transform px-3 remote:px-0">
-                <div className="overflow-hidden rounded-lg shadow-lg ring-1 ring-black ring-opacity-5 bg-gray-500 py-4 space-y-3">
+                <div className="overflow-hidden rounded-lg shadow-lg ring-1 ring-black/5 bg-gray-500 py-4 space-y-3">
                   <AudioModeSelect
                     selectedAudioMode={selectedAudioMode}
                     setSelectedAudioMode={setSelectedAudioMode}

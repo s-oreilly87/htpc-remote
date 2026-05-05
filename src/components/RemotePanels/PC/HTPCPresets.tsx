@@ -200,62 +200,52 @@ function AudioVideoPresets() {
         <KeypressButton
           remote={remote}
           id="preset-gamestream-4K60"
-          className="btn btn-primary-pc w-1/4 flex flex-col justify-center items-center"
+          className="btn btn-primary-pc w-1/4 flex flex-col justify-center items-center gap-0.5"
           value="presetGamestream4K60"
           onClick={handleClick}
         >
           <FontAwesomeIcon icon={faGamepad} className="h-6 w-6" />
-          Game
-          <br />
-          4K60
+          <span className="leading-tight text-center">Game<br/>4K60</span>
         </KeypressButton>
         <KeypressButton
           remote={remote}
           id="preset-gamestream-1440p120"
-          className="btn btn-primary-pc w-1/4 flex flex-col justify-center items-center"
+          className="btn btn-primary-pc w-1/4 flex flex-col justify-center items-center gap-0.5"
           value="presetGamestream1440p120"
           onClick={handleClick}
         >
           <FontAwesomeIcon icon={faGamepad} className="h-6 w-6" />
-          Game
-          <br />
-          1440p120
+          <span className="leading-tight text-center text-xs">Game<br/>1440p120</span>
         </KeypressButton>
         <KeypressButton
           remote={remote}
           id="preset-watch-plex"
-          className="btn btn-primary-pc w-1/4 flex flex-col justify-center items-center"
+          className="btn btn-primary-pc w-1/4 flex flex-col justify-center items-center gap-0.5"
           value="presetWatchPlex"
           onClick={handleClick}
         >
-          <FontAwesomeIcon icon={faTv} className="h-8 w-8" />
-          Watch
-          <br />
-          Kodi
+          <FontAwesomeIcon icon={faTv} className="h-6 w-6" />
+          <span className="leading-tight text-center">Watch<br/>Kodi</span>
         </KeypressButton>
         <KeypressButton
           remote={remote}
           id="preset-plexamp-stereo"
-          className="btn btn-primary-pc w-1/4 flex flex-col justify-center items-center"
+          className="btn btn-primary-pc w-1/4 flex flex-col justify-center items-center gap-0.5"
           value="presetPlexampStereo"
           onClick={handleClick}
         >
-          <FontAwesomeIcon icon={faMusic} className="h-8 w-8" />
-          Plexamp
-          <br />
-          (Stereo/5.1)
+          <FontAwesomeIcon icon={faMusic} className="h-6 w-6" />
+          <span className="leading-tight text-center text-xs">Plexamp<br/>Stereo</span>
         </KeypressButton>
         <KeypressButton
           remote={remote}
           id="preset-qobuz-upmix"
-          className="btn btn-primary-pc w-1/4 flex flex-col justify-center items-center"
+          className="btn btn-primary-pc w-1/4 flex flex-col justify-center items-center gap-0.5"
           value="presetQobuzUpmix"
           onClick={handleClick}
         >
-          <FontAwesomeIcon icon={faMusic} className="h-8 w-8" />
-          Qobuz
-          <br />
-          (Upmix)
+          <FontAwesomeIcon icon={faMusic} className="h-6 w-6" />
+          <span className="leading-tight text-center text-xs">Qobuz<br/>Upmix</span>
         </KeypressButton>
       </div>
       <CustomModesCollapse

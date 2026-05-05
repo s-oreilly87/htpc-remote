@@ -31,7 +31,7 @@ const PressAndHoldButton: React.FC<PressAndHoldButtonProps> = ({
   const [sendKeyInterval, setSendKeyInterval] = useState<NodeJS.Timeout | null>(null);
   const [buttonPressTimerId, setButtonPressTimerId] = useState<number | null>(null);
 
-  const [_denonState, updateDenonState, _refreshDenonState, setDenonState] = useDenonContext();
+  const { updateDenonState, setDenonState } = useDenonContext();
 
   const pressAndHoldVibration = () => {
     setVibrateInterval(setInterval(() => navigator.vibrate(1), 75));

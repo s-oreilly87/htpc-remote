@@ -6,14 +6,14 @@ import { KEYSTROKE, RemoteType } from "@/constants/remotes";
 import {dot_matrix} from "@/styles/fonts";
 import {useDenonContext} from "@/context/denon";
 
-function VolumeControls({ remote }) {
-  const [denonState, updateDenonState, refreshDenonState] = useDenonContext();
+function VolumeControls({ remote }: { remote: RemoteType }) {
+  const { denonState } = useDenonContext();
   return (
     <div className="flex flex-col relative h-full w-full">
       {remote === RemoteType.DENON && (
         <div
           className={
-            "absolute w-3/4 -top-12 right-0 flex justify-center items-center text-center self-center bg-gray-800 rounded-lg border-slate-700 p-1"
+            "absolute w-3/4 -top-12 right-0 flex justify-center items-center text-center self-center bg-gray-900 rounded-lg ring-1 ring-white/10 p-1"
           }
         >
           <span

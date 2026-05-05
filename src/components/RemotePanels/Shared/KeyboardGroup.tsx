@@ -9,7 +9,6 @@ import KeypressButton from "@/components/UI/KeypressButton";
 import {sendKeystrokeToHtpc, sendRokuKeypress, sendRokuSearchQuery,} from "@/utilities/http";
 import {sleep} from "@/utilities/utils";
 import {throttle} from "lodash";
-import {lowerCase} from "lodash/string";
 import { usePlatform } from "@/hooks/usePlatform";
 
 interface KeyboardGroupProps {
@@ -223,7 +222,7 @@ function KeyboardGroup({ remote }: KeyboardGroupProps) {
         id="keyboard-btn-group"
         autoComplete="off"
         onSubmit={handleSubmit}
-        className={`flex absolute bottom-0 justify-items-center h-12 ${
+        className={`flex absolute bottom-3 justify-items-center h-12 ${
           inputExpanded ? "panel-width z-40" : "w-12"
         }`}
       >
@@ -285,7 +284,7 @@ function KeyboardGroup({ remote }: KeyboardGroupProps) {
             <input
               id="keyboard-input"
               ref={keyboardInput}
-              className={`h-full w-full px-3 py-1 z-50`}
+              className="h-full w-full px-3 py-1 z-50 bg-slate-700 text-white placeholder:text-slate-400"
               type="text"
               placeholder={getInputPlaceholder()}
               autoFocus
@@ -300,9 +299,7 @@ function KeyboardGroup({ remote }: KeyboardGroupProps) {
             <button
               id="keyboard-submit"
               type="submit"
-              className={`btn btn-primary-${lowerCase(
-                remote,
-              )} rounded-r-xl rounded-l-none h-full w-full z-10`}
+              className={`btn btn-primary-${remote.toLowerCase()} rounded-r-xl rounded-l-none h-full w-full z-10`}
               value={KEYSTROKE[remote].ENTER}
             >
               <FontAwesomeIcon
@@ -316,7 +313,7 @@ function KeyboardGroup({ remote }: KeyboardGroupProps) {
       {(remote === RemoteType.PC || remote === RemoteType.ROKU) && (
         <KeypressButton
           id="toggle-keyboard"
-          className="btn-secondary absolute bottom-0 left-14 w-10"
+          className="btn-secondary absolute bottom-3 left-14 w-10"
           onClick={toggleInputExpanded}
           remote={remote}
         >

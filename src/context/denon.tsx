@@ -18,12 +18,12 @@ export interface DenonRefreshers {
   dialogueAdjust: () => Promise<[boolean, number] | undefined>;
 }
 
-export type DenonContextValue = [
-  DenonState,
-  (props: Partial<DenonState>) => void,
-  DenonRefreshers,
-  React.Dispatch<React.SetStateAction<DenonState>>,
-];
+export type DenonContextValue = {
+  denonState: DenonState;
+  updateDenonState: (props: Partial<DenonState>) => void;
+  refreshDenonState: DenonRefreshers;
+  setDenonState: React.Dispatch<React.SetStateAction<DenonState>>;
+};
 
 const Context = createContext<DenonContextValue | undefined>(undefined);
 
@@ -238,7 +238,7 @@ export function DenonProvider({ children }: { children: ReactNode }) {
   );
 
   const contextValue = useMemo<DenonContextValue>(
-    () => [denonState, updateDenonState, refreshers, setDenonState],
+    () => ({ denonState, updateDenonState, refreshDenonState: refreshers, setDenonState }),
     [denonState, refreshers, updateDenonState],
   );
 

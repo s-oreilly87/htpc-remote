@@ -32,13 +32,6 @@ function RokuRemote({ rokuState, setRokuState, setSelectedRemote }) {
     fetchPowerState();
   }, [setRokuPowerOn]);
 
-  const searchForRoku = async () => {
-    const ipAddresses = await fetch(
-      "api/cors-proxy?url=http://192.168.1.102:8060/query/device-info",
-    );
-    console.log(ipAddresses);
-  };
-
   return (
     <>
       <Overlay show={!rokuState.powerOn} />
@@ -53,11 +46,10 @@ function RokuRemote({ rokuState, setRokuState, setSelectedRemote }) {
           </div>
           <div className="flex flex-col flex-grow gap-3 justify-center">
             <MediaButtons remote={remote} />
-            {/*<button className="btn" onClick={searchForRoku}>Search For Roku</button>*/}
             <BackHomeOption />
           </div>
         </div>
-        <div className="h-50 items-end">
+        <div className="shrink-0">
           <BottomSection
             remote={remote}
             rokuState={rokuState}

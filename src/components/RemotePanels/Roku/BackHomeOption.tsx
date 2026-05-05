@@ -7,12 +7,11 @@ import {
   faHouse,
 } from "@fortawesome/free-solid-svg-icons";
 
-function BackHomeOption(props) {
+function BackHomeOption() {
   return (
     <div
       id="back-home-option"
       className="w-full flex gap-2 h-12 max-h-12"
-      style={{ height: props.height }}
     >
       <div className="flex w-full place-content-center gap-2">
         <KeypressButton

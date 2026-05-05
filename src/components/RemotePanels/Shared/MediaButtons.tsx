@@ -9,12 +9,12 @@ import {
   faPlay,
 } from "@fortawesome/free-solid-svg-icons";
 import { KEYSTROKE, RemoteType } from "@/constants/remotes";
+
 import PressAndHoldButton from "@/components/UI/PressAndHoldButton";
 
-function MediaButtons({ remote }) {
+function MediaButtons({ remote }: { remote: RemoteType.PC | RemoteType.ROKU }) {
   return (
-    <div id="media-buttons" className="w-full flex gap-2 h-12 max-h-12">
-      <div className="flex w-full h-full place-content-center gap-2">
+    <div id="media-buttons" className="w-full flex place-content-center gap-2 h-12 max-h-12">
         {remote === RemoteType.PC && (
           <KeypressButton
             remote={remote}
@@ -83,7 +83,6 @@ function MediaButtons({ remote }) {
             <FontAwesomeIcon icon={faForwardStep} className="h-1/2" />
           </KeypressButton>
         )}
-      </div>
     </div>
   );
 }

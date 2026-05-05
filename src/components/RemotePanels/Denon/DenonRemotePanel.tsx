@@ -10,7 +10,7 @@ import SoundModes from "@/components/RemotePanels/Denon/SoundModes";
 const remote = RemoteType.DENON;
 
 function DenonRemote() {
-  const [denonState, updateDenonState, refreshDenonState] = useDenonContext();
+  const { denonState, refreshDenonState } = useDenonContext();
 
   // On render, query the amp for its current state (some data from MainZone HTTP request, levels data over telnet)
   useEffect(() => {
@@ -29,7 +29,7 @@ function DenonRemote() {
           <SoundModes />
           <AdvancedVolumeControl />
         </div>
-        <div className="h-50 items-end">
+        <div className="shrink-0">
           <BottomSection remote={remote} />
         </div>
       </div>

@@ -18,7 +18,7 @@ const DIALOGUE_ADJUST_DISABLED_MODES = [
   DENON_SOUND_MODES.PURE_DIRECT,
 ];
 const AdvancedVolumeControl = ({}) => {
-  const [denonState, updateDenonState, refreshDenonState] = useDenonContext();
+  const { denonState, updateDenonState } = useDenonContext();
 
   const [buttonPressTimerId, setButtonPressTimerId] = useState<number>(null);
 
@@ -81,10 +81,10 @@ const AdvancedVolumeControl = ({}) => {
 
         <div
           id="dialog-level"
-          className={`flex w-full p-2 space-x-1 ${
+          className={`flex w-full p-2 gap-1 ${
             denonState.psDilOn &&
             !DIALOGUE_ADJUST_DISABLED_MODES.includes(denonState.soundMode)
-              ? "opacity:100"
+              ? "opacity-100"
               : "opacity-0"
           } transition-all-500`}
           role="group"
@@ -123,24 +123,18 @@ const AdvancedVolumeControl = ({}) => {
       </div>
 
       <div className="flex flex-col gap-3 w-2/3 justify-end">
-        <div className="flex flex-col gap-2 justify-center items-center ">
+        <div className="flex flex-col gap-2 justify-center items-center">
           <label
             htmlFor="dynamic-volume"
-            className="text-center"
-            style={{ color: "#00be9f" }}
+            className="text-center text-teal-500"
           >
             Dynamic Volume
           </label>
 
-          <div id="dynamic-volume" className="flex" role="group">
+          <div id="dynamic-volume" className="flex divide-x divide-slate-500/30" role="group">
             <KeypressButton
               remote={remote}
-              className={`${
-                denonState.PSDYNVOL === "OFF"
-                  ? "btn-primary-denon"
-                  : "btn-secondary"
-              } \
-                                            w-1/4 items-center justify-center`}
+              className={`${denonState.PSDYNVOL === "OFF" ? "btn-primary-denon" : "btn-secondary"} w-1/4 items-center justify-center`}
               value="PSDYNVOL OFF"
               onClick={handleClick}
               disabled={denonState.loading}
@@ -149,12 +143,7 @@ const AdvancedVolumeControl = ({}) => {
             </KeypressButton>
             <KeypressButton
               remote={remote}
-              className={`${
-                denonState.PSDYNVOL === "LIT"
-                  ? "btn-primary-denon"
-                  : "btn-secondary"
-              } \
-                                            w-1/4 items-center justify-center`}
+              className={`${denonState.PSDYNVOL === "LIT" ? "btn-primary-denon" : "btn-secondary"} w-1/4 items-center justify-center`}
               value="PSDYNVOL LIT"
               onClick={handleClick}
               disabled={denonState.loading}
@@ -163,12 +152,7 @@ const AdvancedVolumeControl = ({}) => {
             </KeypressButton>
             <KeypressButton
               remote={remote}
-              className={`${
-                denonState.PSDYNVOL === "MED"
-                  ? "btn-primary-denon"
-                  : "btn-secondary"
-              } \
-                                            w-1/4 items-center justify-center`}
+              className={`${denonState.PSDYNVOL === "MED" ? "btn-primary-denon" : "btn-secondary"} w-1/4 items-center justify-center`}
               value="PSDYNVOL MED"
               onClick={handleClick}
               disabled={denonState.loading}
@@ -177,12 +161,7 @@ const AdvancedVolumeControl = ({}) => {
             </KeypressButton>
             <KeypressButton
               remote={remote}
-              className={`${
-                denonState.PSDYNVOL === "HEV"
-                  ? "btn-primary-denon"
-                  : "btn-secondary"
-              } \
-                                            w-1/4 items-center justify-center`}
+              className={`${denonState.PSDYNVOL === "HEV" ? "btn-primary-denon" : "btn-secondary"} w-1/4 items-center justify-center`}
               value="PSDYNVOL HEV"
               onClick={handleClick}
               disabled={denonState.loading}
@@ -192,7 +171,7 @@ const AdvancedVolumeControl = ({}) => {
           </div>
         </div>
 
-        <div className="flex flex-col gap-2 justify-center items-center ">
+        <div className="flex flex-col gap-2 justify-center items-center">
           <Toggle
             label={"Dynamic EQ"}
             labelColor={"teal-500"}
@@ -202,7 +181,7 @@ const AdvancedVolumeControl = ({}) => {
           />
           <div
             id="dynamic-eq"
-            className={`flex ${
+            className={`flex divide-x divide-slate-500/30 ${
               denonState.psDynEqOn ? "opacity-100" : "opacity-0"
             } transition-all-500`}
             role="group"
