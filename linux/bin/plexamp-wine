@@ -1,0 +1,105 @@
+#!/bin/bash
+
+# Be forgiving here; we don't want desktop launchers to blow up over minor errors
+set -u  # only: fail on undefined vars, but not -e/-o pipefail
+
+# === CONFIG ===
+WINEPREFIX="${WINEPREFIX:-$HOME/.wine-plexamp}"
+PLEXAMP_EXE="$WINEPREFIX/drive_c/Program Files/Plexamp/Plexamp.exe"
+SINK_NAME="denon51_remap"
+SYSTEM_SINK="system.null"
+
+# HDMI card + profile (baked in)
+CARD_NAME="alsa_card.pci-0000_00_1f.3"
+SURROUND_PROFILE="output:hdmi-surround"
+
+# Wait for remap sink before launching Plexamp (prevents losing device binding)
+WAIT_SECS=6
+WAIT_STEP=0.2
+# ==============
+
+# Extra args to avoid white / blank Electron window under Wine
+PLEXAMP_ARGS=(
+  --disable-gpu
+  --disable-gpu-rasterization
+  --force-device-scale-factor=2
+)
+
+export WINEPREFIX
+export WINEDEBUG=-all
+
+# Force Plexamp (this process only) to use the remap sink,
+# WITHOUT changing the system-wide default sink.
+export PULSE_SINK="$SINK_NAME"
+
+sink_exists() {
+  command -v pactl >/dev/null 2>&1 || return 1
+  pactl list short sinks 2>/dev/null | awk '{print $2}' | grep -qx "$1"
+}
+
+notify() {
+  local msg="$1"
+  if command -v notify-send >/dev/null 2>&1; then
+    notify-send "Plexamp (Wine)" "$msg" >/dev/null 2>&1 || true
+  fi
+  echo "Plexamp (Wine): $msg" >&2
+}
+
+# Ensure the Wine prefix exists (best-effort)
+if [ ! -d "$WINEPREFIX" ]; then
+  mkdir -p "$WINEPREFIX"
+fi
+
+# Keep system default on null (best-effort). This prevents Plasma probes hitting HDMI/remap.
+if command -v pactl >/dev/null 2>&1; then
+  pactl set-default-sink "$SYSTEM_SINK" >/dev/null 2>&1 || true
+fi
+
+# Kill any stale Plexamp processes (Wine or native)
+if command -v pgrep >/dev/null 2>&1; then
+  pgrep -f "Plexamp.exe" >/dev/null 2>&1 && pkill -f "Plexamp.exe" || true
+  pgrep -f "Plexamp.AppImage" >/dev/null 2>&1 && pkill -f "Plexamp.AppImage" || true
+fi
+
+sleep 0.5
+
+# --- Ensure remap sink exists BEFORE launching Plexamp ---
+if command -v pactl >/dev/null 2>&1; then
+  # Nudge HDMI into surround profile (best-effort, harmless if already set)
+  pactl set-card-profile "$CARD_NAME" "$SURROUND_PROFILE" >/dev/null 2>&1 || true
+
+  # Wait up to WAIT_SECS for the remap sink to appear
+  loops="$(awk -v s="$WAIT_SECS" -v d="$WAIT_STEP" 'BEGIN{printf "%d", (s/d)}')"
+  i=0
+  while ! sink_exists "$SINK_NAME"; do
+    i=$((i+1))
+    if [ "$i" -ge "$loops" ]; then
+      notify "Required sink '$SINK_NAME' is not available. Not starting Plexamp (prevents losing device binding)."
+      exit 0
+    fi
+    sleep "$WAIT_STEP"
+  done
+else
+  notify "pactl not found; refusing to start Plexamp because sink availability can't be verified."
+  exit 0
+fi
+# --- END guard ---
+
+# Launch Plexamp under Wine, fully detached
+nohup wine "$PLEXAMP_EXE" "${PLEXAMP_ARGS[@]}" >/dev/null 2>&1 &
+disown
+
+# Wake the remap / HDMI graph so audio actually flows
+if command -v pactl >/dev/null 2>&1; then
+  (
+    sleep 1
+    pactl suspend-sink "$SINK_NAME" 0 >/dev/null 2>&1 || true
+  ) &
+fi
+
+# Re-assert system default after Plexamp has created its stream (race-proof)
+if command -v pactl >/dev/null 2>&1; then
+  ( sleep 1; pactl set-default-sink "$SYSTEM_SINK" >/dev/null 2>&1 || true ) &
+fi
+
+exit 0

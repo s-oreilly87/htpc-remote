@@ -1,26 +1,28 @@
-import { mouse } from "@nut-tree/nut-js";
+import type { NextApiRequest, NextApiResponse } from "next";
 import { ClickType } from "@/constants/remotes";
+import { runClick } from "@/pages/api/lib/command";
 
-export default async function handleClick(req, res) {
-  let { type } = req.query; //.toUpperCase() //probably unnecessary with constants refactor
+const VALID_CLICK_TYPES = new Set<string>(Object.values(ClickType));
 
-  switch (type) {
-    case ClickType.LEFT:
-      await mouse.click(0);
-      break;
-    case ClickType.RIGHT:
-      await mouse.click(2);
-      break;
-    case ClickType.DOUBLE:
-      await mouse.doubleClick(0);
-      break;
-    default:
-      res
-        .status(400)
-        .send(
-          `No click 'type' specified. Values: {${ClickType.LEFT}, ${ClickType.RIGHT}, ${ClickType.DOUBLE}}`,
-        );
+export default async function handleClick(
+  req: NextApiRequest,
+  res: NextApiResponse,
+): Promise<void> {
+  const { type } = req.query;
+  const clickType = Array.isArray(type) ? type[0] : type;
+
+  if (!clickType || !VALID_CLICK_TYPES.has(clickType)) {
+    res.status(400).send(
+      `Invalid click type. Valid values: ${Object.values(ClickType).join(", ")}`,
+    );
+    return;
   }
 
-  res.status(200).send(`${type} click`);
+  try {
+    await runClick(clickType as ClickType);
+    res.status(200).send(`${clickType} click`);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    res.status(500).json({ ok: false, error: message });
+  }
 }

@@ -1,6 +1,9 @@
 {
-  "name": "remote-nextjs",
+  "name": "htpc-remote",
   "version": "0.1.0",
+  "description": "Mobile-first PWA remote control for a home theater PC setup — Denon AVR, Roku, and HTPC unified in one swipeable interface.",
+  "author": "Sean O'Reilly <seanoreilly00@proton.me>",
+  "license": "MIT",
   "type": "module",
   "private": true,
   "scripts": {

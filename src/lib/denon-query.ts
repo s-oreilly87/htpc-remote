@@ -157,7 +157,7 @@ export async function fetchDenonState(): Promise<DenonState> {
     muteOn = data.mute === "ON";
   }
 
-  return {
+  const state = {
     powerOn,
     muteOn,
     input,
@@ -170,4 +170,7 @@ export async function fetchDenonState(): Promise<DenonState> {
     PSREFLEV,
     PSDYNVOL,
   };
+
+  console.log(state);
+  return state
 }

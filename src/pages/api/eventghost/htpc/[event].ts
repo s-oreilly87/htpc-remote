@@ -1,8 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 
-const serverIp = process.env.NEXT_PUBLIC_SERVER_IP ?? "";
+const htpcIp = process.env.NEXT_PUBLIC_HTPC_IP ?? "";
 const HTPC_EVENTGHOST_URL =
-  process.env.HTPC_EVENTGHOST_URL ?? (serverIp ? `http://${serverIp}:3005` : "");
+  process.env.HTPC_EVENTGHOST_URL ?? (htpcIp ? `http://${htpcIp}:3005` : "");
 
 export default async function eventghostEventHandler(
   req: NextApiRequest,

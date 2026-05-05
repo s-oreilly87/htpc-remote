@@ -1,0 +1,143 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+###############################################################################
+# Kodi JSON-RPC config
+###############################################################################
+KODI_USER="kodi"
+KODI_PASS="kodi"
+KODI_PORT="8080"
+KODI_URL="http://127.0.0.1:${KODI_PORT}/jsonrpc"
+
+kodi_running() {
+  # match any kodi binary (kodi, kodi.bin, etc.)
+  pgrep -fi 'kodi' >/dev/null 2>&1
+}
+
+kodi_rpc() {
+  curl -s -u "${KODI_USER}:${KODI_PASS}" \
+    -H 'Content-Type: application/json' \
+    --data-binary "$1" \
+    "${KODI_URL}"
+}
+
+kodi_is_reachable() {
+  # under set -euo pipefail, don't let failures kill the script
+  local out
+  out="$(kodi_rpc '{"jsonrpc":"2.0","id":1,"method":"JSONRPC.Ping"}' || true)"
+  grep -q '"result":"pong"' <<<"$out"
+}
+
+kodi_get_player_id() {
+  local out
+  out="$(kodi_rpc '{"jsonrpc":"2.0","id":1,"method":"Player.GetActivePlayers"}' || true)"
+  sed -n 's/.*"playerid":[[:space:]]*\([0-9]\+\).*/\1/p' <<<"$out" | head -n1
+}
+
+kodi_playpause() {
+  local pid
+  pid="$(kodi_get_player_id)"
+  [[ -z "$pid" ]] && return 1
+
+  kodi_rpc "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"Player.PlayPause\",\"params\":{\"playerid\":${pid}}}" >/dev/null || true
+}
+
+kodi_next() {
+  local pid
+  pid="$(kodi_get_player_id)"
+  [[ -z "$pid" ]] && return 1
+
+  kodi_rpc "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"Player.GoTo\",\"params\":{\"playerid\":${pid},\"to\":\"next\"}}" >/dev/null || true
+}
+
+kodi_prev() {
+  local pid
+  pid="$(kodi_get_player_id)"
+  [[ -z "$pid" ]] && return 1
+
+  kodi_rpc "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"Player.GoTo\",\"params\":{\"playerid\":${pid},\"to\":\"previous\"}}" >/dev/null || true
+}
+
+use_kodi() {
+  kodi_running && kodi_is_reachable
+}
+
+###############################################################################
+# Main dispatcher
+###############################################################################
+
+cmd="${1:-}"
+
+if [[ -z "$cmd" ]]; then
+  echo "Usage: htpc-key <command> [text]"
+  exit 1
+fi
+
+case "$cmd" in
+  # text input
+  type)
+    shift
+    text="$*"
+    ydotool type "$text"
+    ;;
+
+  # navigation
+  up)        ydotool key 103:1 103:0 ;;  # KEY_UP
+  down)      ydotool key 108:1 108:0 ;;  # KEY_DOWN
+  left)      ydotool key 105:1 105:0 ;;  # KEY_LEFT
+  right)     ydotool key 106:1 106:0 ;;  # KEY_RIGHT
+  enter|ok)  ydotool key 28:1 28:0   ;;  # KEY_ENTER
+  esc)       ydotool key 1:1 1:0     ;;  # KEY_ESC
+  back)      ydotool key 14:1 14:0   ;;  # KEY_BACKSPACE
+  tab)       ydotool key 15:1 15:0   ;;  # KEY_TAB
+  alt-down)  ydotool key 56:1        ;;  # KEY_LEFTALT DOWN
+  alt-up)    ydotool key 56:0        ;;  # KEY_LEFTALT UP
+
+  # alt-tab quick window switcher
+  alt-tab)
+    # LeftAlt down, Tab down/up, LeftAlt up
+    ydotool key 56:1 15:1 15:0 56:0
+    ;;
+
+
+  # close focused window with Kwin helper script
+  close-window)  "$HOME/bin/kwin-close-window.sh"
+    ;;
+
+  # media buttons (volume/mute always global)
+  vol-up)     ydotool key 115:1 115:0 ;; # KEY_VOLUMEUP
+  vol-down)   ydotool key 114:1 114:0 ;; # KEY_VOLUMEDOWN
+  mute)       ydotool key 113:1 113:0 ;; # KEY_MUTE
+
+  # play/pause: prefer Kodi via JSON-RPC, fallback to media key
+  play-pause)
+    if use_kodi; then
+      kodi_playpause || ydotool key 164:1 164:0  # KEY_PLAYPAUSE
+    else
+      ydotool key 164:1 164:0                    # KEY_PLAYPAUSE
+    fi
+    ;;
+
+  # next track: prefer Kodi, fallback to media key
+  next)
+    if use_kodi; then
+      kodi_next || ydotool key 163:1 163:0       # KEY_NEXTSONG
+    else
+      ydotool key 163:1 163:0
+    fi
+    ;;
+
+  # previous track: prefer Kodi, fallback to media key
+  prev)
+    if use_kodi; then
+      kodi_prev || ydotool key 165:1 165:0       # KEY_PREVIOUSSONG
+    else
+      ydotool key 165:1 165:0
+    fi
+    ;;
+
+  *)
+    echo "Unknown command: $cmd"
+    exit 1
+    ;;
+esac

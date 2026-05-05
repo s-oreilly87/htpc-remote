@@ -32,7 +32,7 @@ function DenonBottomLeftButtons({}) {
     <div className="flex flex-col w-full pb-4">
       <KeypressButton
         remote={remote}
-        className="size-12 p-3 bg-red-600 rounded-full flex items-center justify-center text-white shadow-inner shadow-red-400/70 select-none self-start"
+        className="relative z-50 size-12 p-3 bg-red-600 rounded-full flex items-center justify-center text-white shadow-inner shadow-red-400/70 select-none self-start"
         value={KEYSTROKE.DENON.POWER}
         onClick={handleClickPowerButton}
       >

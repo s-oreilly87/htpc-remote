@@ -1,0 +1,13 @@
+[Unit]
+Description=HTPC Agent (htpc-remote script bridge)
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/node %h/WebstormProjects/htpc-remote/linux/htpc-agent/index.mjs
+WorkingDirectory=%h/WebstormProjects/htpc-remote
+Environment=LINUX_HTPC_AGENT_PORT=3001
+Environment=SHELL_SCRIPT_PREFIX=%h/bin
+Restart=on-failure
+
+[Install]
+WantedBy=default.target

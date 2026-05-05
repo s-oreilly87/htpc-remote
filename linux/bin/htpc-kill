@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+app="${1:-}"
+
+case "$app" in
+  kodi)
+    pkill -9 -f kodi || true
+    ;;
+  plexamp)
+    pkill -9 -f Plexamp || true
+    ;;
+  moonlight)
+    pkill -9 -f Moonlight || true
+    ;;
+  qobuz)
+    pkill -9 -f Qobuz || true
+    ;;
+  *)
+    echo "Usage: htpc-launch {kodi|plexamp|moonlight}"
+    exit 1
+    ;;
+esac

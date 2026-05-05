@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+export WINEPREFIX="$HOME/.wine-qobuz"
+exec wine "C:\\users\\sean\\AppData\\Local\\Qobuz\\Qobuz.exe"

@@ -1,0 +1,13 @@
+{
+  "name": "htpc-agent",
+  "version": "1.0.0",
+  "description": "Lightweight HTTP + Socket.io bridge that lets a remote Next.js host control the Linux HTPC.",
+  "type": "module",
+  "main": "index.mjs",
+  "scripts": {
+    "start": "node index.mjs"
+  },
+  "dependencies": {
+    "socket.io": "^4.7.4"
+  }
+}
