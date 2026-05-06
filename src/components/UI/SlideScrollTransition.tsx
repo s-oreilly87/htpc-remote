@@ -38,6 +38,8 @@ const SlideScrollTransition: React.FC<SlideScrollTransitionProps> = ({
 
   return (
     <Transition
+      as="div"
+      unmount={false}
       show={show}
       appear={true}
       enter="transition-all ease-in-out duration-[500ms]"
@@ -46,6 +48,7 @@ const SlideScrollTransition: React.FC<SlideScrollTransitionProps> = ({
       leave="transition-all ease-in-out duration-[500ms]"
       leaveFrom="opacity-100 translate-x-0"
       leaveTo={leaveToClassNames(selectedComponentIndex, prevComponentIndex)}
+      className="absolute w-full will-change-transform"
     >
       {children}
     </Transition>

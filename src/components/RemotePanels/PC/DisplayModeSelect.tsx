@@ -1,5 +1,4 @@
-import { Fragment } from "react";
-import { Listbox, Transition } from "@headlessui/react";
+import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from "@headlessui/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheck, faChevronDown } from "@fortawesome/free-solid-svg-icons";
 
@@ -40,21 +39,19 @@ function DisplayModeSelect({ selectedDisplayMode, setSelectedDisplayMode }: Disp
     <div className="flex w-4/5 mx-auto">
       <Listbox value={selectedDisplayMode} by="key" onChange={handleSelect}>
         <div className="relative mt-1 w-full">
-          <Listbox.Button className="relative w-full cursor-default rounded-lg bg-gray-700 py-2 pl-3 pr-10 text-center shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300">
+          <ListboxButton className="relative w-full cursor-default rounded-lg bg-gray-700 py-2 pl-3 pr-10 text-center shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300">
             <span className="block truncate text-white">{selectedDisplayMode.label}</span>
             <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
               <FontAwesomeIcon icon={faChevronDown} className="h-5 w-5 text-gray-400" aria-hidden="true" />
             </span>
-          </Listbox.Button>
-          <Transition
-            as={Fragment}
-            leave="transition ease-in duration-100"
-            leaveFrom="opacity-100"
-            leaveTo="opacity-0"
-          >
-            <Listbox.Options className="fixed z-40 mt-1 max-h-100 left-[12%] right-[12%] max-w-[440px] overflow-auto rounded-md bg-gray-700 py-1 text-base text-center shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm">
+          </ListboxButton>
+            <ListboxOptions
+              transition
+              className="fixed z-40 mt-1 max-h-100 left-[12%] right-[12%] max-w-[440px] overflow-auto rounded-md bg-gray-700 py-1 text-base text-center shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm
+                transition ease-in duration-100 data-[closed]:opacity-0"
+            >
               {modes.map((mode) => (
-                <Listbox.Option
+                <ListboxOption
                   key={mode.key}
                   value={mode}
                   disabled={mode.disabled}
@@ -76,10 +73,9 @@ function DisplayModeSelect({ selectedDisplayMode, setSelectedDisplayMode }: Disp
                       )}
                     </>
                   )}
-                </Listbox.Option>
+                </ListboxOption>
               ))}
-            </Listbox.Options>
-          </Transition>
+            </ListboxOptions>
         </div>
       </Listbox>
     </div>

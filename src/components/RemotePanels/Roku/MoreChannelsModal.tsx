@@ -1,5 +1,5 @@
-import { Dialog, Transition } from "@headlessui/react";
-import { Fragment, useState } from "react";
+import { Dialog, DialogPanel } from "@headlessui/react";
+import { useState } from "react";
 import { sendRokuLaunchCommand } from "@/utilities/http";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
@@ -59,32 +59,17 @@ export default function MoreChannelsModal({
   };
 
   return (
-    <Transition appear show={isOpen} as={Fragment}>
-      <Dialog as="div" className="relative z-10" onClose={closeModal}>
-        <Transition.Child
-          as={Fragment}
-          enter="ease-out duration-300"
-          enterFrom="opacity-0"
-          enterTo="opacity-100"
-          leave="ease-in duration-200"
-          leaveFrom="opacity-100"
-          leaveTo="opacity-0"
-        >
-          <div className="fixed inset-0 bg-black bg-opacity-50" />
-        </Transition.Child>
+    <Dialog open={isOpen} onClose={closeModal} className="relative z-50">
+      <div className="fixed inset-0 z-50 bg-black/50" />
 
-        <div className="fixed inset-0 overflow-y-auto">
-          <div className="flex min-h-full items-center justify-center p-4 text-center">
-            <Transition.Child
-              as={Fragment}
-              enter="ease-out duration-300"
-              enterFrom="opacity-0 scale-95"
-              enterTo="opacity-100 scale-100"
-              leave="ease-in duration-200"
-              leaveFrom="opacity-100 scale-100"
-              leaveTo="opacity-0 scale-95"
-            >
-              <Dialog.Panel className="w-full max-w-md relative transform overflow-visible rounded-2xl bg-violet-950 p-6 text-left align-middle shadow-xl transition-all -top-3">
+      <div className="fixed inset-0 z-50 overflow-y-auto">
+        <div className="flex min-h-full items-center justify-center p-4 text-center">
+          <DialogPanel
+            transition
+            className="w-full max-w-md relative transform overflow-visible rounded-2xl bg-violet-950 p-6 text-left align-middle shadow-xl -top-3
+              transition duration-300 ease-out data-[closed]:opacity-0 data-[closed]:scale-95
+              data-[enter]:duration-300 data-[leave]:duration-200 data-[leave]:ease-in"
+          >
                 <div className="mt-1 flex justify-end">
                   <button
                     type="button"
@@ -103,11 +88,9 @@ export default function MoreChannelsModal({
                     />
                   ))}
                 </div>
-              </Dialog.Panel>
-            </Transition.Child>
-          </div>
+          </DialogPanel>
         </div>
-      </Dialog>
-    </Transition>
+      </div>
+    </Dialog>
   );
 }

@@ -13,15 +13,13 @@ const KEYSTROKE_TO_ACTION: Partial<Record<string, LinuxKeyAction>> = {
     [KEYSTROKE.PC.TAB]: LinuxKeyAction.Tab,
     [KEYSTROKE.PC.UP]: LinuxKeyAction.Up,
     [KEYSTROKE.PC.DOWN]: LinuxKeyAction.Down,
-    [KEYSTROKE.PC.LEFT]: LinuxKeyAction.Left,
-    [KEYSTROKE.PC.RIGHT]: LinuxKeyAction.Right,
+    [KEYSTROKE.PC.LEFT]: LinuxKeyAction.Left,   // also covers REWIND (same value)
+    [KEYSTROKE.PC.RIGHT]: LinuxKeyAction.Right,  // also covers FFWD (same value)
     [KEYSTROKE.PC.VOL_UP]: LinuxKeyAction.VolUp,
     [KEYSTROKE.PC.VOL_DOWN]: LinuxKeyAction.VolDown,
     [KEYSTROKE.PC.MUTE]: LinuxKeyAction.Mute,
     [KEYSTROKE.PC.PREV]: LinuxKeyAction.Prev,
-    [KEYSTROKE.PC.REWIND]: LinuxKeyAction.Left,
     [KEYSTROKE.PC.PLAY]: LinuxKeyAction.PlayPause,
-    [KEYSTROKE.PC.FFWD]: LinuxKeyAction.Right,
     [KEYSTROKE.PC.NEXT]: LinuxKeyAction.Next,
     [KEYSTROKE.PC.BACKSPACE]: LinuxKeyAction.Back,
     [KEYSTROKE.PC.CLOSE_WINDOW]: LinuxKeyAction.CloseWindow,

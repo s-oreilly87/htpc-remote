@@ -1,15 +1,21 @@
-import { Dialog, Popover, Transition } from "@headlessui/react";
-import { Fragment, useState } from "react";
+import { Dialog, DialogPanel, DialogTitle, Popover, PopoverButton, PopoverPanel } from "@headlessui/react";
+import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faQuestion, faXmark } from "@fortawesome/free-solid-svg-icons";
+
+interface AirMouseCalibrationModalProps {
+  showCalibration: boolean;
+  setShowCalibration: (show: boolean) => void;
+  handleSetTopLeft: () => void;
+  handleSetBottomRight: () => void;
+}
 
 export default function AirMouseCalibrationModal({
   showCalibration,
   setShowCalibration,
   handleSetTopLeft,
   handleSetBottomRight,
-  orientation,
-}) {
+}: AirMouseCalibrationModalProps) {
   const [isTopLeftSet, setIsTopLeftSet] = useState(false);
 
   function closeModal() {
@@ -29,38 +35,23 @@ export default function AirMouseCalibrationModal({
 
   return (
     <>
-      <Transition appear show={showCalibration} as={Fragment}>
-        <Dialog as="div" className="relative z-10" onClose={closeModal}>
-          <Transition.Child
-            as={Fragment}
-            enter="ease-out duration-300"
-            enterFrom="opacity-0"
-            enterTo="opacity-100"
-            leave="ease-in duration-200"
-            leaveFrom="opacity-100"
-            leaveTo="opacity-0"
-          >
-            <div className="fixed inset-0 bg-black bg-opacity-75" />
-          </Transition.Child>
+      <Dialog open={showCalibration} onClose={closeModal} className="relative z-50">
+        <div className="fixed inset-0 z-50 bg-black/75" />
 
-          <div className="fixed inset-0 overflow-y-auto">
-            <div className="flex min-h-full items-center justify-center p-4 text-center">
-              <Transition.Child
-                as={Fragment}
-                enter="ease-out duration-300"
-                enterFrom="opacity-0 scale-95"
-                enterTo="opacity-100 scale-100"
-                leave="ease-in duration-200"
-                leaveFrom="opacity-100 scale-100"
-                leaveTo="opacity-0 scale-95"
-              >
-                <Dialog.Panel className="w-full max-w-md transform rounded-2xl bg-slate-800 p-6 text-left align-middle shadow-xl transition-all">
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex min-h-full items-center justify-center p-4 text-center">
+            <DialogPanel
+              transition
+              className="w-full max-w-md transform rounded-2xl bg-slate-800 p-6 text-left align-middle shadow-xl
+                transition duration-300 ease-out data-[closed]:opacity-0 data-[closed]:scale-95
+                data-[enter]:duration-300 data-[leave]:duration-200 data-[leave]:ease-in"
+            >
                   <div className="mt-1 flex justify-start w-full">
                     <Popover className="relative w-full">
-                      <Popover.Button className="absolute -left-3 -top-4 z-50 shadow-2xl inline-flex justify-center rounded-full border border-transparent bg-blue-500 px-4 py-3 text-sm font-medium text-blue-900 focus:outline-none">
+                      <PopoverButton className="absolute -left-3 -top-4 z-50 shadow-2xl inline-flex justify-center rounded-full border border-transparent bg-blue-500 px-4 py-3 text-sm font-medium text-blue-900 focus:outline-none">
                         <FontAwesomeIcon icon={faQuestion} color={"white"} />
-                      </Popover.Button>
-                      <Popover.Panel className="absolute z-30 bg-slate-900 text-blue-200 rounded-2xl px-5 py-5">
+                      </PopoverButton>
+                      <PopoverPanel className="absolute z-30 bg-slate-900 text-blue-200 rounded-2xl px-5 py-5">
                         This will calibrate your phone to the mouse pointer on
                         your screen from your seated position.
                         <br />
@@ -68,7 +59,7 @@ export default function AirMouseCalibrationModal({
                         screen.
                         <br />- If you change positions or things seem off, run
                         this again.
-                      </Popover.Panel>
+                      </PopoverPanel>
                     </Popover>
                   </div>
 
@@ -81,12 +72,12 @@ export default function AirMouseCalibrationModal({
                       <FontAwesomeIcon icon={faXmark} color={"white"} />
                     </button>
                   </div>
-                  <Dialog.Title
+                  <DialogTitle
                     as="h3"
                     className="text-xl text-center font-medium text-blue-400"
                   >
                     Airmouse Calibration
-                  </Dialog.Title>
+                  </DialogTitle>
                   <div className="mt-2">
                     <p className="text-md text-blue-200">
                       {isTopLeftSet
@@ -110,12 +101,10 @@ export default function AirMouseCalibrationModal({
                       {isTopLeftSet ? "Bottom Right" : "Top Left"}
                     </button>
                   </div>
-                </Dialog.Panel>
-              </Transition.Child>
-            </div>
+            </DialogPanel>
           </div>
-        </Dialog>
-      </Transition>
+        </div>
+      </Dialog>
     </>
   );
 }

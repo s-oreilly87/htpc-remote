@@ -1,13 +1,13 @@
-import {useCallback, useEffect, useRef, useState} from "react";
-import {Switch} from "@headlessui/react";
-import {useWakeLock} from "react-screen-wake-lock";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faLocationCrosshairs} from "@fortawesome/free-solid-svg-icons";
-import {hasRelativeOrientationSensor, type OrientationReading} from "@/utilities/sensors";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Field, Label, Switch } from "@headlessui/react";
+import { useWakeLock } from "react-screen-wake-lock";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faLocationCrosshairs } from "@fortawesome/free-solid-svg-icons";
+import { hasRelativeOrientationSensor, type OrientationReading } from "@/utilities/sensors";
 import AirMouseCalibrationModal from "@/components/RemotePanels/PC/AirMouseCalibrationModal";
 import RelativeOrientationSensor from "@/components/Sensors/RelativeOrientationSensor";
-import {io, type Socket} from "socket.io-client";
-import {sendClickToRobot, sendDisableCommandToRobot} from "@/utilities/http";
+import { io, type Socket } from "socket.io-client";
+import { sendClickToRobot, sendDisableCommandToRobot } from "@/utilities/http";
 import { ClickType } from "@/constants/remotes";
 import { getPlatformInfo } from "@/hooks/usePlatform";
 
@@ -135,7 +135,6 @@ const AirMouse = () => {
             setShowCalibration={setShowCalibration}
             handleSetTopLeft={handleSetTopLeft}
             handleSetBottomRight={handleSetBottomRight}
-            orientation={currentOrientation}
           />
 
           <div className="flex gap-3 mx-auto self-end">
@@ -150,11 +149,11 @@ const AirMouse = () => {
             )}
 
             <div className="flex flex-col items-center gap-2">
-              <Switch.Group>
+              <Field>
                 <div className="flex flex-col items-center justify-center">
-                  <Switch.Label className={"text-white"}>
+                  <Label className={"text-white"}>
                     Air Mouse
-                  </Switch.Label>
+                  </Label>
                   <Switch
                     checked={enabled}
                     onChange={handleEnable}
@@ -172,7 +171,7 @@ const AirMouse = () => {
                     />
                   </Switch>
                 </div>
-              </Switch.Group>
+              </Field>
 
               {enabled && (
                 <button

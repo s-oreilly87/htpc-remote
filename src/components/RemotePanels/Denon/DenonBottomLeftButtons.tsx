@@ -1,3 +1,4 @@
+import React from "react";
 import { RemoteType, KEYSTROKE } from "@/constants/remotes";
 import KeypressButton from "@/components/UI/KeypressButton";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
@@ -7,10 +8,10 @@ import {useDenonContext} from "@/context/denon";
 
 const remote = RemoteType.DENON;
 
-function DenonBottomLeftButtons({}) {
+function DenonBottomLeftButtons() {
   const { denonState, updateDenonState } = useDenonContext();
 
-  const handleClickPowerButton = async (event) => {
+  const handleClickPowerButton = async (event: React.MouseEvent<HTMLButtonElement>) => {
     updateDenonState({
       powerOn: !denonState.powerOn,
     });
@@ -22,10 +23,10 @@ function DenonBottomLeftButtons({}) {
       return console.error(response.error);
     }
 
-    let powerOn = response.data;
+    const powerOn = response.data;
 
     updateDenonState({
-      powerOn: !!powerOn ?? !denonState.powerOn,
+      powerOn: !!powerOn,
     });
   };
   return (

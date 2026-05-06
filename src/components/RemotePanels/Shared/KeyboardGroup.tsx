@@ -271,6 +271,7 @@ function KeyboardGroup({ remote }: KeyboardGroupProps) {
           )}
         </div>
         <Transition
+          as="div"
           show={inputExpanded}
           enter="transition-all ease-in-out duration-[500ms]"
           enterFrom="opacity-0 -translate-x-4/5 w-1/4"

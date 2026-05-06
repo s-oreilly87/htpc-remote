@@ -1,5 +1,5 @@
-import { Fragment, useEffect, useState } from "react";
-import { Listbox, Transition } from "@headlessui/react";
+import { useEffect, useState } from "react";
+import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from "@headlessui/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheck, faChevronDown } from "@fortawesome/free-solid-svg-icons";
 import { sendDenonCommand } from "@/utilities/http";
@@ -41,7 +41,7 @@ const SelectSoundMode = ({ cycleTimeout }) => {
         onChange={handleListBoxSelect}
       >
         <div className="relative mt-1 w-full ">
-          <Listbox.Button className="relative w-full h-10 cursor-default rounded-lg bg-slate-800 pt-1 pb-2 pl-3 pr-10 text-center shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm">
+          <ListboxButton className="relative w-full h-10 cursor-default rounded-lg bg-slate-800 pt-1 pb-2 pl-3 pr-10 text-center shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm">
             {!isLoading && (
               <span
                 className={`block truncate text-teal-400 text-xl ${
@@ -59,16 +59,14 @@ const SelectSoundMode = ({ cycleTimeout }) => {
                 aria-hidden="true"
               />
             </span>
-          </Listbox.Button>
-          <Transition
-            as={Fragment}
-            leave="transition ease-in duration-100"
-            leaveFrom="opacity-100"
-            leaveTo="opacity-0"
-          >
-            <Listbox.Options className="absolute z-40 mt-1 max-h-72 w-full overflow-auto rounded-md bg-slate-700 py-1 text-base text-center shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm">
+          </ListboxButton>
+            <ListboxOptions
+              transition
+              className="absolute z-40 mt-1 max-h-72 w-full overflow-auto rounded-md bg-slate-700 py-1 text-base text-center shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm
+                transition ease-in duration-100 data-[closed]:opacity-0"
+            >
               {Object.values(DENON_SOUND_MODES).map((soundMode) => (
-                <Listbox.Option
+                <ListboxOption
                   key={soundMode.label}
                   value={soundMode}
                   disabled={soundMode.value === "placeholder"}
@@ -103,10 +101,9 @@ const SelectSoundMode = ({ cycleTimeout }) => {
                       ) : null}
                     </>
                   )}
-                </Listbox.Option>
+                </ListboxOption>
               ))}
-            </Listbox.Options>
-          </Transition>
+            </ListboxOptions>
         </div>
       </Listbox>
     </div>

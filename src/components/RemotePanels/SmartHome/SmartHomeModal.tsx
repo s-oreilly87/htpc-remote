@@ -1,22 +1,27 @@
-import {Dialog, Transition} from "@headlessui/react";
-import {Fragment, useEffect} from "react";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faXmark} from "@fortawesome/free-solid-svg-icons";
-import {useTplinkContext} from "@/context/tplink";
+import { Dialog, DialogPanel } from "@headlessui/react";
+import { useEffect } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faXmark } from "@fortawesome/free-solid-svg-icons";
+import { useTplinkContext } from "@/context/tplink";
 import { PLUGS } from "@/constants/smartHome";
 import LightswitchToggle from "@/components/RemotePanels/SmartHome/LightswitchToggle";
 import LoadingSpinner from "@/components/UI/LoadingSpinner";
 
-const brightnessButtons = [
-  { value: 1, label: " 1%", color: "amber-800", textColor: "amber-400" },
-  { value: 25, label: "25%", color: "amber-600", textColor: "amber-300" },
-  { value: 40, label: "40%", color: "amber-500", textColor: "amber-200" },
-  { value: 60, label: "60%", color: "amber-400", textColor: "amber-900" },
-  { value: 75, label: "75%", color: "amber-300", textColor: "amber-800" },
-  { value: 100, label: "MAX", color: "amber-200", textColor: "amber-700" },
-];
+// const brightnessButtons = [
+//   { value: 1, label: " 1%", color: "amber-800", textColor: "amber-400" },
+//   { value: 25, label: "25%", color: "amber-600", textColor: "amber-300" },
+//   { value: 40, label: "40%", color: "amber-500", textColor: "amber-200" },
+//   { value: 60, label: "60%", color: "amber-400", textColor: "amber-900" },
+//   { value: 75, label: "75%", color: "amber-300", textColor: "amber-800" },
+//   { value: 100, label: "MAX", color: "amber-200", textColor: "amber-700" },
+// ];
 
-const SmartHomeModal = ({ isOpen, setIsOpen }) => {
+interface SmartHomeModalProps {
+  isOpen: boolean;
+  setIsOpen: (open: boolean) => void;
+}
+
+const SmartHomeModal = ({ isOpen, setIsOpen }: SmartHomeModalProps) => {
   const [tplinkState, updateTplinkState, refreshSwitchInfo] =
     useTplinkContext();
 
@@ -30,11 +35,7 @@ const SmartHomeModal = ({ isOpen, setIsOpen }) => {
     setIsOpen(false);
   }
 
-  function openModal() {
-    setIsOpen(true);
-  }
-
-  const handleToggle = (event) => {
+  const handleToggle = (event: React.MouseEvent<HTMLButtonElement>) => {
     updateTplinkState({
       [event.currentTarget.value.split("/")[0]]: {
         powerState: event.currentTarget.value.split("/")[1] === "on",
@@ -45,23 +46,23 @@ const SmartHomeModal = ({ isOpen, setIsOpen }) => {
     );
   };
 
-  const handleChangeBasementBrightness = (event) => {
-    const brightness = event.currentTarget.value;
-    if (!(brightness >= 0 && brightness <= 100)) {
-      return console.error("Invalid Brightness value");
-    }
-
-    // if (tplinkState.basement.powerState === false) {
-    //   sendSetPowerState('')
-    // }
-    // Just need to update the state immediately, request will get sent by useThrottleFn
-    updateTplinkState({
-      basement: {
-        powerState: tplinkState.basement.powerState,
-        brightness: brightness,
-      },
-    });
-  };
+  // const handleChangeBasementBrightness = (event: React.ChangeEvent<HTMLInputElement>) => {
+  //   const brightness = Number(event.currentTarget.value);
+  //   if (!(brightness >= 0 && brightness <= 100)) {
+  //     return console.error("Invalid Brightness value");
+  //   }
+  //
+  //   // if (tplinkState.basement.powerState === false) {
+  //   //   sendSetPowerState('')
+  //   // }
+  //   // Just need to update the state immediately, request will get sent by useThrottleFn
+  //   updateTplinkState({
+  //     basement: {
+  //       powerState: tplinkState.basement.powerState,
+  //       brightness: brightness,
+  //     },
+  //   });
+  // };
 
   // const sendSetBrightness = (brightness) => {
   //   fetch(`api/tp-link/brightness/basement/${brightness}`);
@@ -70,32 +71,17 @@ const SmartHomeModal = ({ isOpen, setIsOpen }) => {
 
   return (
     <>
-      <Transition appear show={isOpen} as={Fragment}>
-        <Dialog as="div" className="relative z-10" onClose={closeModal}>
-          <Transition.Child
-            as={Fragment}
-            enter="ease-out duration-300"
-            enterFrom="opacity-0"
-            enterTo="opacity-100"
-            leave="ease-in duration-200"
-            leaveFrom="opacity-100"
-            leaveTo="opacity-0"
-          >
-            <div className="fixed inset-0 bg-black bg-opacity-50" />
-          </Transition.Child>
+      <Dialog open={isOpen} onClose={closeModal} className="relative z-50">
+        <div className="fixed inset-0 z-50 bg-black/50" />
 
-          <div className="fixed inset-0 overflow-y-auto">
-            <div className="flex min-h-full items-center justify-center p-4 text-center">
-              <Transition.Child
-                as={Fragment}
-                enter="ease-out duration-300"
-                enterFrom="opacity-0 scale-95"
-                enterTo="opacity-100 scale-100"
-                leave="ease-in duration-200"
-                leaveFrom="opacity-100 scale-100"
-                leaveTo="opacity-0 scale-95"
-              >
-                <Dialog.Panel className="w-full max-w-md relative transform overflow-visible rounded-2xl bg-slate-800 p-6 text-left align-middle shadow-xl transition-all -top-3">
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex min-h-full items-center justify-center p-4 text-center">
+            <DialogPanel
+              transition
+              className="w-full max-w-md relative transform overflow-visible rounded-2xl bg-slate-800 p-6 text-left align-middle shadow-xl -top-3
+                transition duration-300 ease-out data-closed:opacity-0 data-closed:scale-95
+                data-enter:duration-300 data-leave:duration-200 data-leave:ease-in"
+            >
                   <div className="mt-1 flex justify-end">
                     <button
                       type="button"
@@ -106,7 +92,7 @@ const SmartHomeModal = ({ isOpen, setIsOpen }) => {
                     </button>
                   </div>
                   {!tplinkState.loading && (
-                      <div className="flex flex-col gap-3 flex-grow pb-[10%] items-center">
+                      <div className="flex flex-col gap-3 grow pb-[10%] items-center">
                         <span className="mb-2 text-2xl text-center text-amber-400">Smart Light Control</span>
                         <div className="flex w-full space-x-6 items-center justify-center">
                           {Object.values(PLUGS).map((plug) => (
@@ -165,17 +151,15 @@ const SmartHomeModal = ({ isOpen, setIsOpen }) => {
                       </div>
                   )}
                   {tplinkState.loading && (
-                      <div className="flex flex-col justify-center items-center text-amber-400 h-[425px] gap-3">
+                      <div className="flex flex-col justify-center items-center text-amber-400 h-106.25 gap-3">
                       Connecting to lights . . .
                       <LoadingSpinner color="amber-400" size={32} />
                     </div>
                   )}
-                </Dialog.Panel>
-              </Transition.Child>
-            </div>
+            </DialogPanel>
           </div>
-        </Dialog>
-      </Transition>
+        </div>
+      </Dialog>
     </>
   );
 };
