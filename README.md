@@ -161,9 +161,11 @@ See **[linux/README.md](linux/README.md)** for the full Linux setup guide, cover
 
 See **[windows/README.md](windows/README.md)** for the Windows setup guide.
 
-#### PC — Linux / X11 (NutJS)
+#### PC — Linux / X11 and macOS (NutJS)
 
-NutJS is vendored at `vendor/@nut-tree/nut-js` (not on the public npm registry). No additional installation is required beyond `npm install`. X11 platforms only support keystroke and mouse control — display/audio presets and app launching are not available.
+NutJS is vendored at `vendor/@nut-tree/nut-js` (not on the public npm registry). No additional installation is required beyond `npm install`. X11 and macOS platforms only support keystroke and mouse control — display/audio presets and app launching are not available.
+
+> **Why vendored?** `@nut-tree/nut-js` moved to a commercial pricing model after the version used here was released. The vendored copy is the last MIT-licensed release. The plan is to replace it with [`@jitsi/robotjs`](https://github.com/jitsi/robotjs) (an actively maintained MIT fork of robotjs), which covers the same keyboard, mouse, and screen-size APIs needed here — keeping Wayland on ydotool as-is, since robotjs requires X11/a display server.
 
 #### TP-Link Kasa smart home
 
