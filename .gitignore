@@ -47,7 +47,3 @@ public/workbox-*
 
 # backup of nutjs node module
 .nutjs-backup
-/vendor/@nut-tree/libnut/package-lock.json
-/vendor/@nut-tree/libnut/node_modules/
-/vendor/@nut-tree/nut-js/package-lock.json
-/vendor/@nut-tree/nut-js/node_modules/

@@ -14,7 +14,7 @@ const remote = RemoteType.PC;
 function PCRemote() {
   const { isLinuxWayland, isMac, isLinuxX11, hasFullHtpcControl, isRemoteHtpc } = usePlatform();
 
-  // AirMouse uses NutJS — works on-host for Mac and LINUX_X11, not on Wayland
+  // AirMouse uses robotjs — works on-host for Mac and LINUX_X11, not on Wayland
   const showAirMouse = !isLinuxWayland;
 
   // Mac requires Next.js to run on the HTPC itself — no remote control path exists.

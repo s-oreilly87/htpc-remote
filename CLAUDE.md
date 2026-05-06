@@ -21,7 +21,7 @@ Next.js 13 (Pages Router) TypeScript PWA. The app is a mobile web remote control
 Each panel lives under `src/components/RemotePanels/`:
 - **Denon** — AVR receiver control via Telnet (`src/api-modules/denon/`) and HTTP rewrites in `next.config.js`
 - **Roku** — TV control via Roku ECP (HTTP), proxied through Next.js rewrites
-- **PC** — HTPC control via EventGhost (Windows) or ydotool/shell scripts (Linux), plus NutJS for mouse/keyboard automation
+- **PC** — HTPC control via EventGhost (Windows) or ydotool/shell scripts (Linux), plus robotjs for mouse/keyboard automation
 
 Shared panel primitives (Dpad, VolumeControls, MediaButtons, KeyboardGroup, BottomSection) live in `RemotePanels/Shared/`.
 
@@ -32,8 +32,8 @@ Panel switching uses swipe gestures and a navbar. `RemotePanelSlideScroll` handl
 `NEXT_PUBLIC_HTPC_PLATFORM` env var determines HTPC backend:
 - `PC` → EventGhost HTTP events
 - `LINUX_WAYLAND` → ydotool + shell scripts (full control)
-- `LINUX_X11` → NutJS + shell scripts (keystroke/mouse only when remote)
-- `MACOS` → NutJS (keystroke/mouse only, must run on HTPC itself)
+- `LINUX_X11` → robotjs + shell scripts (keystroke/mouse only when remote)
+- `MACOS` → robotjs (keystroke/mouse only, must run on HTPC itself)
 
 `NEXT_PUBLIC_HOST_IP` vs `NEXT_PUBLIC_HTPC_IP` determines local vs remote execution. When they differ, Linux commands are proxied to `linux/htpc-agent` on the HTPC.
 
@@ -65,9 +65,9 @@ The hidden divs at the top of `index.tsx` (e.g. `#dynamically-named-classes`) ex
 
 Button theming: `.btn-primary-denon`, `.btn-primary-roku`, `.btn-primary-pc` are defined in `globals.css` and applied dynamically. `.btn-secondary` is theme-neutral.
 
-### Vendored dependency
+### Native dependency
 
-`@nut-tree/nut-js` is not on the public npm registry — it's vendored at `vendor/@nut-tree/nut-js` and referenced via a `file:` path in `package.json`. Do not `npm install @nut-tree/nut-js` from the registry.
+`@jitsi/robotjs` is a native Node addon (requires `node-gyp-build`). It is on the public npm registry and installs normally. It requires X11 or a display server at runtime — it will crash if loaded on Linux Wayland, which is why it is imported lazily in `src/pages/api/lib/command.ts` and as a top-level import only in routes that are never called on Wayland (`src/pages/api/robot/`).
 
 ### Environment variables
 

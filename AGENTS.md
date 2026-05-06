@@ -21,10 +21,6 @@ Agents must always start the application using:
 
 npm run dev
 
-Note: @nut-tree is no longer available on npm public repo. I have published the required module + deps
-to /vendor/@nut-tree, and package.json points there. Make sure that the npm install is not
-erroring out trying to fetch the package from npm.
-
 Under no circumstances should agents:
 
 run next build

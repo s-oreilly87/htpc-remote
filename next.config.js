@@ -29,15 +29,13 @@ const nextConfig = {
       },
     ]
   },
-    webpack: (config, { isServer }) => {
-        if (isServer) {
-            config.externals.push({
-                '@nut-tree/libnut': 'commonjs @nut-tree/libnut',
-            });
-        }
-
-        return config;
-    },
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      // robotjs is a native addon — prevent webpack from trying to bundle it.
+      config.externals.push('@jitsi/robotjs');
+    }
+    return config;
+  },
 }
 
 export default withPWA({

@@ -2,8 +2,8 @@ import { execFile } from "child_process";
 import path from "path";
 import { ClickType } from "@/constants/remotes";
 
-// NutJS is NOT imported at the top level — it requires X11 and will crash on
-// Linux Wayland if loaded eagerly. Dynamic imports below keep it lazy.
+// robotjs is NOT imported at the top level — it requires X11/a display server and
+// will crash on Linux Wayland if loaded eagerly. Dynamic imports below keep it lazy.
 
 const hostIp = process.env.NEXT_PUBLIC_HOST_IP ?? "";
 const htpcIp = process.env.NEXT_PUBLIC_HTPC_IP ?? "";
@@ -105,23 +105,23 @@ async function postToAgent(endpoint: string, body: Record<string, unknown> = {})
 // ─── Mouse click ──────────────────────────────────────────────────────────────
 
 /**
- * Perform a mouse click either via NutJS locally or via the htpc-agent remotely.
+ * Perform a mouse click locally via robotjs or remotely via the htpc-agent.
  */
 export async function runClick(type: ClickType): Promise<void> {
   if (isRemoteHtpc) {
     return postToAgent("/click", { type });
   }
 
-  const { mouse } = await import("@nut-tree/nut-js");
+  const robot = await import("@jitsi/robotjs");
   switch (type) {
     case ClickType.LEFT:
-      await mouse.click(0);
+      robot.mouseClick("left");
       break;
     case ClickType.RIGHT:
-      await mouse.click(2);
+      robot.mouseClick("right");
       break;
     case ClickType.DOUBLE:
-      await mouse.doubleClick(0);
+      robot.mouseClick("left", true);
       break;
   }
 }
@@ -129,13 +129,13 @@ export async function runClick(type: ClickType): Promise<void> {
 // ─── AirMouse disable / reset ─────────────────────────────────────────────────
 
 /**
- * Reset AirMouse state either locally (NutJS nut-state) or via the htpc-agent remotely.
+ * Reset AirMouse state either locally or via the htpc-agent remotely.
  */
 export async function runDisable(): Promise<void> {
   if (isRemoteHtpc) {
     return postToAgent("/disable");
   }
 
-  const { initializeState } = await import("@/api-modules/nutjs/nut-state");
-  initializeState();
+  const { resetRobotState } = await import("@/api-modules/robot/robot-state");
+  resetRobotState();
 }
