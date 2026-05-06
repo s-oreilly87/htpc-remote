@@ -1,4 +1,4 @@
-import { Archivo_Narrow, Roboto_Mono } from "next/font/google";
+import { Archivo_Narrow, Roboto, Roboto_Mono } from "next/font/google";
 import localFont from "next/font/local";
 
 export const archivo_narrow = Archivo_Narrow({
@@ -6,6 +6,13 @@ export const archivo_narrow = Archivo_Narrow({
   subsets: ["latin"],
   display: "swap",
   weight: "400",
+});
+
+export const roboto = Roboto({
+  variable: "--font-roboto",
+  subsets: ["latin"],
+  display: "swap",
+  weight: ["300", "400", "500"],
 });
 
 export const roboto_mono = Roboto_Mono({

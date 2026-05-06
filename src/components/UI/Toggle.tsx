@@ -1,4 +1,4 @@
-import { Switch } from "@headlessui/react";
+import { Field, Label, Switch, SwitchGroup, SwitchLabel } from "@headlessui/react";
 import React from "react";
 
 interface ToggleProps {
@@ -21,11 +21,11 @@ const Toggle: React.FC<ToggleProps> = ({
   disabled,
 }) => {
   return (
-    <Switch.Group>
+    <Field>
       <div
         className={`flex ${labelPos === "above" ? "flex-col" : ""} gap-3 items-center justify-center`}
       >
-        <Switch.Label className={`text-${labelColor}`}>{label}</Switch.Label>
+        <Label className={`text-${labelColor}`}>{label}</Label>
         <Switch
           checked={enabled}
           onChange={onToggle}
@@ -44,7 +44,7 @@ const Toggle: React.FC<ToggleProps> = ({
           />
         </Switch>
       </div>
-    </Switch.Group>
+    </Field>
   );
 };
 

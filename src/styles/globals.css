@@ -1,27 +1,35 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
+/* ─── Custom theme tokens ─────────────────────────────────────────────────── */
+@theme {
+  --breakpoint-xs: 420px;
+  --breakpoint-remote: 550px;
+}
+
+/* ─── Safelist: utilities referenced only via dynamic string interpolation ── */
+/* Replaces the hidden <div> blocks that existed at the top of index.tsx       */
+@source inline("{w,h}-{2,3,4,5,6,7,8,9,10,12,14,16,18,20,22,24,28,32,36}");
+@source inline("{bg,text}-amber-{100,200,300,400,500,600,700,800,900}");
+@source inline("bg-teal-500 fill-teal-500 fill-amber-400 fill-white fill-red-600");
+
+/* ─── Base ────────────────────────────────────────────────────────────────── */
 @layer base {
   html {
     font-family: Calibri, system-ui, sans-serif;
   }
 }
 
+/* ─── Component classes ───────────────────────────────────────────────────── */
+/* Note: In TW4, @apply cannot reference other @layer components classes.      */
+/* Classes that previously composed via @apply are expanded to pure utilities. */
 @layer components {
-  .nav-tab {
-    @apply btn w-1/3 rounded-t-2xl rounded-b-none items-end text-gray-400 bg-slate-800 transition-all-500;
-  }
-  .nav-tab-active {
-    @apply nav-tab h-14 drop-shadow-2xl text-white;
-  }
-  .nav-tab-inactive {
-    @apply nav-tab h-[50px];
-  }
-
+  /* Base button — used directly in JSX as `btn btn-primary-*` etc. */
   .btn {
     @apply py-2 px-2 rounded-lg shadow-md font-medium text-white focus:outline-none focus:ring-1 focus:ring-gray-700/75 select-none transition-colors active:brightness-[0.85];
   }
+
+  /* Primary/secondary buttons — defined BEFORE nav-tab-* so nav-tab-active's shadow-md    */
+  /* (defined later, wins cascade) picks up --tw-shadow-color set here → colored underglow. */
   .btn-primary-denon {
     @apply bg-teal-600 hover:bg-teal-500 focus:ring-teal-400 disabled:bg-teal-700/60 disabled:opacity-60 shadow-inner shadow-teal-400/70;
   }
@@ -31,20 +39,40 @@
   .btn-primary-pc {
     @apply bg-blue-600 hover:bg-blue-500 focus:ring-blue-400 shadow-inner shadow-blue-400/70;
   }
+
+  /* Nav tabs — defined AFTER btn-primary-* so shadow-md wins the box-shadow cascade and   */
+  /* reads --tw-shadow-color (set by whichever btn-primary-* is paired) → colored underglow */
+  /* nav-tab-active omits bg — always paired with btn-primary-* which supplies the color.   */
+  .nav-tab-active {
+    @apply py-2 px-2 rounded-lg shadow-md font-medium focus:outline-none focus:ring-1 focus:ring-gray-700/75 select-none transition-colors active:brightness-[0.85]
+           w-1/3 rounded-t-2xl rounded-b-none items-end transition-all duration-500 ease-in-out
+           h-14 drop-shadow-2xl text-white;
+  }
+  .nav-tab-inactive {
+    @apply py-2 px-2 rounded-lg shadow-md font-medium focus:outline-none focus:ring-1 focus:ring-gray-700/75 select-none transition-colors active:brightness-[0.85]
+           w-1/3 rounded-t-2xl rounded-b-none items-end text-gray-400 bg-slate-800 transition-all duration-500 ease-in-out
+           h-[50px];
+  }
   .btn-secondary {
     @apply bg-slate-600 hover:bg-slate-500 disabled:bg-slate-700 disabled:opacity-60 shadow-inner shadow-black/30;
   }
+
+  /* Channel buttons — btn + channel base + color variant */
   .channel-button {
-    @apply btn bg-gray-500 aspect-4/3 text-white hover:opacity-90 focus:ring-gray-700;
+    @apply py-2 px-2 rounded-lg shadow-md font-medium text-white focus:outline-none focus:ring-1 focus:ring-gray-700/75 select-none transition-colors active:brightness-[0.85]
+           bg-gray-500 aspect-4/3 hover:opacity-90 focus:ring-gray-700;
   }
   .more-channels-button {
-    @apply channel-button bg-transparent;
+    @apply py-2 px-2 rounded-lg shadow-md font-medium text-white focus:outline-none focus:ring-1 focus:ring-gray-700/75 select-none transition-colors active:brightness-[0.85]
+           bg-transparent aspect-4/3 hover:opacity-90 focus:ring-gray-700;
   }
   .extra-channel-button {
-    @apply channel-button bg-slate-800;
+    @apply py-2 px-2 rounded-lg shadow-md font-medium text-white focus:outline-none focus:ring-1 focus:ring-gray-700/75 select-none transition-colors active:brightness-[0.85]
+           bg-slate-800 aspect-4/3 hover:opacity-90 focus:ring-gray-700;
   }
 }
 
+/* ─── Utility classes ─────────────────────────────────────────────────────── */
 @layer utilities {
   .panel-height {
     min-height: calc(100vh - 64px);
@@ -69,18 +97,9 @@
     background-color: red !important;
   }
 
-  /*.bg-dynamic {*/
-  /*    @apply bg-[var(--dynamic-color)]*/
-  /*}*/
-  /*.fill-dynamic {*/
-  /*    @apply fill-[var(--dynamic-color)]*/
-  /*}*/
 }
 
-.aspect-4\/3 {
-  aspect-ratio: 4/3;
-}
-
+/* Available as a direct class in JSX (not @apply — utilities layer resolves after components) */
 .transition-all-500 {
   transition: all 500ms ease-in-out;
 }
