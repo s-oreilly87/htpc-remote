@@ -17,7 +17,7 @@ function BottomSection({ remote }: BottomSectionProps) {
         {remote === RemoteType.ROKU && <RokuBottomLeftButtons />}
         {remote === RemoteType.DENON && <DenonBottomLeftButtons />}
       </div>
-      <div className="flex px-6 pb-12 xs:pb-16 w-2/3 translate-x-2">
+      <div className="flex px-6 mb-12 xs:mb-16 w-2/3 translate-x-2">
         <Dpad remote={remote} />
       </div>
       <div className="flex flex-col w-1/6">

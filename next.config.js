@@ -16,6 +16,8 @@ const nextConfig = {
   // Excludes @jitsi/robotjs (native addon) from the server bundle.
   // Works for both webpack and Turbopack (which became the default dev bundler in Next.js 15.3+).
   serverExternalPackages: ['@jitsi/robotjs'],
+  // Allow the phone (network IP) to receive HMR updates in dev.
+  allowedDevOrigins: ['192.168.1.231'],
   // next-pwa injects a webpack plugin even when disabled in dev, which triggers a
   // "webpack config with no turbopack config" error. Empty turbopack config silences it.
   turbopack: {},

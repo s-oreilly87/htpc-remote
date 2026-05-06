@@ -13,7 +13,7 @@ const Dpad = ({ remote }: { remote: RemoteType }) => {
   return (
     <div
       id="dpad"
-      className="flex flex-col w-full aspect-square drop-shadow-2xl bg-gray-800 [border-radius:30%] mx-auto"
+      className="flex flex-col w-full aspect-square drop-shadow-2xl bg-gray-800 rounded-[30%] mx-auto"
     >
       <div id="top-row" className="flex w-full h-1/3 place-content-center">
         <div className="flex h-full w-1/3 mx-auto place-content-center">

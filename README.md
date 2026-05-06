@@ -87,7 +87,7 @@ TP-Link Kasa smart plug and light switch control via the `tplink-smarthome-api`.
 | Roku protocol           | ECP — HTTP REST over port 8060              |
 | PC automation (Windows) | EventGhost HTTP events                      |
 | PC automation (Linux)   | robotjs (X11) / ydotool (Wayland)           |
-| PC automation (macOS)   | robotjs                                     |
+| PC automation (macOS)   | robotjs + libnut (native, vendored)         |
 | Smart home              | TP-Link Smarthome API (LAN, no cloud)       |
 | Sensors                 | Web Orientation Sensor API                  |
 
@@ -166,6 +166,8 @@ See **[windows/README.md](windows/README.md)** for the Windows setup guide.
 
 [`@jitsi/robotjs`](https://github.com/jitsi/robotjs) is a native Node addon and installs automatically via `npm install`. It requires X11 or a macOS display server at runtime — it is not compatible with Wayland (ydotool is used there instead). X11 and macOS platforms support keystroke, AirMouse, and mouse control only — display/audio presets and app launching require the Linux shell scripts and are not available on these platforms.
 
+**macOS — Spotlight / Secure Input Mode:** robotjs injects keyboard events via `CGEventPost(kCGSessionEventTap, …)`, which macOS Secure Input Mode (SIM) silently drops. Any SIM-protected field — most notably Spotlight search — receives no input. To work around this, character typing on macOS goes through a vendored pre-compiled binary (`native/libnut-macos.node`, extracted from [`@nut-tree/libnut-darwin`](https://github.com/nicktindall/nut.js) v2.5.2). libnut posts via `CGEventPost(kCGHIDEventTap, …)`, which inserts events at the HID level *before* the SIM filter runs, so keystrokes reach Spotlight correctly. The binary is a NAPI universal build (x86_64 + arm64) and is ABI-stable across Node versions. Special keys, media keys, and mouse control still go through robotjs — only character typing is routed through libnut.
+
 #### TP-Link Kasa smart home
 
 Configure device IPs and child IDs in `src/constants/smartHome.ts`. Devices must be on the same LAN; all communication happens locally with no cloud dependency.
@@ -197,3 +199,7 @@ src/
 ## License
 
 MIT
+
+### Third-party components
+
+`native/libnut-macos.node` is a pre-compiled binary extracted from [`@nut-tree/libnut-darwin`](https://github.com/nicktindall/nut.js) v2.5.2, © nicktindall and contributors. It is distributed under the **Apache License 2.0** — see [`native/LICENSE`](native/LICENSE).
