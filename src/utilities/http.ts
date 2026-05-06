@@ -178,8 +178,8 @@ export async function sendEventToGameStreamEventGhost(
   await fetch(`api/eventghost/gamestream/${button.value}${payload ? `&${payload}` : ""}`);
 }
 
-export function sendClickToNutJS(type: string): void {
-  fetch(`api/nutjs/click/${type}`, { mode: "no-cors" });
+export function sendClickToRobot(type: string): void {
+  fetch(`api/robot/click/${type}`, { mode: "no-cors" });
 }
 
 export async function sendKeystrokeToHtpc(key: string): Promise<void> {
@@ -188,11 +188,11 @@ export async function sendKeystrokeToHtpc(key: string): Promise<void> {
     return;
   }
 
-  fetch(`api/nutjs/keystroke/${key}`, { mode: "no-cors" });
+  fetch(`api/robot/keystroke/${key}`, { mode: "no-cors" });
 }
 
-export function sendDisableCommandToNutJS(): void {
-  fetch(`api/nutjs/disable`, { mode: "no-cors" });
+export function sendDisableCommandToRobot(): void {
+  fetch(`api/robot/disable`, { mode: "no-cors" });
 }
 
 // ########   Denon Control   ########

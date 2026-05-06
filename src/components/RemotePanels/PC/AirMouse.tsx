@@ -7,7 +7,7 @@ import {hasRelativeOrientationSensor, type OrientationReading} from "@/utilities
 import AirMouseCalibrationModal from "@/components/RemotePanels/PC/AirMouseCalibrationModal";
 import RelativeOrientationSensor from "@/components/Sensors/RelativeOrientationSensor";
 import {io, type Socket} from "socket.io-client";
-import {sendClickToNutJS, sendDisableCommandToNutJS} from "@/utilities/http";
+import {sendClickToRobot, sendDisableCommandToRobot} from "@/utilities/http";
 import { ClickType } from "@/constants/remotes";
 import { getPlatformInfo } from "@/hooks/usePlatform";
 
@@ -66,11 +66,11 @@ const AirMouse = () => {
     let newSocket: Socket;
     if (agentUrl) {
       // Remote HTPC: connect directly to the htpc-agent socket.io server.
-      // No need to call /api/nutjs/initializeSocket — the agent manages its own socket.
+      // No need to call /api/robot/initializeSocket — the agent manages its own socket.
       newSocket = io(agentUrl);
     } else {
       // Same machine: initialize socket.io on the Next.js server and connect same-origin.
-      await fetch(`api/nutjs/initializeSocket`);
+      await fetch(`api/robot/initializeSocket`);
       newSocket = io();
     }
     newSocket.on("connect", () => console.log("AirMouse socket connected"));
@@ -88,14 +88,14 @@ const AirMouse = () => {
       closeSocket().then(() => initializeSocket());
     } else {
       closeSocket();
-      sendDisableCommandToNutJS();
+      sendDisableCommandToRobot();
     }
     setEnabled(isEnabled);
   };
 
-  const handleLeftClick = () => sendClickToNutJS(ClickType.LEFT);
-  const handleRightClick = () => sendClickToNutJS(ClickType.RIGHT);
-  const handleDoubleClick = () => sendClickToNutJS(ClickType.DOUBLE);
+  const handleLeftClick = () => sendClickToRobot(ClickType.LEFT);
+  const handleRightClick = () => sendClickToRobot(ClickType.RIGHT);
+  const handleDoubleClick = () => sendClickToRobot(ClickType.DOUBLE);
 
   const handleSetTopLeft = () => {
     if (!currentOrientation.current) return;

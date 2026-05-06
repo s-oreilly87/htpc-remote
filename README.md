@@ -21,7 +21,7 @@ Built as a personal project and fully typed in TypeScript.
 
 **Roku** — TV navigation and channel launching over the Roku External Control Protocol (ECP). D-pad, keyboard, media controls, channel quick-launch buttons (fetched from the Roku device), HDMI input switching, and an expandable channel browser showing all installed apps.
 
-**HTPC** — Full HTPC control supporting both Windows (NutJS/EventGhost) and Linux (ydotool + scripts). D-pad navigation, media keys, volume, keyboard input, app launching (Kodi, Plex, Plexamp, Qobuz, Moonlight), and audio/display mode switching.
+**HTPC** — Full HTPC control supporting both Windows (EventGhost) and Linux/macOS (robotjs + ydotool + scripts). D-pad navigation, media keys, volume, keyboard input, app launching (Kodi, Plex, Plexamp, Qobuz, Moonlight), and audio/display mode switching.
 
 ### Scene presets
 
@@ -34,7 +34,7 @@ One button simultaneously switches the Roku to the right HDMI input, changes the
 
 ### Phone keyboard input
 
-The HTPC and Roku remotes include an on-screen keyboard that types directly into the focused device. On Roku and the HTPC this is particularly useful for entering streaming service credentials, search queries, or any text field without hunting through an on-screen keyboard with a D-pad. Characters are sent keystroke-by-keystroke via the appropriate backend (Roku ECP, NutJS, or ydotool), so the input lands exactly where focus is — no extra steps.
+The HTPC and Roku remotes include an on-screen keyboard that types directly into the focused device. On Roku and the HTPC this is particularly useful for entering streaming service credentials, search queries, or any text field without hunting through an on-screen keyboard with a D-pad. Characters are sent keystroke-by-keystroke via the appropriate backend (Roku ECP, robotjs, or ydotool), so the input lands exactly where focus is — no extra steps.
 
 ### Platform support
 
@@ -55,11 +55,11 @@ For `LINUX_X11` running remotely, the panel shows a warning banner and falls bac
 
 ### AirMouse *(PC / Mac / Linux X11 only)*
 
-Uses the phone's gyroscope (Web Relative Orientation Sensor API) to control the mouse cursor on the HTPC via NutJS. Orientation deltas are streamed over a Socket.io connection and translated into absolute screen coordinates after a two-point calibration step (top-left / bottom-right corners from seated position). Left click, right click, and double click buttons are exposed while the mode is active. A screen wake lock keeps the phone display on during use.
+Uses the phone's gyroscope (Web Relative Orientation Sensor API) to control the mouse cursor on the HTPC via robotjs. Orientation deltas are streamed over a Socket.io connection and translated into absolute screen coordinates after a two-point calibration step (top-left / bottom-right corners from seated position). Left click, right click, and double click buttons are exposed while the mode is active. A screen wake lock keeps the phone display on during use.
 
 > **Note:** The app must be served over https with a valid SSL certificate to use the AirMouse.
 
-> **Linux:** AirMouse relies on NutJS, which requires X11/a display server accessible to the Node process. For Wayland DE, use [KDE Connect](https://kdeconnect.kde.org/) for phone-as-trackpad functionality instead — it integrates natively with KDE Plasma and supports Wayland.
+> **Linux:** AirMouse relies on robotjs, which requires X11/a display server accessible to the Node process. For Wayland, use [KDE Connect](https://kdeconnect.kde.org/) for phone-as-trackpad functionality instead — it integrates natively with KDE Plasma and supports Wayland.
 
 ### Progressive Web App
 
@@ -85,8 +85,9 @@ TP-Link Kasa smart plug and light switch control via the `tplink-smarthome-api`.
 | Real-time               | Socket.io (AirMouse orientation streaming)  |
 | Denon protocol          | HTTP + Telnet (port 23) via `telnet-stream` |
 | Roku protocol           | ECP — HTTP REST over port 8060              |
-| PC automation (Windows) | NutJs/ EventGhost HTTP events               |
-| PC automation (Linux)   | NutJS (X11) / ydotool (Wayland)             |
+| PC automation (Windows) | EventGhost HTTP events                      |
+| PC automation (Linux)   | robotjs (X11) / ydotool (Wayland)           |
+| PC automation (macOS)   | robotjs                                     |
 | Smart home              | TP-Link Smarthome API (LAN, no cloud)       |
 | Sensors                 | Web Orientation Sensor API                  |
 
@@ -161,9 +162,9 @@ See **[linux/README.md](linux/README.md)** for the full Linux setup guide, cover
 
 See **[windows/README.md](windows/README.md)** for the Windows setup guide.
 
-#### PC — Linux / X11 (NutJS)
+#### PC — Linux X11 and macOS (robotjs)
 
-NutJS is vendored at `vendor/@nut-tree/nut-js` (not on the public npm registry). No additional installation is required beyond `npm install`. X11 platforms only support keystroke and mouse control — display/audio presets and app launching are not available.
+[`@jitsi/robotjs`](https://github.com/jitsi/robotjs) is a native Node addon and installs automatically via `npm install`. It requires X11 or a macOS display server at runtime — it is not compatible with Wayland (ydotool is used there instead). X11 and macOS platforms support keystroke, AirMouse, and mouse control only — display/audio presets and app launching require the Linux shell scripts and are not available on these platforms.
 
 #### TP-Link Kasa smart home
 
@@ -177,7 +178,7 @@ Configure device IPs and child IDs in `src/constants/smartHome.ts`. Devices must
 
 ```
 src/
-  api-modules/       # Server-side device clients (Denon Telnet, NutJS, TP-Link)
+  api-modules/       # Server-side device clients (Denon Telnet, robotjs state, TP-Link)
   components/
     RemotePanels/    # Denon, Roku, PC, SmartHome panels + shared primitives
     Sensors/         # Orientation sensor wrappers

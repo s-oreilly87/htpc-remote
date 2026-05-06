@@ -53,7 +53,7 @@ Before running any install script, install these manually.
 
 ### ydotool
 
-HDR requires Wayland, and NutJS does not work under Wayland — ydotool replaces it as the input backend. Build from source (the apt package is often outdated):
+HDR requires Wayland, and robotjs does not work under Wayland — ydotool replaces it as the input backend. Build from source (the apt package is often outdated):
 
 ```bash
 sudo apt install build-essential cmake pkg-config libevdev-dev libudev-dev scdoc
