@@ -4,7 +4,7 @@ import {useEffect, useRef, useState} from "react";
 import {Transition} from "@headlessui/react";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faKeyboard, faMagnifyingGlass, faXmark,} from "@fortawesome/free-solid-svg-icons";
-import {faWindows} from "@fortawesome/free-brands-svg-icons";
+import {faLinux, faWindows} from "@fortawesome/free-brands-svg-icons";
 import KeypressButton from "@/components/UI/KeypressButton";
 import {sendKeystrokeToHtpc, sendRokuKeypress, sendRokuSearchQuery,} from "@/utilities/http";
 import {sleep} from "@/utilities/utils";
@@ -16,7 +16,7 @@ interface KeyboardGroupProps {
 }
 
 function KeyboardGroup({ remote }: KeyboardGroupProps) {
-  const { isMac, isPc } = usePlatform();
+  const { isMac, isPc, isLinux } = usePlatform();
   const [inputExpanded, setInputExpanded] = useState(false);
 
   const [inputSoFar, setInputSoFar] = useState("");
@@ -38,21 +38,11 @@ function KeyboardGroup({ remote }: KeyboardGroupProps) {
     }
   }, [inputExpanded]);
 
-  const toggleInputExpanded = (event = null) => {
-    if (event && event.currentTarget.id === "toggle-keyboard") {
-      setInputExpanded(!inputExpanded);
-      return;
-    }
-
+  // Close the input panel, sending WIN_KEY to close spotlight/start-menu if it was opened.
+  const closeInput = () => {
     if (remote === RemoteType.PC) {
-      if (!inputExpanded) {
-        sendKeystrokeToHtpc(KEYSTROKE[remote].WIN_KEY);
-        setInputExpanded(!inputExpanded);
-        startMenuOpen.current = true;
-        return;
-      }
-
-      // if user has typed - need to send an extra winkey to clear field so second one closes start menu
+      // If user typed into spotlight, send WIN_KEY once to clear the field, then a second
+      // one below (startMenuOpen) to actually close the menu.
       if (hasTyped.current) {
         sendKeystrokeToHtpc(KEYSTROKE[remote].WIN_KEY);
       }
@@ -60,7 +50,39 @@ function KeyboardGroup({ remote }: KeyboardGroupProps) {
         sendKeystrokeToHtpc(KEYSTROKE[remote].WIN_KEY);
       }
     }
-    setInputExpanded(!inputExpanded);
+    startMenuOpen.current = false;
+    setInputExpanded(false);
+  };
+
+  // Win-key / spotlight / super button: sends the search key on open, closes it on close.
+  // Only rendered for RemoteType.PC, so KEYSTROKE.PC is always correct here.
+  const handleSearchButton = () => {
+    if (inputExpanded) {
+      closeInput();
+      return;
+    }
+    sendKeystrokeToHtpc(KEYSTROKE.PC.WIN_KEY);
+    setInputExpanded(true);
+    startMenuOpen.current = true;
+  };
+
+  // Keyboard button: toggles the input panel without sending any WIN_KEY.
+  const handleKeyboardButton = () => {
+    if (inputExpanded) {
+      closeInput();
+    } else {
+      setInputExpanded(true);
+    }
+  };
+
+  // Roku search button toggles the Roku search state in addition to the input.
+  const handleRokuSearchButton = () => {
+    setRokuSearchOpen(!inputExpanded);
+    if (inputExpanded) {
+      closeInput();
+    } else {
+      setInputExpanded(true);
+    }
   };
 
   const sendKey = (key) => {
@@ -190,16 +212,13 @@ function KeyboardGroup({ remote }: KeyboardGroupProps) {
   };
 
   const handleInputBlur = (event) => {
-    // unless the focus is lost when they click the close or search button, in that case let the click handler handle it
-    if (
-      event.relatedTarget ===
-        (document.getElementById("keyboard") ??
-          document.getElementById("win-key")) ||
-      event.relatedTarget === document.getElementById("keyboard-submit")
-    ) {
+    // If focus moved to one of our own buttons, let the click handler on that button
+    // manage the state — don't double-close/double-toggle from here.
+    const actionButtons = ["win-key", "search", "toggle-keyboard", "keyboard-submit"];
+    if (actionButtons.includes(event.relatedTarget?.id)) {
       return;
     }
-    toggleInputExpanded();
+    closeInput();
   };
 
   const getInputPlaceholder = () => {
@@ -218,35 +237,36 @@ function KeyboardGroup({ remote }: KeyboardGroupProps) {
         <div className="bg-slate-900 z-30 panel-height panel-width fixed top-0 left-0 m-3 opacity-90"></div>
       )}
 
+      {/*
+        The form expands/collapses via a CSS width transition on the container itself.
+        The inner Transition only animates opacity (no layout-reflow-causing width changes),
+        which keeps the animation GPU-accelerated and jank-free.
+      */}
       <form
         id="keyboard-btn-group"
         autoComplete="off"
         onSubmit={handleSubmit}
-        className={`flex absolute bottom-3 justify-items-center h-12 ${
-          inputExpanded ? "panel-width z-40" : "w-12"
+        className={`flex absolute bottom-3 h-12 overflow-hidden transition-all duration-300 ease-in-out ${
+          inputExpanded ? "panel-width z-40" : "w-12 z-10"
         }`}
       >
         <input type="hidden" value="needed-to-disable-autocomplete" />
-        <div className="w-12 h-full">
+        <div className="w-12 shrink-0 h-full">
           {remote === RemoteType.PC && (
             <button
               id="win-key"
               type="button"
-              className={`btn h-full w-full flex justify-center items-center shadow-inner \
-                            ${
-                              inputExpanded
-                                ? "rounded-l-xl rounded-r-none bg-red-600 shadow-red-500"
-                                : "bg-green-700 shadow-green-500"
-                            } `}
-              onClick={toggleInputExpanded}
+              className={`btn h-full w-full flex justify-center items-center shadow-inner ${
+                inputExpanded
+                  ? "rounded-l-xl rounded-r-none bg-red-600 shadow-red-500"
+                  : "bg-green-700 shadow-green-500"
+              }`}
+              onClick={handleSearchButton}
               value={KEYSTROKE.PC.WIN_KEY}
             >
-              {!inputExpanded && isMac && (
-                <FontAwesomeIcon icon={faMagnifyingGlass} />
-              )}
-              {!inputExpanded && isPc && (
-                <FontAwesomeIcon icon={faWindows} />
-              )}
+              {!inputExpanded && isMac && <FontAwesomeIcon icon={faMagnifyingGlass} />}
+              {!inputExpanded && isPc && <FontAwesomeIcon icon={faWindows} />}
+              {!inputExpanded && isLinux && <FontAwesomeIcon icon={faLinux} />}
               {inputExpanded && <FontAwesomeIcon icon={faXmark} />}
             </button>
           )}
@@ -254,16 +274,12 @@ function KeyboardGroup({ remote }: KeyboardGroupProps) {
             <button
               id="search"
               type="button"
-              className={`btn h-full w-full flex justify-center items-center \
-                            ${
-                              inputExpanded
-                                ? "rounded-l-xl rounded-r-none bg-red-600"
-                                : "btn-primary-roku"
-                            } `}
-              onClick={() => {
-                setRokuSearchOpen(!inputExpanded);
-                toggleInputExpanded();
-              }}
+              className={`btn h-full w-full flex justify-center items-center ${
+                inputExpanded
+                  ? "rounded-l-xl rounded-r-none bg-red-600"
+                  : "btn-primary-roku"
+              }`}
+              onClick={handleRokuSearchButton}
             >
               {!inputExpanded && <FontAwesomeIcon icon={faMagnifyingGlass} />}
               {inputExpanded && <FontAwesomeIcon icon={faXmark} />}
@@ -273,15 +289,15 @@ function KeyboardGroup({ remote }: KeyboardGroupProps) {
         <Transition
           as="div"
           show={inputExpanded}
-          enter="transition-all ease-in-out duration-[500ms]"
-          enterFrom="opacity-0 -translate-x-4/5 w-1/4"
-          enterTo="opacity-100 translate-x-0 w-full"
-          leave="transition-all ease-in-out duration-[500ms]"
-          leaveFrom="opacity-100 translate-x-0 w-full"
-          leaveTo="opacity-0 -translate-x-4/5 w-1/4"
-          className="flex"
+          enter="transition-opacity ease-in-out duration-200 delay-150"
+          enterFrom="opacity-0"
+          enterTo="opacity-100"
+          leave="transition-opacity ease-in-out duration-150"
+          leaveFrom="opacity-100"
+          leaveTo="opacity-0"
+          className="flex flex-1 min-w-0"
         >
-          <div className="w-full h-full">
+          <div className="flex-1 h-full min-w-0">
             <input
               id="keyboard-input"
               ref={keyboardInput}
@@ -296,7 +312,7 @@ function KeyboardGroup({ remote }: KeyboardGroupProps) {
               onBlur={handleInputBlur}
             />
           </div>
-          <div className="w-14 flex justify-items-stretch">
+          <div className="w-14 shrink-0 flex justify-items-stretch">
             <button
               id="keyboard-submit"
               type="submit"
@@ -315,7 +331,7 @@ function KeyboardGroup({ remote }: KeyboardGroupProps) {
         <KeypressButton
           id="toggle-keyboard"
           className="btn-secondary absolute bottom-3 left-14 w-10"
-          onClick={toggleInputExpanded}
+          onClick={handleKeyboardButton}
           remote={remote}
         >
           <FontAwesomeIcon icon={faKeyboard} />

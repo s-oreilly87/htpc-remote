@@ -76,6 +76,12 @@ export default function handleKeystroke(
     return;
   }
 
-  robot.keyTap(mapped.key, mapped.modifiers);
+  // Never pass undefined as the second arg — the native addon sees it as 2 args and throws
+  // "Invalid key flag specified". Only pass modifiers when actually present.
+  if (mapped.modifiers && mapped.modifiers.length > 0) {
+    robot.keyTap(mapped.key, mapped.modifiers);
+  } else {
+    robot.keyTap(mapped.key);
+  }
   res.send(`key '${keyParam}' pressed`);
 }
