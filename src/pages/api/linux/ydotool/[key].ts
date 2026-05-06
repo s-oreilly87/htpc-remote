@@ -15,6 +15,7 @@ const KEYSTROKE_TO_ACTION: Partial<Record<string, LinuxKeyAction>> = {
     [KEYSTROKE.PC.DOWN]: LinuxKeyAction.Down,
     [KEYSTROKE.PC.LEFT]: LinuxKeyAction.Left,   // also covers REWIND (same value)
     [KEYSTROKE.PC.RIGHT]: LinuxKeyAction.Right,  // also covers FFWD (same value)
+    [KEYSTROKE.PC.WIN_KEY]: LinuxKeyAction.SuperKey,
     [KEYSTROKE.PC.VOL_UP]: LinuxKeyAction.VolUp,
     [KEYSTROKE.PC.VOL_DOWN]: LinuxKeyAction.VolDown,
     [KEYSTROKE.PC.MUTE]: LinuxKeyAction.Mute,
