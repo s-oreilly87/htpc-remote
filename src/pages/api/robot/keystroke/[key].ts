@@ -3,8 +3,9 @@ import type { NextApiRequest, NextApiResponse } from "next";
 
 import { KEYSTROKE } from "@/constants/remotes";
 import { getPlatformInfo } from "@/hooks/usePlatform";
+import { libnutTypeString } from "../libnut-macos";
 
-const { platform: PLATFORM } = getPlatformInfo();
+const { platform: PLATFORM, isMac } = getPlatformInfo();
 
 // On macOS the "super" modifier is 'command'; on Linux it's 'super'.
 const superMod = PLATFORM === "MACOS" ? "command" : "super";
@@ -47,7 +48,14 @@ export default function handleKeystroke(
 
   // Single printable character — type it directly.
   if (keyParam.length === 1) {
-    robot.typeString(keyParam);
+    // On macOS, use libnut which posts via kCGHIDEventTap so it reaches Spotlight
+    // and other Secure Input Mode-protected fields.  robotjs uses kCGSessionEventTap
+    // which SIM filters out.
+    if (isMac) {
+      libnutTypeString(keyParam);
+    } else {
+      robot.typeString(keyParam);
+    }
     res.send(`typed '${keyParam}'`);
     return;
   }
@@ -55,7 +63,11 @@ export default function handleKeystroke(
   const mapped = keyMap[keyParam];
   if (!mapped) {
     // Unknown multi-char token — best-effort type it as a string.
-    robot.typeString(keyParam);
+    if (isMac) {
+      libnutTypeString(keyParam);
+    } else {
+      robot.typeString(keyParam);
+    }
     res.send(`typed '${keyParam}'`);
     return;
   }
