@@ -92,6 +92,7 @@ case "$cmd" in
   tab)       ydotool key 15:1 15:0   ;;  # KEY_TAB
   alt-down)  ydotool key 56:1        ;;  # KEY_LEFTALT DOWN
   alt-up)    ydotool key 56:0        ;;  # KEY_LEFTALT UP
+  super)     ydotool key 56:1 57:1 57:0 56:0 ;; # Alt + Space (Search runner)
 
   # alt-tab quick window switcher
   alt-tab)

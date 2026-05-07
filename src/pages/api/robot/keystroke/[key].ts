@@ -5,10 +5,10 @@ import { KEYSTROKE } from "@/constants/remotes";
 import { getPlatformInfo } from "@/hooks/usePlatform";
 import { libnutTypeString } from "../libnut-macos";
 
-const { platform: PLATFORM, isMac } = getPlatformInfo();
+const { platform: PLATFORM, isMac, isLinux, isPc } = getPlatformInfo();
 
-// On macOS the "super" modifier is 'command'; on Linux it's 'super'.
-const superMod = PLATFORM === "MACOS" ? "command" : "super";
+// On macOS and Windows the "super" modifier is 'command'; on Linux it's 'super'.
+const superMod = (isMac || isPc) ? "command" : "super";
 
 type RobotKey = { key: string; modifiers?: string[] };
 
@@ -17,7 +17,11 @@ type RobotKey = { key: string; modifiers?: string[] };
 const keyMap: Record<string, RobotKey> = {
   [KEYSTROKE.PC.ENTER]:               { key: "enter" },
   [KEYSTROKE.PC.BACKSPACE]:           { key: "backspace" },
-  [KEYSTROKE.PC.WIN_KEY]:             { key: "space", modifiers: [superMod] },
+  [KEYSTROKE.PC.WIN_KEY]:             isLinux
+    ? { key: "space", modifiers: ["alt"] }
+    : isMac
+      ? { key: "space", modifiers: [superMod] }
+      : { key: superMod },
   [KEYSTROKE.PC.ALT_TAB]:             { key: "tab",   modifiers: ["alt"] },  // sticky-alt — see handler
   [KEYSTROKE.PC.ESCAPE]:              { key: "escape" },
   [KEYSTROKE.PC.TAB]:                 { key: "tab" },
