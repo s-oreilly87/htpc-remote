@@ -34,11 +34,11 @@ function Navbar({ className, selectedRemote, onClickHandler }: NavbarProps) {
         <div className="max-w-7xl h-16 w-full mx-auto px-3 z-10 flex relative justify-center">
           <div className="py-1 absolute left-0 top-0 z-20 aspect-video">
             <Image
-              src={"/icons/app-icon.png"}
+              src={"/icons/app-icon-512.png"}
               alt="Remote"
               width={60}
               height={60}
-              className="w-auto"
+              className="w-auto ml-1"
               onClick={handleIconClick}
             />
           </div>
