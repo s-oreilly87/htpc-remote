@@ -9,7 +9,7 @@ Works with Denon/Marantz AVRs, Roku/RokuTV devices, HTPCs running Windows/Mac/Li
 
 HTPC Remote runs as a local Next.js server on your home network and is accessed from a browser. It provides three swipeable remote panels — one per device — plus one-tap activity presets that orchestrate multi-device scene switches in the correct sequence (TV input → display mode → audio mode → app launch).
 
-Built as a personal project and fully typed in TypeScript.
+Built as a personal development project and fully typed in TypeScript.
 
 ---
 
@@ -17,7 +17,7 @@ Built as a personal project and fully typed in TypeScript.
 
 ### Three dedicated remote panels
 
-**Denon AVR** — Full receiver control over Telnet + HTTP. Volume, mute, input selection, sound mode cycling, and a custom D-pad for navigating the AVR's on-screen menu. Surfaces controls that are usually buried deep in the on-screen menus eg. Dialogue Adjust, Dynamic Volume/EQ. AVR state is polled and kept in sync via a Tanstack/React context with a persistent Telnet connection that auto-reconnects after inactivity.
+**Denon AVR** — Full receiver control over Telnet + HTTP. Volume, mute, input selection, sound mode cycling, and D-pad for navigating the AVR's on-screen menu. Surfaces controls that are usually buried deep in the on-screen menus eg. Dialogue Adjust, Dynamic Volume/EQ. AVR state is polled and kept in sync via a Tanstack/React context with a persistent Telnet connection that auto-reconnects after inactivity.
 
 **Roku** — TV navigation and channel launching over the Roku External Control Protocol (ECP). D-pad, keyboard, media controls, channel quick-launch buttons (fetched from the Roku device), HDMI input switching, and an expandable channel browser showing all installed apps.
 
@@ -34,7 +34,7 @@ One button simultaneously switches the Roku to the right HDMI input, changes the
 
 ### Phone keyboard input
 
-The HTPC and Roku remotes include an on-screen keyboard that types directly into the focused device. On Roku and the HTPC this is particularly useful for entering streaming service credentials, search queries, or any text field without hunting through an on-screen keyboard with a D-pad. Characters are sent keystroke-by-keystroke via the appropriate backend (Roku ECP, robotjs, or ydotool), so the input lands exactly where focus is — no extra steps.
+The HTPC and Roku remotes include an on-screen keyboard that types directly into the focused device. As well as typing to the HTPC, this is particularly useful on Roku for entering streaming service credentials, search queries, or any text field without hunting through an on-screen keyboard with a D-pad. Characters are sent keystroke-by-keystroke via the appropriate backend (Roku ECP, robotjs, or ydotool), so the input lands exactly where focus is — no extra steps.
 
 ### Platform support
 
@@ -49,13 +49,13 @@ The HTPC and Roku remotes include an on-screen keyboard that types directly into
 
 `LINUX_X11` and `MACOS` support keystroke and mouse control only — features that depend on shell scripts (`htpc-res`, `htpc-audio`, `htpc-launch`) are hidden in the UI. These platforms work only when Next.js runs on the HTPC itself (`HOST_IP` = `HTPC_IP`).
 
-**Mac specifically has no remote control path** — there is no agent equivalent for macOS. If `HTPC_PLATFORM=MACOS` and the server is on a different machine, the HTPC panel will display an error rather than non-functional controls.
+**Mac specifically has no standalone-HTPC control path** — there is no agent equivalent for macOS. If `HTPC_PLATFORM=MACOS` and the server is on a different machine, the HTPC panel will display an error rather than non-functional controls.
 
 For `LINUX_X11` running remotely, the panel shows a warning banner and falls back to keystroke-only control via ydotool through the `linux/htpc-agent`.
 
 ### AirMouse *(PC / Mac / Linux X11 only)*
 
-Uses the phone's gyroscope (Web Relative Orientation Sensor API) to control the mouse cursor on the HTPC via robotjs. Orientation deltas are streamed over a Socket.io connection and translated into absolute screen coordinates after a two-point calibration step (top-left / bottom-right corners from seated position). Left click, right click, and double click buttons are exposed while the mode is active. A screen wake lock keeps the phone display on during use.
+Uses the phone's gyroscope (Web Relative Orientation Sensor API) to control the mouse cursor on the HTPC via robotjs. Orientation deltas are streamed over a Socket.io connection and translated into absolute screen coordinates. Left and right click buttons are exposed while the mode is active, as well as a calibration button which initiates a two-point calibration step (top-left / bottom-right corners from seated position). A screen wake lock keeps the phone display on during use.
 
 > **Note:** The app must be served over https with a valid SSL certificate to use the AirMouse.
 
@@ -77,7 +77,7 @@ TP-Link Kasa smart plug and light switch control via the `tplink-smarthome-api`.
 
 | Layer                   | Technology                                  |
 |-------------------------|---------------------------------------------|
-| Framework               | Next.js 13 (Pages Router)                   |
+| Framework               | Next.js 16 (Pages Router)                   |
 | Language                | TypeScript                                  |
 | UI                      | Tailwind CSS, HeadlessUI, FontAwesome       |
 | PWA                     | next-pwa (Workbox)                          |
@@ -101,6 +101,10 @@ Roku and Denon HTTP commands are proxied directly via Next.js rewrites — no se
 
 - Node.js 18+
 - The server must be on the same local network as all controlled devices
+- RokuTV (or Roku stick? untested, but same ECP protocol, HDMI CEC should handle TV power control)
+- Denon or Marantz AVR (Tested on Denon AVR-X2300W. AFAIK newer models still support the same telnet protocol)
+- HTPC running Windows/Mac/Linux (EventGhost or robotjs + ydotool + scripts) SEE INSTALL NOTES
+- TP-Link Kasa smart plugs (Tapo unfortunately seems to be cloud only . . .)
 
 ```bash
 git clone https://github.com/yourname/htpc-remote
@@ -172,7 +176,7 @@ See **[windows/README.md](windows/README.md)** for the Windows setup guide.
 
 Configure device IPs and child IDs in `src/constants/smartHome.ts`. Devices must be on the same LAN; all communication happens locally with no cloud dependency.
 
-*TODO: How to find the child IDs for TP-Link smart strips (currently requires a discovery script or the Kasa app's device info).*
+*TODO: How to find the child IDs for TP-Link smart strips (currently requires a discovery script or the Kasa app's device info). I think i just curled the switch ips with some command and got a device info object back*
 
 ---
 
@@ -188,6 +192,7 @@ src/
   constants/         # Keystroke enums, device configs, command maps
   context/           # React contexts for Denon and TP-Link state
   hooks/             # usePlatform, useRokuChannelIcon
+  native/            # Pre-compiled native binaries (libnut-macos.node)
   pages/
     api/             # Next.js API routes → device backends
   types/             # Shared domain types and API response types
