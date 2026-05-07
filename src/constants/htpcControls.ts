@@ -12,6 +12,7 @@ export enum LinuxKeyAction {
   AltDown = "alt-down",
   AltUp = "alt-up",
   AltTab = "alt-tab",
+  SuperKey = "super",
   VolUp = "vol-up",
   VolDown = "vol-down",
   Mute = "mute",
