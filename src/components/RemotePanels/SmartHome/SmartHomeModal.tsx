@@ -6,6 +6,7 @@ import { useTplinkContext } from "@/context/tplink";
 import { PLUGS } from "@/constants/smartHome";
 import LightswitchToggle from "@/components/RemotePanels/SmartHome/LightswitchToggle";
 import LoadingSpinner from "@/components/UI/LoadingSpinner";
+import { toggleTplinkSwitch } from "@/utilities/http";
 
 // const brightnessButtons = [
 //   { value: 1, label: " 1%", color: "amber-800", textColor: "amber-400" },
@@ -36,14 +37,10 @@ const SmartHomeModal = ({ isOpen, setIsOpen }: SmartHomeModalProps) => {
   }
 
   const handleToggle = (event: React.MouseEvent<HTMLButtonElement>) => {
-    updateTplinkState({
-      [event.currentTarget.value.split("/")[0]]: {
-        powerState: event.currentTarget.value.split("/")[1] === "on",
-      },
-    });
-    fetch("api/tp-link/toggle/" + event.currentTarget.value).then((response) =>
-      console.log(response),
-    );
+    const [deviceId, onOff] = event.currentTarget.value.split("/");
+    const on = onOff === "on";
+    updateTplinkState({ [deviceId]: { powerState: on } });
+    toggleTplinkSwitch(deviceId, on);
   };
 
   // const handleChangeBasementBrightness = (event: React.ChangeEvent<HTMLInputElement>) => {

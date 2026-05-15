@@ -1,8 +1,14 @@
-import {useTplinkContext} from "@/context/tplink";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faExclamationCircle} from "@fortawesome/free-solid-svg-icons";
+import { useTplinkContext } from "@/context/tplink";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faExclamationCircle } from "@fortawesome/free-solid-svg-icons";
+import type { PlugConfig } from "@/types/remote";
 
-export default function LightswitchToggle({ lightSwitch, handleToggle }) {
+interface Props {
+  lightSwitch: PlugConfig;
+  handleToggle: React.MouseEventHandler<HTMLButtonElement>;
+}
+
+export default function LightswitchToggle({ lightSwitch, handleToggle }: Props) {
   const [tplinkState] = useTplinkContext();
 
   return (

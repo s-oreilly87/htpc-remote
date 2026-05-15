@@ -7,6 +7,8 @@ import {
   useMemo,
 } from "react";
 
+import { fetchTplinkInfo } from "@/utilities/http";
+
 export interface TplinkDeviceState {
   powerState: boolean;
   brightness?: number;
@@ -48,12 +50,12 @@ export function TplinkProvider({ children }: { children: ReactNode }) {
 
   const refreshSwitchInfo = useCallback(async (switchName: string) => {
     updateTplinkState({ loading: true });
-    const response = await fetch(`api/tp-link/info/${switchName}`);
-    if (200 !== response.status) {
-      console.error(response.statusText);
-      return;
+    const result = await fetchTplinkInfo(switchName);
+    if (result.error) {
+      console.error(result.error);
+    } else if (result.data) {
+      updateTplinkState({ [switchName]: result.data });
     }
-    updateTplinkState(await response.json());
     updateTplinkState({ loading: false });
   }, [updateTplinkState]);
 
