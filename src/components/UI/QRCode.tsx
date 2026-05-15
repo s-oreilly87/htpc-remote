@@ -3,6 +3,7 @@ import { Dialog, DialogPanel } from "@headlessui/react";
 import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
+import { MODAL_INSET } from "@/utilities/modalClasses";
 
 interface QRCodeProps {
   isOpen: boolean;
@@ -16,9 +17,9 @@ const QRCode: React.FC<QRCodeProps> = ({ isOpen, setIsOpen }) => {
 
   return (
     <Dialog open={isOpen} onClose={closeModal} className="relative z-50">
-      <div className="fixed inset-0 z-50 bg-black/50" />
+      <div className={`${MODAL_INSET} z-50 bg-black/50`} />
 
-      <div className="fixed inset-0 z-50 overflow-y-auto">
+      <div className={`${MODAL_INSET} z-50 overflow-y-auto`}>
         <div className="flex min-h-full items-center justify-center p-4 text-center">
           <DialogPanel
             transition

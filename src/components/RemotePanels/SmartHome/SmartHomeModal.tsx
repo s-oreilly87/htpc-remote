@@ -7,6 +7,7 @@ import { PLUGS } from "@/constants/smartHome";
 import LightswitchToggle from "@/components/RemotePanels/SmartHome/LightswitchToggle";
 import LoadingSpinner from "@/components/UI/LoadingSpinner";
 import { toggleTplinkSwitch } from "@/utilities/http";
+import { MODAL_INSET } from "@/utilities/modalClasses";
 
 // const brightnessButtons = [
 //   { value: 1, label: " 1%", color: "amber-800", textColor: "amber-400" },
@@ -69,9 +70,9 @@ const SmartHomeModal = ({ isOpen, setIsOpen }: SmartHomeModalProps) => {
   return (
     <>
       <Dialog open={isOpen} onClose={closeModal} className="relative z-50">
-        <div className="fixed inset-0 z-50 bg-black/50" />
+        <div className={`${MODAL_INSET} z-50 bg-black/50`} />
 
-        <div className="fixed inset-0 z-50 overflow-y-auto">
+        <div className={`${MODAL_INSET} z-50 overflow-y-auto`}>
           <div className="flex min-h-full items-center justify-center p-4 text-center">
             <DialogPanel
               transition

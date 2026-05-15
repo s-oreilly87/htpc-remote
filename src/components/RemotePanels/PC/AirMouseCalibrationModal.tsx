@@ -2,6 +2,7 @@ import { Dialog, DialogPanel, DialogTitle, Popover, PopoverButton, PopoverPanel 
 import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faQuestion, faXmark } from "@fortawesome/free-solid-svg-icons";
+import { MODAL_INSET } from "@/utilities/modalClasses";
 
 interface AirMouseCalibrationModalProps {
   showCalibration: boolean;
@@ -36,9 +37,9 @@ export default function AirMouseCalibrationModal({
   return (
     <>
       <Dialog open={showCalibration} onClose={closeModal} className="relative z-50">
-        <div className="fixed inset-0 z-50 bg-black/75" />
+        <div className={`${MODAL_INSET} z-50 bg-black/75`} />
 
-        <div className="fixed inset-0 z-50 overflow-y-auto">
+        <div className={`${MODAL_INSET} z-50 overflow-y-auto`}>
           <div className="flex min-h-full items-center justify-center p-4 text-center">
             <DialogPanel
               transition

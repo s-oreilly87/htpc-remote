@@ -13,9 +13,14 @@ import type { FetchResult, ValueButton } from "@/utilities/http";
 import type { RokuSimState } from "@/demo/types";
 
 // Static fake app list built from the real ROKU_APPS constant so channel IDs match.
+// Numeric IDs (real Roku channels) load icons from the Roku device; non-numeric
+// IDs render as plain text labels — used here for demo-only placeholder entries.
 const FAKE_APPS: { id: string; label: string }[] = [
   ...Object.values(ROKU_APPS.CHANNELS),
   ...Object.values(ROKU_APPS.HDMI),
+  { id: "demo-other",     label: "Other" },
+  { id: "demo-installed", label: "Installed" },
+  { id: "demo-channels",  label: "Channels" },
 ];
 
 // Flat lookup for launch commands: id → label
