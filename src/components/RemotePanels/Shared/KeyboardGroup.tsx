@@ -16,7 +16,7 @@ interface KeyboardGroupProps {
 }
 
 function KeyboardGroup({ remote }: KeyboardGroupProps) {
-  const { isMac, isPc, isLinux } = usePlatform();
+  const { isMac, isWindows, isLinux } = usePlatform();
   const [inputExpanded, setInputExpanded] = useState(false);
 
   const [inputSoFar, setInputSoFar] = useState("");
@@ -256,7 +256,7 @@ function KeyboardGroup({ remote }: KeyboardGroupProps) {
               onClick={handleSearchButton}
             >
               {!inputExpanded && isMac  && <FontAwesomeIcon icon={faMagnifyingGlass} />}
-              {!inputExpanded && isPc   && <FontAwesomeIcon icon={faWindows} />}
+              {!inputExpanded && isWindows && <FontAwesomeIcon icon={faWindows} />}
               {!inputExpanded && isLinux && <FontAwesomeIcon icon={faLinux} />}
               {inputExpanded           && <FontAwesomeIcon icon={faXmark} />}
             </button>
