@@ -10,9 +10,9 @@ const TEXT_MUTED = "#94a3b8";
 const GRAY = "#334155";
 
 const DEVICE_LABELS: Record<string, string> = {
+  "yard-dining": "Patio",
   "yard-fence": "Fence",
-  "yard-dining": "Dining",
-  "bedroom":  "Bed",
+  "bedroom":  "Bedroom",
   "stairway": "Stairs",
   "basement": "TV Room",
 };

@@ -78,7 +78,7 @@ export function DemoModeWelcomeInfoModal({
                 <p className="font-semibold text-slate-100">Good things to try</p>
                 <ul className="mt-2 list-disc space-y-1 pl-5">
                   <li>
-                    Swipe left/right to switch to other remote panels
+                    Swipe left/right to switch to other remote panels.
                   </li>
                   <li>
                     Use the HTPC presets, especially <span className="text-slate-100">Game</span>{" "}

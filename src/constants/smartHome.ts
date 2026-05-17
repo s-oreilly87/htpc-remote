@@ -10,22 +10,22 @@ const IS_DEMO = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
 
 const DEMO_TPLINK_DEVICES: SmartHomeDeviceConfig[] = [
   {
-    id: "yard-fence",
-    ip: "demo",
-    childId: "demo-yard-fence",
-    label: "Yard (fence)",
-    kind: "plug",
-  },
-  {
     id: "yard-dining",
     ip: "demo",
     childId: "demo-yard-dining",
-    label: "Yard (dining)",
+    label: "Outdoor: Patio",
+    kind: "plug",
+  },
+  {
+    id: "yard-fence",
+    ip: "demo",
+    childId: "demo-yard-fence",
+    label: "Outdoor: Fence",
     kind: "plug",
   },
   { id: "bedroom", ip: "demo", label: "Bedroom", kind: "switch" },
-  { id: "stairway", ip: "demo", label: "Stairway", kind: "switch" },
-  { id: "basement", ip: "demo", label: "Basement", kind: "dimmer" },
+  { id: "stairway", ip: "demo", label: "Stairs", kind: "switch" },
+  { id: "basement", ip: "demo", label: "TV Room", kind: "dimmer" },
 ];
 
 function isRecord(value: unknown): value is Record<string, unknown> {
