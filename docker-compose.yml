@@ -6,8 +6,10 @@ services:
       dockerfile: Dockerfile
       args:
         NEXT_PUBLIC_DEMO_MODE: ${NEXT_PUBLIC_DEMO_MODE:-false}
+        NEXT_PUBLIC_HTPC_PLATFORM: ${NEXT_PUBLIC_HTPC_PLATFORM:-WINDOWS}
     environment:
       NEXT_PUBLIC_DEMO_MODE: ${NEXT_PUBLIC_DEMO_MODE:-false}
+      NEXT_PUBLIC_HTPC_PLATFORM: ${NEXT_PUBLIC_HTPC_PLATFORM:-WINDOWS}
     restart: unless-stopped
     expose:
       - "3000"
