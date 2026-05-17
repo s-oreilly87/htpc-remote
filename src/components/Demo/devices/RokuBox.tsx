@@ -1,4 +1,7 @@
 import type { RokuSimState } from "@/demo/types";
+import { InfoIcon } from "@/components/Demo/devices/InfoIcon";
+
+const TITLE = "Roku TV — source selection and navigation controlled via the Roku ECP HTTP API (port 8060), proxied through Next.js rewrites. Volume keypresses are mirrored to the Denon AVR via HDMI ARC.";
 
 const VIOLET = "#6d28d9";
 const CARD_BG = "#0f172a";
@@ -14,14 +17,14 @@ interface Props {
   width: number;
   height: number;
   isRecent: boolean;
+  onInfo: (text: string) => void;
 }
 
-export function RokuBox({ state, x, y, width, height, isRecent }: Props) {
+export function RokuBox({ state, x, y, width, height, isRecent, onInfo }: Props) {
   const appLabel = state.currentApp?.label ?? "Home";
 
   return (
     <g>
-      <title>Roku TV — controlled via Roku ECP HTTP API (port 8060), proxied through Next.js rewrites</title>
       {/* Card background */}
       <rect
         x={x}
@@ -51,6 +54,9 @@ export function RokuBox({ state, x, y, width, height, isRecent }: Props) {
       >
         Roku TV
       </text>
+
+      {/* Info icon */}
+      <InfoIcon cx={x + 14} cy={y + 14} onClick={() => onInfo(TITLE)} />
 
       {/* Power indicator */}
       <circle

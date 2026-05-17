@@ -1,4 +1,7 @@
 import type { DenonSimState } from "@/demo/types";
+import { InfoIcon } from "@/components/Demo/devices/InfoIcon";
+
+const TITLE = "Denon AVR — queries device state via Telnet (port 23); sends commands via HTTP (port 80). Volume, input, sound mode, and EQ settings all controlled here.";
 
 const TEAL = "#0d9488";
 const CARD_BG = "#0f172a";
@@ -14,15 +17,15 @@ interface Props {
   width: number;
   height: number;
   isRecent: boolean;
+  onInfo: (text: string) => void;
 }
 
-export function AvrBox({ state, x, y, width, height, isRecent }: Props) {
+export function AvrBox({ state, x, y, width, height, isRecent, onInfo }: Props) {
   const volumePct = state.MV !== undefined ? (state.MV / 98) * 100 : 0;
   const barWidth = (width - 24) * (volumePct / 100);
 
   return (
     <g>
-      <title>Denon AVR — queries via Telnet (port 23), commands via HTTP (port 80)</title>
       {/* Card background */}
       <rect
         x={x}
@@ -52,6 +55,9 @@ export function AvrBox({ state, x, y, width, height, isRecent }: Props) {
       >
         Denon AVR
       </text>
+
+      {/* Info icon */}
+      <InfoIcon cx={x + 14} cy={y + 14} onClick={() => onInfo(TITLE)} />
 
       {/* Power indicator */}
       <circle

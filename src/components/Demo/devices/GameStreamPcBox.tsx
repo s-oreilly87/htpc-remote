@@ -1,4 +1,7 @@
 import type { GameStreamPcSimState } from "@/demo/types";
+import { InfoIcon } from "@/components/Demo/devices/InfoIcon";
+
+const TITLE = "GameStream PC — Windows gaming PC running Nvidia GameStream + EventGhost. The HTPC sends it a display-mode command before launching Moonlight, so the stream resolution matches the TV output.";
 
 const PURPLE = "#7c3aed";
 const CARD_BG = "#0f172a";
@@ -19,17 +22,16 @@ interface Props {
   width: number;
   height: number;
   isRecent: boolean;
+  onInfo: (text: string) => void;
 }
 
-export function GameStreamPcBox({ state, x, y, width, height, isRecent }: Props) {
+export function GameStreamPcBox({ state, x, y, width, height, isRecent, onInfo }: Props) {
   const displayLabel = state.displayMode
     ? (DISPLAY_MODE_LABELS[state.displayMode] ?? state.displayMode)
     : "—";
 
   return (
     <g>
-      <title>GameStream PC — Windows gaming PC running Nvidia GameStream + EventGhost. Receives display-mode commands from the HTPC before Moonlight streaming sessions.</title>
-
       {/* Card background */}
       <rect
         x={x}
@@ -59,6 +61,9 @@ export function GameStreamPcBox({ state, x, y, width, height, isRecent }: Props)
       >
         GameStream PC
       </text>
+
+      {/* Info icon */}
+      <InfoIcon cx={x + 11} cy={y + 12} r={4} onClick={() => onInfo(TITLE)} />
 
       {/* Power indicator — always on */}
       <circle cx={x + width - 12} cy={y + 12} r={4} fill={GREEN} />

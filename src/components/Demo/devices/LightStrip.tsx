@@ -1,4 +1,7 @@
 import type { TplinkSimState } from "@/demo/types";
+import { InfoIcon } from "@/components/Demo/devices/InfoIcon";
+
+const TITLE = "TP-Link smart home — lights toggled via Next.js API routes that proxy to the TP-Link Kasa local REST API. Brightness and power state per device.";
 
 const AMBER = "#f5b30b";
 const CARD_BG = "#0f172a";
@@ -21,27 +24,26 @@ interface Props {
   width: number;
   height: number;
   isRecent: boolean;
+  onInfo: (text: string) => void;
 }
 
 /**
  * Horizontal light strip. Devices are evenly distributed across the full width
  * so the strip fills nicely regardless of how wide the container is.
  */
-export function LightStrip({ state, x, y, width, height, isRecent }: Props) {
+export function LightStrip({ state, x, y, width, height, isRecent, onInfo }: Props) {
   const devices = Object.entries(state.devices);
   const DOT_R = 8;
   const TITLE_H = 14;
   const LABEL_H = 10;
 
   // Evenly distribute dots across the full width
-  const dotCY = y + TITLE_H + (height - TITLE_H - LABEL_H) / 2;
-  const labelY = dotCY + DOT_R + LABEL_H / 2 + 2;
+  const dotCY = y - 4 + TITLE_H + (height - TITLE_H - LABEL_H) / 2;
+  const labelY = dotCY + DOT_R + LABEL_H / 2 + 6;
   const slotW = devices.length > 0 ? width / devices.length : width;
 
   return (
     <g>
-      <title>TP-Link smart home — toggled via Next.js API routes that proxy to the TP-Link Kasa local REST API</title>
-
       <rect
         x={x} y={y} width={width} height={height}
         rx={8} fill={CARD_BG}
@@ -57,6 +59,9 @@ export function LightStrip({ state, x, y, width, height, isRecent }: Props) {
       >
         Lights
       </text>
+
+      {/* Info icon — right edge of title row */}
+      <InfoIcon cx={x + width - 10} cy={y + TITLE_H / 2} r={4} onClick={() => onInfo(TITLE)} />
 
       {devices.length === 0 ? (
         <text

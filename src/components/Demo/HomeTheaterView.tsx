@@ -13,11 +13,10 @@ const FLASH_DURATION_MS = 2000;
 
 // ── Layout (viewBox 800×560) ──────────────────────────────────────────────────
 //
-// Row 1  y=8    LightStrip — full width (784px)
-// Row 2  y=62   Roku | AVR (centered at x=400) | HTPC  — equal widths (200px), equal gaps (92px)
-// Row 3  y=202  GameStreamPcBox — below HTPC, same x/width as HTPC
-// Row 4  y=302  TV — 16:9 (280×157), centered at x=400
-// Row 5  y=467  SpeakerArray — same width+x as TV
+// Row 1  y=16   LightStrip — x=32, w=736
+// Row 2  y=94   Roku | AVR (centered at x=400) | HTPC  — equal widths (200px), equal gaps (92px)
+// Row 3  y=280  GameStreamPcBox (right, x=592) | TV 16:9 (center, x=260) — same y
+// Row 4  y=467  SpeakerArray — same width+x as TV
 //
 // Connection lines:
 //   Roku right  → AVR left     (horizontal, pulses on ROKU)
@@ -26,7 +25,7 @@ const FLASH_DURATION_MS = 2000;
 //   AVR bottom-center → TV top-center      (vertical, pulses on DENON)
 
 const L = {
-  lights:   { x: 32,   y: 16,   width: 736, height: 50  },
+  lights:   { x: 32,  y: 16,  width: 736, height: 50  },
   // 3 equal boxes × 200px + 2 gaps × 92px = 600 + 184 = 784px ✓
   roku:     { x: 8,   y: 94,  width: 200, height: 132 },
   avr:      { x: 300, y: 94,  width: 200, height: 132 },  // center at x=400
@@ -42,14 +41,54 @@ const LINES = {
   avrLeft:      L.avr.x,                                  // 300
   avrRight:     L.avr.x + L.avr.width,                    // 500
   htpcLeft:     L.htpc.x,                                  // 592
-  rowMidY:      L.roku.y + L.roku.height / 2,             // 128
-  htpcBottom:   L.htpc.y + L.htpc.height,                 // 194
-  gspcTop:      L.gspc.y,                                  // 202
+  rowMidY:      L.roku.y + L.roku.height / 2,             // 160
+  htpcBottom:   L.htpc.y + L.htpc.height,                 // 226
+  gspcTop:      L.gspc.y,                                  // 280
   htpcCenterX:  L.htpc.x + L.htpc.width / 2,             // 692
   avrCenterX:   L.avr.x + L.avr.width / 2,               // 400
-  avrBottom:    L.avr.y + L.avr.height,                   // 194
-  tvTop:        L.tv.y,                                    // 302
+  avrBottom:    L.avr.y + L.avr.height,                   // 226
+  tvTop:        L.tv.y,                                    // 280
 } as const;
+
+// ── Tooltip overlay ────────────────────────────────────────────────────────────
+const TOOLTIP = { x: 80, y: 188, width: 640, height: 96, pad: 14 } as const;
+
+interface TooltipOverlayProps {
+  text: string;
+  onDismiss: () => void;
+}
+
+function TooltipOverlay({ text, onDismiss }: TooltipOverlayProps) {
+  return (
+    <g>
+      {/* Full-SVG dismiss target */}
+      <rect width={800} height={560} fill="transparent" onClick={onDismiss} style={{ cursor: "default" }} />
+      {/* Card */}
+      <rect
+        x={TOOLTIP.x} y={TOOLTIP.y}
+        width={TOOLTIP.width} height={TOOLTIP.height}
+        rx={10} fill="#0f172a" stroke="#475569" strokeWidth={1.5}
+      />
+      <foreignObject
+        x={TOOLTIP.x + TOOLTIP.pad} y={TOOLTIP.y + TOOLTIP.pad}
+        width={TOOLTIP.width - TOOLTIP.pad * 2}
+        height={TOOLTIP.height - TOOLTIP.pad * 2}
+      >
+        {/* @ts-expect-error: xmlns required on foreignObject content root */}
+        <div xmlns="http://www.w3.org/1999/xhtml" style={{
+          color: "#cbd5e1",
+          fontSize: "12px",
+          lineHeight: "1.6",
+          fontFamily: "system-ui, sans-serif",
+        }}>
+          {text}
+        </div>
+      </foreignObject>
+    </g>
+  );
+}
+
+// ── Main component ─────────────────────────────────────────────────────────────
 
 interface Props {
   state: VirtualState;
@@ -58,6 +97,7 @@ interface Props {
 
 export function HomeTheaterView({ state, events }: Props) {
   const [flashTarget, setFlashTarget] = useState<DeviceTarget | null>(null);
+  const [tooltipText, setTooltipText] = useState<string | null>(null);
 
   const latestEventId = events[0]?.id;
   const latestEventTarget = events[0]?.target;
@@ -76,6 +116,9 @@ export function HomeTheaterView({ state, events }: Props) {
     strokeDasharray: isFlash(t) ? "none" : "4 3",
     className: isFlash(t) ? "line-recent" : undefined,
   });
+
+  const showInfo = (text: string) =>
+    setTooltipText(prev => (prev === text ? null : text));
 
   return (
     <svg
@@ -131,30 +174,35 @@ export function HomeTheaterView({ state, events }: Props) {
         state={state.tplink}
         {...L.lights}
         isRecent={isFlash(DeviceTarget.TPLINK)}
+        onInfo={showInfo}
       />
 
       <RokuBox
         state={state.roku}
         {...L.roku}
         isRecent={isFlash(DeviceTarget.ROKU)}
+        onInfo={showInfo}
       />
 
       <AvrBox
         state={state.denon}
         {...L.avr}
         isRecent={isFlash(DeviceTarget.DENON)}
+        onInfo={showInfo}
       />
 
       <HtpcBox
         state={state.htpc}
         {...L.htpc}
         isRecent={isFlash(DeviceTarget.HTPC)}
+        onInfo={showInfo}
       />
 
       <GameStreamPcBox
         state={state.gamestreamPc}
         {...L.gspc}
         isRecent={isFlash(DeviceTarget.GAMESTREAM_PC)}
+        onInfo={showInfo}
       />
 
       <TvBox
@@ -162,13 +210,20 @@ export function HomeTheaterView({ state, events }: Props) {
         rokuState={state.roku}
         htpcState={state.htpc}
         {...L.tv}
+        onInfo={showInfo}
       />
 
       <SpeakerArray
         soundMode={state.denon.soundMode}
         powerOn={state.denon.powerOn}
         {...L.speakers}
+        onInfo={showInfo}
       />
+
+      {/* ── Tooltip overlay (rendered last = always on top) ──────────────── */}
+      {tooltipText && (
+        <TooltipOverlay text={tooltipText} onDismiss={() => setTooltipText(null)} />
+      )}
     </svg>
   );
 }

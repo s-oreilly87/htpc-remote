@@ -1,4 +1,7 @@
 import type { HtpcSimState } from "@/demo/types";
+import { InfoIcon } from "@/components/Demo/devices/InfoIcon";
+
+const TITLE = "HTPC — Windows: controlled via EventGhost HTTP events. Linux Wayland: ydotool + shell scripts. Linux X11 / macOS: robotjs for keystroke and mouse. App, display mode, and audio mode are inferred from preset event names.";
 
 const BLUE = "#2563eb";
 const CARD_BG = "#0f172a";
@@ -14,15 +17,15 @@ interface Props {
   width: number;
   height: number;
   isRecent: boolean;
+  onInfo: (text: string) => void;
 }
 
-export function HtpcBox({ state, x, y, width, height, isRecent }: Props) {
+export function HtpcBox({ state, x, y, width, height, isRecent, onInfo }: Props) {
   // HTPC has no power control integration — it's always on.
   const isOn = true;
 
   return (
     <g>
-      <title>HTPC — controlled via EventGhost (Windows) or ydotool/shell scripts (Linux Wayland), robotjs for keystroke/mouse (Linux X11 / macOS)</title>
       {/* Card background */}
       <rect
         x={x}
@@ -52,6 +55,9 @@ export function HtpcBox({ state, x, y, width, height, isRecent }: Props) {
       >
         HTPC
       </text>
+
+      {/* Info icon */}
+      <InfoIcon cx={x + 14} cy={y + 14} onClick={() => onInfo(TITLE)} />
 
       {/* Power indicator */}
       <circle

@@ -1,6 +1,9 @@
 import { ROKU_APPS } from "@/constants/roku";
+import { InfoIcon } from "@/components/Demo/devices/InfoIcon";
 import { LinuxLaunchAppCommand } from "@/constants/htpcControls";
 import type { DenonSimState, RokuSimState, HtpcSimState } from "@/demo/types";
+
+const TITLE = "TV / Display — passive output device. Input source is selected via Roku ECP; audio is routed through the Denon AVR via HDMI ARC. The HTPC connects as HDMI4 on the Roku TV.";
 
 const CARD_BG = "#0f172a";
 const SCREEN_BG = "#060d1a";
@@ -82,9 +85,10 @@ interface Props {
   y: number;
   width: number;
   height: number;
+  onInfo: (text: string) => void;
 }
 
-export function TvBox({ denonState, rokuState, htpcState, x, y, width, height }: Props) {
+export function TvBox({ denonState, rokuState, htpcState, x, y, width, height, onInfo }: Props) {
   const HEADER_H = 28;
   const PADDING = 12;
 
@@ -97,8 +101,6 @@ export function TvBox({ denonState, rokuState, htpcState, x, y, width, height }:
 
   return (
     <g>
-      <title>TV / Display — passive output. Source selected via Roku ECP; audio routed through Denon AVR via HDMI ARC.</title>
-
       {/* Outer card */}
       <rect x={x} y={y} width={width} height={height} rx={10} fill={CARD_BG} stroke="#1e293b" strokeWidth={1} />
 
@@ -117,6 +119,9 @@ export function TvBox({ denonState, rokuState, htpcState, x, y, width, height }:
       >
         TV / Display
       </text>
+
+      {/* Info icon */}
+      <InfoIcon cx={x + 14} cy={y + HEADER_H / 2} onClick={() => onInfo(TITLE)} />
 
       {/* Denon input badge — top-right corner */}
       {denonState.input && (
