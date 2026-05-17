@@ -1,4 +1,7 @@
 import type { DenonSoundMode } from "@/types/remote";
+import { InfoIcon } from "@/components/Demo/devices/InfoIcon";
+
+const TITLE = "Speakers — channel configuration is driven by the Denon AVR sound mode. Active channels are lit in teal. Stereo = FL/FR, surround modes add C/SL/SR.";
 
 const TEAL = "#0d9488";
 const CARD_BG = "#0f172a";
@@ -42,14 +45,14 @@ interface Props {
   y: number;
   width: number;
   height: number;
+  onInfo: (text: string) => void;
 }
 
-export function SpeakerArray({ soundMode, powerOn, x, y, width, height }: Props) {
+export function SpeakerArray({ soundMode, powerOn, x, y, width, height, onInfo }: Props) {
   const active = getActiveSpeakers(soundMode);
 
   return (
     <g>
-      <title>Speakers — channel configuration driven by the Denon AVR sound mode. Active channels lit in teal.</title>
       {/* Background */}
       <rect
         x={x}
@@ -73,6 +76,9 @@ export function SpeakerArray({ soundMode, powerOn, x, y, width, height }: Props)
       >
         Speakers
       </text>
+
+      {/* Info icon */}
+      <InfoIcon cx={x + width - 12} cy={y + 12} r={4} onClick={() => onInfo(TITLE)} />
 
       {/* Speaker dots */}
       {SPEAKERS.map((sp) => {

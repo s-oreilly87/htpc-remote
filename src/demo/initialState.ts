@@ -25,6 +25,9 @@ export const INITIAL_STATE: VirtualState = {
     displayMode: null,
     audioMode: null,
   },
+  gamestreamPc: {
+    displayMode: null,
+  },
   tplink: {
     devices: {
       "yard-fence": { powerState: false },

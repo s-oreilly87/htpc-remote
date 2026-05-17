@@ -25,7 +25,7 @@ export function DemoPanel() {
   };
 
   return (
-    <div className="flex flex-col h-full p-4 bg-slate-900 text-slate-100 w-full overflow-hidden">
+    <div className="flex flex-col h-full p-4 bg-slate-900 text-slate-100 w-full overflow-hidden border-l-4 border-slate-950">
       <DemoModeWelcomeInfoModal isOpen={isInfoOpen} setIsOpen={setIsInfoOpen} />
 
       {/* Header */}

@@ -121,7 +121,13 @@ export class RokuSimulator {
     if (key === "Power") {
       this.state = { ...this.state, powerOn: !this.state.powerOn };
     }
-    this.onMutate(`keypress:${key}`);
+
+    const volumeDetail =
+      key === "VolumeUp" || key === "VolumeDown" || key === "VolumeMute"
+        ? "Denon AVR updated via HDMI CEC — app syncs state on next poll"
+        : undefined;
+
+    this.onMutate(`keypress:${key}`, volumeDetail);
   }
 
   handleKeydown(button: ValueButton): void {

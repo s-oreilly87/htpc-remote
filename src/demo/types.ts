@@ -7,6 +7,7 @@ export enum DeviceTarget {
   DENON = "DENON",
   ROKU = "ROKU",
   HTPC = "HTPC",
+  GAMESTREAM_PC = "GAMESTREAM_PC",
   TPLINK = "TPLINK",
 }
 
@@ -37,6 +38,11 @@ export interface HtpcSimState {
   audioMode: LinuxAudioModeCommand | null;
 }
 
+export interface GameStreamPcSimState {
+  /** Last display-mode EventGhost command received (e.g. "displayDummy4K60"). */
+  displayMode: string | null;
+}
+
 export interface TplinkDeviceSimState {
   powerState: boolean;
   brightness?: number;
@@ -53,5 +59,6 @@ export interface VirtualState {
   denon: DenonSimState;
   roku: RokuSimState;
   htpc: HtpcSimState;
+  gamestreamPc: GameStreamPcSimState;
   tplink: TplinkSimState;
 }

@@ -50,6 +50,7 @@ export function sendRokuKeypress(button: ValueButton): void {
   const wasOn = simulator.roku.getState().powerOn;
   simulator.roku.handleKeypress(button);
   simulator.applyCec(wasOn);
+  simulator.applyCecVolumeKey(button.value);
 }
 
 export function sendRokuKeydown(button: ValueButton): void {
@@ -84,6 +85,7 @@ export async function sendEventToGameStreamEventGhost(
   payload = "",
 ): Promise<void> {
   simulator.htpc.sendGameStreamEventGhost(button, payload || undefined);
+  simulator.gamestreamPc.receiveEventGhost(button.value);
 }
 
 export function sendClickToRobot(type: string): void {

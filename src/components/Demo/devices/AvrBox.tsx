@@ -1,4 +1,7 @@
 import type { DenonSimState } from "@/demo/types";
+import { InfoIcon } from "@/components/Demo/devices/InfoIcon";
+
+const TITLE = "Denon AVR — queries device state via Telnet (port 23); sends commands via HTTP (port 80). Volume, input, sound mode, and EQ settings all controlled here.";
 
 const TEAL = "#0d9488";
 const CARD_BG = "#0f172a";
@@ -14,15 +17,15 @@ interface Props {
   width: number;
   height: number;
   isRecent: boolean;
+  onInfo: (text: string) => void;
 }
 
-export function AvrBox({ state, x, y, width, height, isRecent }: Props) {
+export function AvrBox({ state, x, y, width, height, isRecent, onInfo }: Props) {
   const volumePct = state.MV !== undefined ? (state.MV / 98) * 100 : 0;
   const barWidth = (width - 24) * (volumePct / 100);
 
   return (
     <g>
-      <title>Denon AVR — queries via Telnet (port 23), commands via HTTP (port 80)</title>
       {/* Card background */}
       <rect
         x={x}
@@ -53,6 +56,9 @@ export function AvrBox({ state, x, y, width, height, isRecent }: Props) {
         Denon AVR
       </text>
 
+      {/* Info icon */}
+      <InfoIcon cx={x + 14} cy={y + 14} onClick={() => onInfo(TITLE)} />
+
       {/* Power indicator */}
       <circle
         cx={x + width - 14}
@@ -62,107 +68,43 @@ export function AvrBox({ state, x, y, width, height, isRecent }: Props) {
       />
 
       {/* Input label */}
-      <text
-        x={x + 12}
-        y={y + 46}
-        dominantBaseline="middle"
-        fill={TEXT_MUTED}
-        fontSize={10}
-      >
-        INPUT
-      </text>
-      <text
-        x={x + 12}
-        y={y + 62}
-        dominantBaseline="middle"
-        fill={TEXT}
-        fontSize={11}
-      >
+      <text x={x + 12} y={y + 40} dominantBaseline="middle" fill={TEXT_MUTED} fontSize={9}>INPUT</text>
+      <text x={x + 12} y={y + 54} dominantBaseline="middle" fill={TEXT} fontSize={11}>
         {state.input?.label ?? "—"}
       </text>
 
       {/* Sound mode */}
-      <text
-        x={x + width / 2 + 10}
-        y={y + 46}
-        dominantBaseline="middle"
-        fill={TEXT_MUTED}
-        fontSize={10}
-      >
-        MODE
-      </text>
-      <text
-        x={x + width / 2 + 10}
-        y={y + 62}
-        dominantBaseline="middle"
-        fill={TEXT}
-        fontSize={11}
-      >
+      <text x={x + width / 2 + 10} y={y + 40} dominantBaseline="middle" fill={TEXT_MUTED} fontSize={9}>MODE</text>
+      <text x={x + width / 2 + 10} y={y + 54} dominantBaseline="middle" fill={TEXT} fontSize={11}>
         {state.soundMode.label}
       </text>
 
       {/* Volume label */}
-      <text
-        x={x + 12}
-        y={y + 86}
-        dominantBaseline="middle"
-        fill={TEXT_MUTED}
-        fontSize={10}
-      >
+      <text x={x + 12} y={y + 74} dominantBaseline="middle" fill={TEXT_MUTED} fontSize={9}>
         VOL {state.MV !== undefined ? state.MV : "—"}
       </text>
 
       {/* Mute badge */}
       {state.muteOn && (
         <text
-          x={x + width - 12}
-          y={y + 86}
-          textAnchor="end"
-          dominantBaseline="middle"
-          fill="#ef4444"
-          fontSize={10}
-          fontWeight="bold"
+          x={x + width - 12} y={y + 74}
+          textAnchor="end" dominantBaseline="middle"
+          fill="#ef4444" fontSize={10} fontWeight="bold"
         >
           MUTE
         </text>
       )}
 
       {/* Volume bar track */}
-      <rect
-        x={x + 12}
-        y={y + 98}
-        width={width - 24}
-        height={6}
-        rx={3}
-        fill="#1e293b"
-      />
+      <rect x={x + 12} y={y + 86} width={width - 24} height={6} rx={3} fill="#1e293b" />
       {/* Volume bar fill */}
-      <rect
-        x={x + 12}
-        y={y + 98}
-        width={barWidth}
-        height={6}
-        rx={3}
-        fill={state.muteOn ? GRAY : TEAL}
-      />
+      <rect x={x + 12} y={y + 86} width={barWidth} height={6} rx={3} fill={state.muteOn ? GRAY : TEAL} />
 
       {/* DynEQ / DynComp row */}
-      <text
-        x={x + 12}
-        y={y + 120}
-        dominantBaseline="middle"
-        fill={TEXT_MUTED}
-        fontSize={9}
-      >
+      <text x={x + 12}             y={y + 108} dominantBaseline="middle" fill={TEXT_MUTED} fontSize={9}>
         DynEQ: {state.psDynEqOn ? "ON" : "OFF"}
       </text>
-      <text
-        x={x + width / 2 + 10}
-        y={y + 120}
-        dominantBaseline="middle"
-        fill={TEXT_MUTED}
-        fontSize={9}
-      >
+      <text x={x + width / 2 + 10} y={y + 108} dominantBaseline="middle" fill={TEXT_MUTED} fontSize={9}>
         DIL: {state.psDilOn ? "ON" : "OFF"}
       </text>
     </g>
