@@ -2,7 +2,7 @@
 
 On Windows, HTPC control is handled via [EventGhost](http://www.eventghost.net/) — a free automation tool that exposes an HTTP(S) event server. The Next.js app sends HTTP events to EventGhost, which maps them to keystrokes, display switching, audio output changes, and app launches.
 
-Set `NEXT_PUBLIC_HTPC_PLATFORM=PC` in `.env.local`.
+Set `NEXT_PUBLIC_HTPC_PLATFORM=WINDOWS` in `.env.local`.
 
 ---
 

@@ -38,7 +38,7 @@ The HTPC and Roku remotes include an on-screen keyboard that types directly into
 
 ### Platform support
 
-| Feature | `PC` | `LINUX_WAYLAND` | `LINUX_X11` | `MACOS` |
+| Feature | `WINDOWS` | `LINUX_WAYLAND` | `LINUX_X11` | `MACOS` |
 |---|---|---|---|---|
 | D-pad / media keys / keyboard | ✅ | ✅ | ✅ | ✅ |
 | Scene presets | ✅ | ✅ | — | — |
@@ -53,7 +53,7 @@ The HTPC and Roku remotes include an on-screen keyboard that types directly into
 
 For `LINUX_X11` running remotely, the panel shows a warning banner and falls back to keystroke-only control via ydotool through the `linux/htpc-agent`.
 
-### AirMouse *(PC / Mac / Linux X11 only)*
+### AirMouse *(Windows / Mac / Linux X11 only)*
 
 Uses the phone's gyroscope (Web Relative Orientation Sensor API) to control the mouse cursor on the HTPC via robotjs. Orientation deltas are streamed over a Socket.io connection and translated into absolute screen coordinates. Left and right click buttons are exposed while the mode is active, as well as a calibration button which initiates a two-point calibration step (top-left / bottom-right corners from seated position). A screen wake lock keeps the phone display on during use.
 
@@ -120,7 +120,7 @@ Create a `.env.local` file:
 
 ```env
 NEXT_PUBLIC_HOST_IP=192.168.1.xxx            # IP of the machine running Next.js (for QR code / Caddy config)
-NEXT_PUBLIC_HTPC_PLATFORM=LINUX_WAYLAND      # PC | LINUX_WAYLAND | LINUX_X11 | MACOS — the HTPC's OS, not the host's
+NEXT_PUBLIC_HTPC_PLATFORM=LINUX_WAYLAND      # WINDOWS | LINUX_WAYLAND | LINUX_X11 | MACOS (legacy PC maps to WINDOWS) — the HTPC's OS, not the host's
 NEXT_PUBLIC_HTPC_IP=192.168.1.xxx            # HTPC IP — routes commands to the agent when host ≠ HTPC
 NEXT_PUBLIC_LINUX_HTPC_AGENT_PORT=3001       # linux/htpc-agent port (must be NEXT_PUBLIC for AirMouse client)
 NEXT_PUBLIC_DENON_IP=192.168.1.xxx           # Denon/Marantz AVR IP

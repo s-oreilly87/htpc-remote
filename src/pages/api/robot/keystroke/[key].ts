@@ -5,10 +5,10 @@ import { KEYSTROKE } from "@/constants/remotes";
 import { getPlatformInfo } from "@/hooks/usePlatform";
 import { libnutTypeString } from "../libnut-macos";
 
-const { platform: PLATFORM, isMac, isLinux, isPc } = getPlatformInfo();
+const { platform: PLATFORM, isMac, isLinux, isWindows } = getPlatformInfo();
 
 // On macOS and Windows the "super" modifier is 'command'; on Linux it's 'super'.
-const superMod = (isMac || isPc) ? "command" : "super";
+const superMod = (isMac || isWindows) ? "command" : "super";
 
 type RobotKey = { key: string; modifiers?: string[] };
 
