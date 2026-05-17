@@ -28,7 +28,7 @@ export type TplinkContextValue = [
   React.Dispatch<React.SetStateAction<TplinkState>>,
 ];
 
-const DEFAULT_STATE: TplinkState = {
+export const TPLINK_STATE_DEFAULTS: TplinkState = {
   devices: TPLINK_DEVICES.reduce<Record<string, TplinkDeviceState>>((devices, device) => {
     devices[device.id] = {
       powerState: false,
@@ -42,7 +42,7 @@ const DEFAULT_STATE: TplinkState = {
 const Context = createContext<TplinkContextValue | undefined>(undefined);
 
 export function TplinkProvider({ children }: { children: ReactNode }) {
-  const [tplinkState, setTplinkState] = useState<TplinkState>(DEFAULT_STATE);
+  const [tplinkState, setTplinkState] = useState<TplinkState>(TPLINK_STATE_DEFAULTS);
 
   const updateTplinkState = useCallback((props: Record<string, TplinkDeviceState>) => {
     setTplinkState((prevState) => ({

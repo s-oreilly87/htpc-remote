@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { RokuState } from "@/types/remote";
 import { ROKU_QUERY_KEY, fetchRokuState } from "@/lib/roku-query";
 
-const ROKU_STATE_DEFAULTS: RokuState = {
+export const ROKU_STATE_DEFAULTS: RokuState = {
   powerOn: false,
 };
 

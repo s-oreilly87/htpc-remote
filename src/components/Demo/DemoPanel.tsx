@@ -6,10 +6,23 @@ import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircleInfo } from "@fortawesome/free-solid-svg-icons";
 import { DemoModeWelcomeInfoModal } from "@/components/Demo/DemoModeWelcomeInfoModal";
+import { DENON_STATE_DEFAULTS, useDenonContext } from "@/context/denon";
+import { ROKU_STATE_DEFAULTS, useRokuContext } from "@/context/roku";
+import { TPLINK_STATE_DEFAULTS, useTplinkContext } from "@/context/tplink";
 
 export function DemoPanel() {
   const { state, events } = useSimulator();
   const [isInfoOpen, setIsInfoOpen] = useState(true);
+  const { updateDenonState } = useDenonContext();
+  const { updateRokuState } = useRokuContext();
+  const [, , , setTplinkState] = useTplinkContext();
+
+  const resetDemo = () => {
+    simulator.reset();
+    updateDenonState(DENON_STATE_DEFAULTS);
+    updateRokuState(ROKU_STATE_DEFAULTS);
+    setTplinkState(TPLINK_STATE_DEFAULTS);
+  };
 
   return (
     <div className="flex flex-col h-full p-4 bg-slate-900 text-slate-100 w-full overflow-hidden">
@@ -28,7 +41,7 @@ export function DemoPanel() {
           <FontAwesomeIcon icon={faCircleInfo} />
         </button>
         <button
-          onClick={() => simulator.reset()}
+          onClick={resetDemo}
           className="px-3 py-1 text-sm bg-slate-700 hover:bg-slate-600 rounded text-slate-300 absolute right-4"
         >
           Reset
