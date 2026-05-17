@@ -1,11 +1,10 @@
 import { Dialog, DialogPanel } from "@headlessui/react";
 import { useEffect, useRef } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import { useTplinkContext, TplinkDeviceState } from "@/context/tplink";
 import { TPLINK_DEVICES } from "@/constants/smartHome";
 import LightswitchToggle from "@/components/RemotePanels/SmartHome/LightswitchToggle";
 import LoadingSpinner from "@/components/UI/LoadingSpinner";
+import ModalCloseButton from "@/components/UI/ModalCloseButton";
 import { toggleTplinkSwitch, setTplinkBrightness } from "@/utilities/http";
 import { MODAL_INSET } from "@/utilities/modalClasses";
 
@@ -68,13 +67,7 @@ const SmartHomeModal = ({ isOpen, setIsOpen }: SmartHomeModalProps) => {
                 data-enter:duration-300 data-leave:duration-200 data-leave:ease-in"
             >
                   <div className="mt-1 flex justify-end">
-                    <button
-                      type="button"
-                      className="absolute -right-3 -top-4 z-50 shadow-2xl inline-flex justify-center rounded-md border border-transparent bg-red-700 px-5 py-3 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-                      onClick={closeModal}
-                    >
-                      <FontAwesomeIcon icon={faXmark} color={"white"} />
-                    </button>
+                    <ModalCloseButton onClick={closeModal} />
                   </div>
                   {!tplinkState.loading && (
                     <div className="flex flex-col items-center gap-6">

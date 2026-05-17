@@ -1,8 +1,7 @@
 import Image from "next/image";
 import { Dialog, DialogPanel } from "@headlessui/react";
 import React from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faXmark } from "@fortawesome/free-solid-svg-icons";
+import ModalCloseButton from "@/components/UI/ModalCloseButton";
 import { MODAL_INSET } from "@/utilities/modalClasses";
 
 interface QRCodeProps {
@@ -28,13 +27,7 @@ const QRCode: React.FC<QRCodeProps> = ({ isOpen, setIsOpen }) => {
               data-[enter]:duration-300 data-[leave]:duration-200 data-[leave]:ease-in"
           >
             <div className="mt-1 flex justify-end">
-              <button
-                type="button"
-                className="absolute -right-3 -top-4 z-50 shadow-2xl inline-flex justify-center rounded-md border border-transparent bg-red-700 px-5 py-3 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-                onClick={closeModal}
-              >
-                <FontAwesomeIcon icon={faXmark} color={"white"} />
-              </button>
+              <ModalCloseButton onClick={closeModal} />
             </div>
             <div className="w-full flex flex-col items-center justify-center gap-4">
               <Image

@@ -72,7 +72,7 @@ export default PCRemote;
 
 function KodiButtons() {
     return (
-        <div className="flex flex-col gap-3 justify-between items-center mb-6 border border-gray-600/50 rounded-lg mx-auto p-3 w-fit">
+        <div className="flex flex-col gap-3 justify-between items-center mb-6 mx-auto p-3 w-fit">
             <span className="text-white text-sm">Kodi</span>
             <div className="flex gap-2 justify-center">
                 <KeypressButton
