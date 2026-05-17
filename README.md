@@ -67,6 +67,10 @@ Installable directly from the browser — no app store. The manifest and service
 
 > **Note:** The app must be served over https with a valid SSL certificate to install as PWA.
 
+### Demo mode
+
+Set `NEXT_PUBLIC_DEMO_MODE=true` to run the UI against an in-browser virtual home theater instead of real devices. Demo mode routes normal remote actions through a simulator, renders a desktop-only demo panel with virtual device state and an event log, and disables PWA service-worker generation. Leave `NEXT_PUBLIC_DEMO_MODE` unset for normal LAN deployment.
+
 ### Smart home control *(built, partially wired)*
 
 TP-Link Kasa smart plug and light switch control via the `tplink-smarthome-api`. A modal in the PC panel exposes power toggles for configured devices. Light switch dimmer control (with a brightness slider and preset brightness buttons) is implemented but currently commented out pending hardware.
