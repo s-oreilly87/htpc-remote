@@ -126,9 +126,9 @@ export class DenonSimulator {
     // Input switch — value matches a DENON_INPUTS entry
     const inputEntry = Object.values(DENON_INPUTS).find((i) => i.value === command);
     if (inputEntry) {
-      this.state = { ...this.state, input: inputEntry };
+      this.state = { ...this.state, input: inputEntry, powerOn: true };
       this.onMutate(command, `Input → ${inputEntry.label}`);
-      return { data: [command] };
+      return { data: ["PWON", command] };
     }
 
     // Sound-mode select — value starts with "MS"
