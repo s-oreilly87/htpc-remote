@@ -40,6 +40,9 @@ services:
       dockerfile: Dockerfile
       args:
         NEXT_PUBLIC_PLATFORM: PC
+        NEXT_PUBLIC_DEMO_MODE: ${NEXT_PUBLIC_DEMO_MODE:-false}
+    environment:
+      NEXT_PUBLIC_DEMO_MODE: ${NEXT_PUBLIC_DEMO_MODE:-false}
     restart: always
     ports:
       - '127.0.0.1:3000:3000'
