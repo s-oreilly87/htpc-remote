@@ -92,14 +92,14 @@ class VirtualHomeTheater {
    */
   applyCec(rokuWasOn: boolean): void {
     const rokuNowOn = this.roku.getState().powerOn;
-    const denonOff = !this.denon.getState().powerOn;
+    const denonPowerMatches = this.denon.getState().powerOn === rokuNowOn;
 
-    if (!rokuWasOn && rokuNowOn && denonOff) {
-      this.denon.patchState({ powerOn: true });
+    if (rokuWasOn !== rokuNowOn && !denonPowerMatches) {
+      this.denon.patchState({ powerOn: rokuNowOn });
       this._pushEvent(
         DeviceTarget.DENON,
-        "CEC: power on",
-        "Woken by Roku TV via HDMI CEC — the app never sends this command",
+        `CEC: power ${rokuNowOn ? "on" : "off"}`,
+        `Mirrored Roku TV power ${rokuNowOn ? "on" : "off"} via HDMI CEC — the app never sends this command`,
       );
       this._rebuildState();
       this._notifySubscribers();

@@ -13,6 +13,7 @@ import {
 } from "@/utilities/http";
 import { buttonPress } from "@/utilities/utils";
 import { useDenonContext } from "@/context/denon";
+import { useRokuCec } from "@/hooks/useRokuCec";
 
 interface PressAndHoldButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   remote: RemoteType;
@@ -32,6 +33,7 @@ const PressAndHoldButton: React.FC<PressAndHoldButtonProps> = ({
   const [buttonPressTimerId, setButtonPressTimerId] = useState<number | null>(null);
 
   const { updateDenonState } = useDenonContext();
+  const { toggleRokuPower } = useRokuCec();
 
   const pressAndHoldVibration = () => {
     setVibrateInterval(setInterval(() => navigator.vibrate(1), 75));
@@ -79,6 +81,9 @@ const PressAndHoldButton: React.FC<PressAndHoldButtonProps> = ({
   }
 
   function rokuPressAndHoldStart(button: ValueButton & HTMLButtonElement) {
+    if (button.value === "Power") {
+      toggleRokuPower();
+    }
     sendRokuKeypress(button);
     buttonPress(button, buttonPressTimerId, (timerId) => setButtonPressTimerId(timerId));
     setTouchTimer(

@@ -137,6 +137,7 @@ export class RokuSimulator {
     const label = APP_BY_ID[appId] ?? appId;
     this.state = {
       ...this.state,
+      powerOn: true,
       currentApp: { id: appId, label },
     };
     this.onMutate(`launch:${appId}`, label);

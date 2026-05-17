@@ -7,6 +7,7 @@ import { DISPLAY_MODES, displayModeValue } from "@/constants/pc";
 import { usePlatform } from "@/hooks/usePlatform";
 import type { DisplayMode } from "@/types/remote";
 import type { LinuxDisplayModeCommand } from "@/constants/htpcControls";
+import { useRokuCec } from "@/hooks/useRokuCec";
 
 export interface DisplayModeSelectProps {
   selectedDisplayMode: DisplayMode;
@@ -15,6 +16,7 @@ export interface DisplayModeSelectProps {
 
 function DisplayModeSelect({ selectedDisplayMode, setSelectedDisplayMode }: DisplayModeSelectProps) {
   const { isLinux } = usePlatform();
+  const { wakeRoku } = useRokuCec();
 
   const modes = Object.values(DISPLAY_MODES).filter(
     (m) => m.disabled || displayModeValue(m, isLinux) !== "",
@@ -32,6 +34,7 @@ function DisplayModeSelect({ selectedDisplayMode, setSelectedDisplayMode }: Disp
 
     if (mode.rokuChannel) {
       sendRokuLaunchCommand({ value: mode.rokuChannel.id });
+      wakeRoku();
     }
   };
 

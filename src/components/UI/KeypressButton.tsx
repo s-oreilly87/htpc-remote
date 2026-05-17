@@ -13,6 +13,7 @@ import {
 import {buttonPress, openPlexampAndroidApp, openQobuzAndroidApp, sleep} from "@/utilities/utils";
 import { LinuxDisplayModeCommand, LinuxLaunchAppCommand } from "@/constants/htpcControls";
 import { usePlatform } from "@/hooks/usePlatform";
+import { useRokuCec } from "@/hooks/useRokuCec";
 
 interface RemoteButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   remote: RemoteType;
@@ -21,9 +22,13 @@ interface RemoteButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement
 const RemoteButton: React.FC<RemoteButtonProps> = ({ remote, children, ...props }) => {
   const [buttonPressTimerId, setButtonPressTimerId] = useState<number | undefined>();
   const { isLinux } = usePlatform();
+  const { toggleRokuPower } = useRokuCec();
 
   const handleClick = async (event: React.MouseEvent<HTMLButtonElement>) => {
     if (remote === RemoteType.ROKU) {
+      if (event.currentTarget.value === "Power") {
+        toggleRokuPower();
+      }
       sendRokuKeypress(event.currentTarget);
     } else if (remote === RemoteType.PC) {
       if (event.currentTarget.value.startsWith("KEYSTROKE")) {

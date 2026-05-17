@@ -2,7 +2,6 @@ import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
 import { useEffect, useState } from "react";
 
 import ModalCloseButton from "@/components/UI/ModalCloseButton";
-import { MODAL_INSET } from "@/utilities/modalClasses";
 
 interface DemoModeWelcomeInfoModalProps {
   isOpen: boolean;
@@ -32,9 +31,9 @@ export function DemoModeWelcomeInfoModal({
 
   return (
     <Dialog open={isOpen} onClose={closeModal} className="relative z-50">
-      <div className={`${MODAL_INSET} z-50 bg-black/70`} />
+      <div className="fixed inset-0 z-50 bg-black/70" />
 
-      <div className={`${MODAL_INSET} z-50 overflow-y-auto`}>
+      <div className="fixed inset-0 z-50 overflow-y-auto">
         <div className="flex min-h-full items-center justify-center p-4 text-left">
           <DialogPanel
             transition
