@@ -14,6 +14,15 @@ import { DENON_INPUTS, DENON_SOUND_MODES } from "@/constants/denon";
 import { DenonKeystroke } from "@/constants/remotes";
 import type { FetchResult } from "@/utilities/http";
 import type { DenonSimState } from "@/demo/types";
+import type { DenonSoundMode } from "@/types/remote";
+
+// Ordered mode lists cycled by each shortcut button (wraps around).
+const CYCLE_SEQUENCES: Record<string, DenonSoundMode[]> = {
+  MSMOVIE:  [DENON_SOUND_MODES.DOLBY, DENON_SOUND_MODES.DTS, DENON_SOUND_MODES.MULTI],
+  MSMUSIC:  [DENON_SOUND_MODES.STEREO, DENON_SOUND_MODES.MULTI, DENON_SOUND_MODES.ROCK_ARENA, DENON_SOUND_MODES.JAZZ_CLUB],
+  MSGAME:   [DENON_SOUND_MODES.VIDEO_GAME, DENON_SOUND_MODES.DTS, DENON_SOUND_MODES.DOLBY],
+  MSDIRECT: [DENON_SOUND_MODES.DIRECT, DENON_SOUND_MODES.PURE_DIRECT],
+};
 
 // ── Encoding helpers ─────────────────────────────────────────────────────────
 
@@ -48,6 +57,7 @@ function encodePSDIL(psdil: number): string {
 export class DenonSimulator {
   private state: DenonSimState;
   private readonly onMutate: (command: string, detail?: string) => void;
+  private _cycleState: Record<string, number> = {};
 
   constructor(initial: DenonSimState, onMutate: (command: string, detail?: string) => void) {
     this.state = { ...initial };
@@ -60,6 +70,13 @@ export class DenonSimulator {
 
   reset(initial: DenonSimState): void {
     this.state = { ...initial };
+    this._cycleState = {};
+  }
+
+  /** Silently patch state without emitting an event. Used by the parent
+   *  simulator for CEC side-effects (e.g. Roku power-on wakes the AVR). */
+  patchState(partial: Partial<DenonSimState>): void {
+    this.state = { ...this.state, ...partial };
   }
 
   // ── Shape: fetchMainZoneData ─────────────────────────────────────────────
@@ -111,18 +128,30 @@ export class DenonSimulator {
     if (inputEntry) {
       this.state = { ...this.state, input: inputEntry };
       this.onMutate(command, `Input → ${inputEntry.label}`);
-      return { msg: `Input set to ${inputEntry.label}` };
+      return { data: [command] };
     }
 
     // Sound-mode select — value starts with "MS"
     if (command.startsWith("MS")) {
+      const sequence = CYCLE_SEQUENCES[command];
+      if (sequence) {
+        // Advance cycle index, wrapping around.
+        const prev = this._cycleState[command] ?? -1;
+        const next = (prev + 1) % sequence.length;
+        this._cycleState[command] = next;
+        const modeEntry = sequence[next];
+        this.state = { ...this.state, soundMode: modeEntry };
+        this.onMutate(command, `Sound → ${modeEntry.label}`);
+        return { data: [modeEntry.value] };
+      }
+      // Direct mode value (e.g. from SoundModeSelect dropdown) — exact match.
       const modeEntry = Object.values(DENON_SOUND_MODES).find(
         (m) => m.value === command,
       );
       if (modeEntry) {
         this.state = { ...this.state, soundMode: modeEntry };
         this.onMutate(command, `Sound → ${modeEntry.label}`);
-        return { msg: `Sound mode set to ${modeEntry.label}` };
+        return { data: [modeEntry.value] };
       }
     }
 
@@ -131,7 +160,8 @@ export class DenonSimulator {
       const val = command.slice(9);
       this.state = { ...this.state, PSDYNVOL: val };
       this.onMutate(command);
-      return { msg: `PSDYNVOL → ${val}` };
+      // Return the echo so AdvancedVolumeControl.handleClick can update PSDYNVOL state
+      return { data: [command] };
     }
 
     // PSREFLEV setter — e.g. "PSREFLEV 0"
@@ -139,24 +169,55 @@ export class DenonSimulator {
       const val = command.slice(9);
       this.state = { ...this.state, PSREFLEV: val };
       this.onMutate(command);
-      return { msg: `PSREFLEV → ${val}` };
+      return { data: [command] };
     }
 
-    // PSDIL setter — e.g. "PSDIL ON", "PSDIL 535"
+    // PSDYNEQ setter — e.g. "PSDYNEQ ON", "PSDYNEQ OFF"
+    // Must come before the switch (DenonKeystroke has no PSDYNEQ entry).
+    if (command.startsWith("PSDYNEQ ")) {
+      const val = command.slice(8);
+      this.state = { ...this.state, psDynEqOn: val === "ON" };
+      this.onMutate(command);
+      // The UI does an optimistic update before this call; returning any non-empty
+      // data prevents the TypeError in handleClick's for-of loop.
+      return { data: [command] };
+    }
+
+    // PSDIL setter/adjuster — e.g. "PSDIL ON", "PSDIL 535", "PSDIL UP", "PSDIL DOWN"
     if (command.startsWith("PSDIL ")) {
       const val = command.slice(6);
+
       if (val === "ON" || val === "OFF") {
         this.state = { ...this.state, psDilOn: val === "ON" };
-      } else {
-        // Numeric value — decode back to float
-        const level = parseFloat(val);
-        if (!Number.isNaN(level)) {
-          const decoded = val.length >= 3 ? level / 10 - 50 : level - 50;
-          this.state = { ...this.state, PSDIL: decoded };
-        }
+        this.onMutate(command);
+        // Echo the toggle so handleClick can update psDilOn optimistically
+        return { data: [command] };
+      }
+
+      if (val === "UP" || val === "DOWN") {
+        const PSDIL = val === "UP"
+          ? Math.min(12, (this.state.PSDIL ?? 0) + 0.5)
+          : Math.max(-12, (this.state.PSDIL ?? 0) - 0.5);
+        this.state = { ...this.state, PSDIL };
+        this.onMutate(command, `Level ${PSDIL > 0 ? "+" : ""}${PSDIL.toFixed(1)}`);
+        // Return the same two-line shape the real AVR sends so handleClick can
+        // parse psDilOn (line 0) and the new level (line 1).
+        return {
+          data: [
+            `PSDIL ${this.state.psDilOn ? "ON" : "OFF"}`,
+            `PSDIL ${encodePSDIL(PSDIL)}`,
+          ],
+        };
+      }
+
+      // Numeric value — decode back to float (used internally, not from UI buttons)
+      const level = parseFloat(val);
+      if (!Number.isNaN(level)) {
+        const decoded = val.length >= 3 ? level / 10 - 50 : level - 50;
+        this.state = { ...this.state, PSDIL: decoded };
       }
       this.onMutate(command);
-      return { msg: `PSDIL → ${val}` };
+      return { data: [command] };
     }
 
     // DenonKeystroke commands
@@ -165,14 +226,16 @@ export class DenonSimulator {
         const powerOn = !this.state.powerOn;
         this.state = { ...this.state, powerOn };
         this.onMutate(command, `Power ${powerOn ? "ON" : "OFF"}`);
-        return { msg: `Power ${powerOn ? "ON" : "OFF"}` };
+        // The UI does !!response.data to confirm the new power state.
+        // Return a truthy array when on, undefined (falsy) when off.
+        return { data: powerOn ? ["PWON"] : undefined };
       }
 
       case DenonKeystroke.MUTE: {
         const muteOn = !this.state.muteOn;
         this.state = { ...this.state, muteOn };
         this.onMutate(command, `Mute ${muteOn ? "ON" : "OFF"}`);
-        return { msg: `Mute ${muteOn ? "ON" : "OFF"}` };
+        return { data: muteOn ? ["MUON"] : undefined };
       }
 
       case DenonKeystroke.VOL_UP: {

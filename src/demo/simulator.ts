@@ -57,9 +57,10 @@ class VirtualHomeTheater {
       };
 
     this.denon = new DenonSimulator(INITIAL_STATE.denon, makeNotify(DeviceTarget.DENON));
-    this.roku = new RokuSimulator(INITIAL_STATE.roku, makeNotify(DeviceTarget.ROKU));
     this.htpc = new HtpcSimulator(INITIAL_STATE.htpc, makeNotify(DeviceTarget.HTPC));
     this.tplink = new TplinkSimulator(INITIAL_STATE.tplink, makeNotify(DeviceTarget.TPLINK));
+
+    this.roku = new RokuSimulator(INITIAL_STATE.roku, makeNotify(DeviceTarget.ROKU));
   }
 
   // ── Public API ────────────────────────────────────────────────────────────
@@ -79,6 +80,30 @@ class VirtualHomeTheater {
   /** Returns the event log (newest first). */
   getEvents(): EventLogEntry[] {
     return this._events;
+  }
+
+  /**
+   * HDMI CEC side-effect: if Roku just powered on and the Denon is still off,
+   * wake the AVR. Called explicitly by the bridge after a Roku keypress so
+   * the transition (off→on) is unambiguous — the bridge captures the power
+   * state before and after the command.
+   *
+   * @param rokuWasOn - Roku power state BEFORE the keypress
+   */
+  applyCec(rokuWasOn: boolean): void {
+    const rokuNowOn = this.roku.getState().powerOn;
+    const denonOff = !this.denon.getState().powerOn;
+
+    if (!rokuWasOn && rokuNowOn && denonOff) {
+      this.denon.patchState({ powerOn: true });
+      this._pushEvent(
+        DeviceTarget.DENON,
+        "CEC: power on",
+        "Woken by Roku TV via HDMI CEC — the app never sends this command",
+      );
+      this._rebuildState();
+      this._notifySubscribers();
+    }
   }
 
   /** Resets all device states to their initial values and clears the event log. */

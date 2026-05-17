@@ -1,22 +1,13 @@
 import { Dialog, DialogPanel } from "@headlessui/react";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
-import { useTplinkContext } from "@/context/tplink";
-import { PLUGS } from "@/constants/smartHome";
+import { useTplinkContext, TplinkState, TplinkDeviceState } from "@/context/tplink";
+import { LIGHTSWITCHES, PLUGS } from "@/constants/smartHome";
 import LightswitchToggle from "@/components/RemotePanels/SmartHome/LightswitchToggle";
 import LoadingSpinner from "@/components/UI/LoadingSpinner";
-import { toggleTplinkSwitch } from "@/utilities/http";
+import { toggleTplinkSwitch, setTplinkBrightness } from "@/utilities/http";
 import { MODAL_INSET } from "@/utilities/modalClasses";
-
-// const brightnessButtons = [
-//   { value: 1, label: " 1%", color: "amber-800", textColor: "amber-400" },
-//   { value: 25, label: "25%", color: "amber-600", textColor: "amber-300" },
-//   { value: 40, label: "40%", color: "amber-500", textColor: "amber-200" },
-//   { value: 60, label: "60%", color: "amber-400", textColor: "amber-900" },
-//   { value: 75, label: "75%", color: "amber-300", textColor: "amber-800" },
-//   { value: 100, label: "MAX", color: "amber-200", textColor: "amber-700" },
-// ];
 
 interface SmartHomeModalProps {
   isOpen: boolean;
@@ -27,9 +18,12 @@ const SmartHomeModal = ({ isOpen, setIsOpen }: SmartHomeModalProps) => {
   const [tplinkState, updateTplinkState, refreshSwitchInfo] =
     useTplinkContext();
 
+  // Throttle brightness API calls: send at most once per 300 ms while slider is moving.
+  const brightnessThrottleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   useEffect(() => {
     if (isOpen) {
-      refreshSwitchInfo("yard-dining"); // not "all" right now
+      refreshSwitchInfo("all");
     }
   }, [isOpen, refreshSwitchInfo]);
 
@@ -40,32 +34,19 @@ const SmartHomeModal = ({ isOpen, setIsOpen }: SmartHomeModalProps) => {
   const handleToggle = (event: React.MouseEvent<HTMLButtonElement>) => {
     const [deviceId, onOff] = event.currentTarget.value.split("/");
     const on = onOff === "on";
-    updateTplinkState({ [deviceId]: { powerState: on } });
+    const existing = tplinkState[deviceId as keyof TplinkState];
+    const current: TplinkDeviceState = existing && typeof existing === "object" ? existing as TplinkDeviceState : { powerState: false };
+    updateTplinkState({ [deviceId]: { ...current, powerState: on } });
     toggleTplinkSwitch(deviceId, on);
   };
 
-  // const handleChangeBasementBrightness = (event: React.ChangeEvent<HTMLInputElement>) => {
-  //   const brightness = Number(event.currentTarget.value);
-  //   if (!(brightness >= 0 && brightness <= 100)) {
-  //     return console.error("Invalid Brightness value");
-  //   }
-  //
-  //   // if (tplinkState.basement.powerState === false) {
-  //   //   sendSetPowerState('')
-  //   // }
-  //   // Just need to update the state immediately, request will get sent by useThrottleFn
-  //   updateTplinkState({
-  //     basement: {
-  //       powerState: tplinkState.basement.powerState,
-  //       brightness: brightness,
-  //     },
-  //   });
-  // };
-
-  // const sendSetBrightness = (brightness) => {
-  //   fetch(`api/tp-link/brightness/basement/${brightness}`);
-  // };
-  // useThrottleFn(sendSetBrightness, 500, [tplinkState.basement.brightness]);
+  const handleChangeBasementBrightness = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const brightness = Number(event.currentTarget.value);
+    if (!(brightness >= 1 && brightness <= 100)) return;
+    updateTplinkState({ basement: { powerState: tplinkState.basement.powerState, brightness } });
+    if (brightnessThrottleTimer.current) clearTimeout(brightnessThrottleTimer.current);
+    brightnessThrottleTimer.current = setTimeout(() => setTplinkBrightness("basement", brightness), 300);
+  };
 
   return (
     <>
@@ -90,63 +71,51 @@ const SmartHomeModal = ({ isOpen, setIsOpen }: SmartHomeModalProps) => {
                     </button>
                   </div>
                   {!tplinkState.loading && (
-                      <div className="flex flex-col gap-3 grow pb-[10%] items-center">
-                        <span className="mb-2 text-2xl text-center text-amber-400">Smart Light Control</span>
-                        <div className="flex w-full space-x-6 items-center justify-center">
-                          {Object.values(PLUGS).map((plug) => (
-                              <LightswitchToggle
-                                  key={plug.id}
-                                  lightSwitch={plug}
-                                  handleToggle={handleToggle}
-                              />
-                          ))}
-                        </div>
+                    <div className="flex flex-col gap-4 items-center">
+                      <span className="text-2xl text-center text-amber-400">Smart Light Control</span>
 
-                        {/*<div className="flex w-full space-x-6 items-center justify-center">*/}
-                        {/*  {Object.values(LIGHTSWITCHES).map((lightSwitch) => {*/}
-                        {/*        if (lightSwitch.id !== 'basement') {*/}
-                        {/*          return (*/}
-                        {/*              <LightswitchToggle*/}
-                        {/*                  key={lightSwitch.id}*/}
-                        {/*                  lightSwitch={lightSwitch}*/}
-                        {/*                  handleToggle={handleToggle}*/}
-                        {/*              />*/}
-                        {/*          );*/}
-                        {/*        }*/}
-                        {/*      }*/}
-                        {/*  )}*/}
-                        {/*</div>*/}
-                        {/*<div id="basement-controls" className="flex flex-col items-center">*/}
-                        {/*  <LightswitchToggle*/}
-                        {/*      lightSwitch={LIGHTSWITCHES.BASEMENT}*/}
-                        {/*      handleToggle={handleToggle}*/}
-                        {/*  />*/}
-                        {/*  <div className="flex gap-2 items-center justify-center text-amber-400 mb-2">*/}
-                        {/*    1*/}
-                        {/*    <input*/}
-                        {/*        type="range"*/}
-                        {/*        min={1}*/}
-                        {/*        max={100}*/}
-                        {/*        value={tplinkState.basement.brightness}*/}
-                        {/*        className="w-full h-2 bg-gray-200 accent-amber-400 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"*/}
-                        {/*        onChange={handleChangeBasementBrightness}*/}
-                        {/*    />*/}
-                        {/*    100*/}
-                        {/*  </div>*/}
-                        {/*  /!*<div className="flex justify-center gap-0.5">*!/*/}
-                        {/*  /!*  {brightnessButtons.map((button) => (*!/*/}
-                        {/*  /!*    <button*!/*/}
-                        {/*  /!*      key={button.label}*!/*/}
-                        {/*  /!*      className={`btn bg-${button.color} text-${button.textColor} rounded-full w-1/8"`}*!/*/}
-                        {/*  /!*      value={button.value}*!/*/}
-                        {/*  /!*      onClick={handleChangeBasementBrightness}*!/*/}
-                        {/*  /!*    >*!/*/}
-                        {/*  /!*      <span className="min-w-12">{button.label}</span>*!/*/}
-                        {/*  /!*    </button>*!/*/}
-                        {/*  /!*  ))}*!/*/}
-                        {/*  /!*</div>*!/*/}
-                        {/*</div>*/}
+                      {/* Outdoor plugs: Yard (fence) + Yard (dining) */}
+                      <div className="flex w-full gap-4 items-start justify-center">
+                        {Object.values(PLUGS).map((plug) => (
+                          <LightswitchToggle
+                            key={plug.id}
+                            lightSwitch={plug}
+                            handleToggle={handleToggle}
+                          />
+                        ))}
                       </div>
+
+                      {/* Indoor switches: Bedroom + Stairway */}
+                      <div className="flex w-full gap-4 items-start justify-center">
+                        {[LIGHTSWITCHES.BEDROOM, LIGHTSWITCHES.STAIRWAY].map((ls) => (
+                          <LightswitchToggle
+                            key={ls.id}
+                            lightSwitch={ls}
+                            handleToggle={handleToggle}
+                          />
+                        ))}
+                      </div>
+
+                      {/* Basement dimmer */}
+                      <div className="flex flex-col items-center w-full">
+                        <LightswitchToggle
+                          lightSwitch={LIGHTSWITCHES.BASEMENT}
+                          handleToggle={handleToggle}
+                        />
+                        <div className="flex gap-2 items-center justify-center text-amber-400 w-3/4 -mt-3">
+                          <span className="text-sm">1</span>
+                          <input
+                            type="range"
+                            min={1}
+                            max={100}
+                            value={tplinkState.basement.brightness ?? 50}
+                            className="w-full h-2 bg-gray-700 accent-amber-400 rounded-lg appearance-none cursor-pointer"
+                            onChange={handleChangeBasementBrightness}
+                          />
+                          <span className="text-sm">100</span>
+                        </div>
+                      </div>
+                    </div>
                   )}
                   {tplinkState.loading && (
                       <div className="flex flex-col justify-center items-center text-amber-400 h-106.25 gap-3">

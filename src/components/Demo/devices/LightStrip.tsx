@@ -1,10 +1,18 @@
 import type { TplinkSimState } from "@/demo/types";
 
-const AMBER = "#f59e0b";
+const AMBER = "#f5b30b";
 const CARD_BG = "#0f172a";
 const TEXT = "#f1f5f9";
 const TEXT_MUTED = "#94a3b8";
 const GRAY = "#334155";
+
+const DEVICE_LABELS: Record<string, string> = {
+  "yard-fence": "Fence",
+  "yard-dining": "Dining",
+  "bedroom":  "Bed",
+  "stairway": "Stairs",
+  "basement": "Bsmt",
+};
 
 interface Props {
   state: TplinkSimState;
@@ -22,6 +30,7 @@ export function LightStrip({ state, x, y, width, height, isRecent }: Props) {
 
   return (
     <g>
+      <title>TP-Link smart home — toggled via Next.js API routes that proxy to the TP-Link Kasa local REST API</title>
       {/* Background */}
       <rect
         x={x}
@@ -64,15 +73,16 @@ export function LightStrip({ state, x, y, width, height, isRecent }: Props) {
           const cx = x + 10 + dotSpacing * i + dotSpacing / 2;
           const cy = y + height / 2 - 4;
           const brightness = dev.brightness ?? 100;
-          const opacity = dev.powerState ? 0.3 + (brightness / 100) * 0.7 : 0.2;
+          const opacity = dev.powerState ? 0.1 + (brightness / 100) * 0.6 : 0.2;
           const fill = dev.powerState ? AMBER : GRAY;
-          const shortId = id.length > 6 ? id.slice(0, 6) : id;
+          const shortId = DEVICE_LABELS[id] ?? (id.length > 6 ? id.slice(0, 6) : id);
 
           return (
             <g key={id}>
               {/* Glow effect for on bulbs */}
               {dev.powerState && (
                 <circle
+                  className="transition-all-500"
                   cx={cx}
                   cy={cy}
                   r={dotR + 4}
@@ -81,6 +91,7 @@ export function LightStrip({ state, x, y, width, height, isRecent }: Props) {
                 />
               )}
               <circle
+                className="transition-all-500"
                 cx={cx}
                 cy={cy}
                 r={dotR}

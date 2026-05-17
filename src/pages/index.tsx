@@ -87,7 +87,7 @@ const App = () => {
               <div className={IS_DEMO ? "lg:w-[550px] lg:shrink-0" : ""}>
                 <SwipeDetector onSwipe={handleSwipe}>
                   <RemotePanelSlideScroll
-                    className={`min-w-[330px] max-w-[550px] w-full mt-16${IS_DEMO ? "" : " mx-auto"}`}
+                    className={`min-w-[330px] max-w-[550px] w-full mt-16 mx-auto${IS_DEMO ? " lg:mx-0" : ""}`}
                     selectedRemote={selectedRemote}
                     setSelectedRemote={setSelectedRemote}
                     prevRemote={prevRemote}
@@ -95,7 +95,7 @@ const App = () => {
                 </SwipeDetector>
               </div>
               {IS_DEMO && (
-                <div className="hidden lg:flex flex-1 overflow-y-auto">
+                <div className="hidden lg:flex flex-1 overflow-hidden">
                   <DemoPanel />
                 </div>
               )}

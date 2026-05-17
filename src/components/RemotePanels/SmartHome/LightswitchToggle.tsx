@@ -1,10 +1,9 @@
 import { useTplinkContext } from "@/context/tplink";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faExclamationCircle } from "@fortawesome/free-solid-svg-icons";
-import type { PlugConfig } from "@/types/remote";
 
 interface Props {
-  lightSwitch: PlugConfig;
+  lightSwitch: { id: string; label: string };
   handleToggle: React.MouseEventHandler<HTMLButtonElement>;
 }
 
@@ -54,7 +53,7 @@ export default function LightswitchToggle({ lightSwitch, handleToggle }: Props) 
       </div>
       {tplinkState[lightSwitch.id].error && (
         <span className="text-red-600 text-center">
-          Could not connect to switch on {lightSwitch.ip}
+          Could not connect to device
         </span>
       )}
     </div>

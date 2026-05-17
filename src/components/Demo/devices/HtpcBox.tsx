@@ -21,6 +21,7 @@ export function HtpcBox({ state, x, y, width, height, isRecent }: Props) {
 
   return (
     <g>
+      <title>HTPC — controlled via EventGhost (Windows) or ydotool/shell scripts (Linux Wayland), robotjs for keystroke/mouse (Linux X11 / macOS)</title>
       {/* Card background */}
       <rect
         x={x}

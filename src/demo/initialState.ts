@@ -29,7 +29,9 @@ export const INITIAL_STATE: VirtualState = {
     devices: {
       "yard-fence": { powerState: false },
       "yard-dining": { powerState: false },
-      "basement": { powerState: false, brightness: 50 },
+      "bedroom":    { powerState: false },
+      "stairway":   { powerState: false },
+      "basement":   { powerState: false, brightness: 50 },
     },
   },
 };

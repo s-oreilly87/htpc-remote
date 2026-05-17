@@ -47,7 +47,9 @@ export function fetchRokuDeviceInfo(): Promise<FetchResult<Record<string, string
 }
 
 export function sendRokuKeypress(button: ValueButton): void {
+  const wasOn = simulator.roku.getState().powerOn;
   simulator.roku.handleKeypress(button);
+  simulator.applyCec(wasOn);
 }
 
 export function sendRokuKeydown(button: ValueButton): void {

@@ -18,9 +18,15 @@ import type { RokuSimState } from "@/demo/types";
 const FAKE_APPS: { id: string; label: string }[] = [
   ...Object.values(ROKU_APPS.CHANNELS),
   ...Object.values(ROKU_APPS.HDMI),
+  { id: "demo-all",     label: "All" },
   { id: "demo-other",     label: "Other" },
   { id: "demo-installed", label: "Installed" },
   { id: "demo-channels",  label: "Channels" },
+  { id: "demo-queried",  label: "Queried" },
+  { id: "demo-from",  label: "From" },
+  { id: "demo-roku",  label: "Roku" },
+  { id: "demo-api",  label: "API" },
+
 ];
 
 // Flat lookup for launch commands: id → label

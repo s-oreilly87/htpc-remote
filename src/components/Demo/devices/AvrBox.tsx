@@ -22,6 +22,7 @@ export function AvrBox({ state, x, y, width, height, isRecent }: Props) {
 
   return (
     <g>
+      <title>Denon AVR — queries via Telnet (port 23), commands via HTTP (port 80)</title>
       {/* Card background */}
       <rect
         x={x}

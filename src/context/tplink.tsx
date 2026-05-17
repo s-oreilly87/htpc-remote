@@ -18,7 +18,9 @@ export interface TplinkDeviceState {
 export interface TplinkState {
   "yard-fence": TplinkDeviceState;
   "yard-dining": TplinkDeviceState;
-  basement?: TplinkDeviceState;
+  bedroom: TplinkDeviceState;
+  stairway: TplinkDeviceState;
+  basement: TplinkDeviceState;
   loading: boolean;
 }
 
@@ -30,12 +32,11 @@ export type TplinkContextValue = [
 ];
 
 const DEFAULT_STATE: TplinkState = {
-  "yard-fence": {
-    powerState: false,
-  },
-  "yard-dining": {
-    powerState: false,
-  },
+  "yard-fence": { powerState: false },
+  "yard-dining": { powerState: false },
+  bedroom:  { powerState: false },
+  stairway: { powerState: false },
+  basement: { powerState: false, brightness: 50 },
   loading: false,
 };
 
@@ -50,11 +51,21 @@ export function TplinkProvider({ children }: { children: ReactNode }) {
 
   const refreshSwitchInfo = useCallback(async (switchName: string) => {
     updateTplinkState({ loading: true });
-    const result = await fetchTplinkInfo(switchName);
-    if (result.error) {
-      console.error(result.error);
-    } else if (result.data) {
-      updateTplinkState({ [switchName]: result.data });
+    if (switchName === "all") {
+      const ids = Object.keys(DEFAULT_STATE).filter((k) => k !== "loading");
+      const results = await Promise.all(ids.map((id) => fetchTplinkInfo(id).then((r) => ({ id, r }))));
+      const patch: Record<string, TplinkDeviceState> = {};
+      for (const { id, r } of results) {
+        if (!r.error && r.data) patch[id] = r.data;
+      }
+      updateTplinkState(patch);
+    } else {
+      const result = await fetchTplinkInfo(switchName);
+      if (result.error) {
+        console.error(result.error);
+      } else if (result.data) {
+        updateTplinkState({ [switchName]: result.data });
+      }
     }
     updateTplinkState({ loading: false });
   }, [updateTplinkState]);

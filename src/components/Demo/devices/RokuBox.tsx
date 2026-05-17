@@ -21,6 +21,7 @@ export function RokuBox({ state, x, y, width, height, isRecent }: Props) {
 
   return (
     <g>
+      <title>Roku TV — controlled via Roku ECP HTTP API (port 8060), proxied through Next.js rewrites</title>
       {/* Card background */}
       <rect
         x={x}

@@ -23,9 +23,9 @@ const Toggle: React.FC<ToggleProps> = ({
   return (
     <Field>
       <div
-        className={`flex ${labelPos === "above" ? "flex-col" : ""} gap-3 items-center justify-center`}
+        className={`flex ${labelPos === "above" ? "flex-col" : ""} gap-3 items-center justify-center ${disabled ? "opacity-40 cursor-not-allowed" : ""}`}
       >
-        <Label className={`text-${labelColor}`}>{label}</Label>
+        <Label className={`text-${disabled ? "slate-500" : labelColor}`}>{label}</Label>
         <Switch
           checked={enabled}
           onChange={onToggle}

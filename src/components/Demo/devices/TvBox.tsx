@@ -41,6 +41,7 @@ export function TvBox({ denonState, rokuState, htpcState, x, y, width, height, i
 
   return (
     <g>
+      <title>TV / Display — passive output; no direct commands sent. Source is selected via Roku ECP or HDMI CEC.</title>
       {/* Card background (TV bezel) */}
       <rect
         x={x}

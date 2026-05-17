@@ -49,6 +49,7 @@ export function SpeakerArray({ soundMode, powerOn, x, y, width, height }: Props)
 
   return (
     <g>
+      <title>Speakers — channel configuration driven by the Denon AVR sound mode. Active channels lit in teal.</title>
       {/* Background */}
       <rect
         x={x}
