@@ -3,24 +3,24 @@ import { DENON_INPUTS } from "@/constants/denon";
 import { ROKU_APPS } from "@/constants/roku";
 import KeypressButton from "@/components/UI/KeypressButton";
 import { sendDenonCommand, sendRokuLaunchCommand } from "@/utilities/http";
-import { useRokuContext } from "@/context/roku";
+import { useRokuCec } from "@/hooks/useRokuCec";
 
 interface HDMIInputsProps {
   setSelectedRemote: (remote: RemoteType) => void;
 }
 
 function HDMIInputs({ setSelectedRemote }: HDMIInputsProps) {
-  const { updateRokuState } = useRokuContext();
+  const { wakeRoku } = useRokuCec();
 
   const handleClick = (event) => {
     sendRokuLaunchCommand(event.currentTarget);
-    updateRokuState({ powerOn: true });
+    wakeRoku();
   };
 
   const handlePCInputClickWithDenonCommandAndRemoteSwitch = (event, remote: RemoteType) => {
     sendRokuLaunchCommand(event.currentTarget);
     sendDenonCommand({ value: DENON_INPUTS.PC.value });
-    updateRokuState({ powerOn: true });
+    wakeRoku();
     setSelectedRemote(remote);
   };
 

@@ -21,6 +21,7 @@ import {
   toggleTplinkSwitch,
 } from "@/utilities/http";
 import { usePlatform } from "@/hooks/usePlatform";
+import { useRokuCec } from "@/hooks/useRokuCec";
 import { openPlexampAndroidApp, openQobuzAndroidApp } from "@/utilities/utils";
 import type { AudioMode, DisplayMode, RokuChannel } from "@/types/remote";
 import type { LinuxAudioModeCommand, LinuxDisplayModeCommand } from "@/constants/htpcControls";
@@ -49,6 +50,7 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 function AudioVideoPresets() {
   const { isLinux } = usePlatform();
+  const { wakeRoku } = useRokuCec();
 
   const [selectedAudioMode, setSelectedAudioMode] = useState<AudioMode>(
     AUDIO_MODES.PLACEHOLDER,
@@ -142,6 +144,7 @@ function AudioVideoPresets() {
       // 2. Roku input / app first: wake TV + select HDMI
       if (preset.rokuApp) {
         sendRokuLaunchCommand({ value: preset.rokuApp.id });
+        wakeRoku();
         // give TV time to power on / lock HDMI
         await sleep(2000);
       }

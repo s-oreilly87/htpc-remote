@@ -2,11 +2,13 @@ import { Dialog, DialogPanel } from "@headlessui/react";
 import { useState } from "react";
 import { sendRokuLaunchCommand } from "@/utilities/http";
 import { buttonPress } from "@/utilities/utils";
-import { useRokuContext } from "@/context/roku";
 import { useRokuChannelIcon } from "@/hooks/useRokuChannelIcon";
 import type { RokuChannel } from "@/types/remote";
 import ModalCloseButton from "@/components/UI/ModalCloseButton";
 import { MODAL_INSET } from "@/utilities/modalClasses";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faTv } from "@fortawesome/free-solid-svg-icons";
+import { useRokuCec } from "@/hooks/useRokuCec";
 
 interface MoreChannelsModalProps {
   isOpen: boolean;
@@ -21,6 +23,7 @@ interface ExtraChannelButtonProps {
 
 function ExtraChannelButton({ channel, onPress }: ExtraChannelButtonProps) {
   const isNumeric = !isNaN(parseInt(channel.id));
+  const isHdmiInput = channel.id.startsWith("tvinput");
   const { data: iconUrl } = useRokuChannelIcon(channel.id);
 
   // Text-only buttons (HDMI inputs) show immediately; icon buttons fade in when loaded.
@@ -34,7 +37,13 @@ function ExtraChannelButton({ channel, onPress }: ExtraChannelButtonProps) {
       value={channel.id}
       style={isNumeric && iconUrl ? { backgroundImage: `url(${iconUrl})`, backgroundSize: "100% 100%" } : undefined}
     >
-      {!isNumeric && channel.label}
+      {isHdmiInput && (
+        <span className="flex h-full w-full flex-col items-center justify-center gap-2 rounded-lg bg-slate-900/35 px-2 text-center text-sm font-semibold leading-tight text-slate-100">
+          <FontAwesomeIcon icon={faTv} className="text-2xl text-slate-100" />
+          <span>{channel.label}</span>
+        </span>
+      )}
+      {!isNumeric && !isHdmiInput && channel.label}
     </button>
   );
 }
@@ -44,7 +53,7 @@ export default function MoreChannelsModal({
   setIsOpen,
   moreChannels,
 }: MoreChannelsModalProps) {
-  const { updateRokuState } = useRokuContext();
+  const { wakeRoku } = useRokuCec();
   const [buttonPressTimerId, setButtonPressTimerId] = useState<number | null>(null);
 
   function closeModal() {
@@ -53,7 +62,7 @@ export default function MoreChannelsModal({
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     sendRokuLaunchCommand(event.currentTarget);
-    updateRokuState({ powerOn: true });
+    wakeRoku();
     buttonPress(event.currentTarget, buttonPressTimerId, setButtonPressTimerId);
     closeModal();
   };

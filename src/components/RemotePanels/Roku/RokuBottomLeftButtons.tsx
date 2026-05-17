@@ -4,12 +4,14 @@ import { faPowerOff } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { sendRokuKeypress } from "@/utilities/http";
 import { useRokuContext } from "@/context/roku";
+import { useRokuCec } from "@/hooks/useRokuCec";
 
 function RokuBottomLeftButtons() {
-  const { rokuState, updateRokuState, invalidateRokuState } = useRokuContext();
+  const { invalidateRokuState } = useRokuContext();
+  const { toggleRokuPower } = useRokuCec();
 
   const handleClickPower = () => {
-    updateRokuState({ powerOn: !rokuState.powerOn });
+    toggleRokuPower();
     sendRokuKeypress({ value: "Power" });
     // Confirm actual power state after the TV has had time to respond
     setTimeout(invalidateRokuState, 1000);

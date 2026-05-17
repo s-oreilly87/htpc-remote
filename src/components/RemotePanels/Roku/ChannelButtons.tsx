@@ -5,10 +5,10 @@ import { buttonPress } from "@/utilities/utils";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import MoreChannelsModal from "@/components/RemotePanels/Roku/MoreChannelsModal";
-import { useRokuContext } from "@/context/roku";
 import { useRokuChannelIcon } from "@/hooks/useRokuChannelIcon";
 import { useQuery } from "@tanstack/react-query";
 import type { RokuChannel } from "@/types/remote";
+import { useRokuCec } from "@/hooks/useRokuCec";
 
 const FRONT_PAGE_CHANNEL_IDS = new Set(
   Object.values(ROKU_APPS.CHANNELS).map((ch) => ch.id),
@@ -34,7 +34,7 @@ function ChannelButton({ channel, onPress }: ChannelButtonProps) {
 }
 
 function RokuChannels() {
-  const { updateRokuState } = useRokuContext();
+  const { wakeRoku } = useRokuCec();
   const [isMoreChannelsModalOpen, setIsMoreChannelsModalOpen] = useState(false);
   const [buttonPressTimerId, setButtonPressTimerId] = useState<number | null>(null);
 
@@ -50,7 +50,7 @@ function RokuChannels() {
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     sendRokuLaunchCommand(event.currentTarget);
-    updateRokuState({ powerOn: true });
+    wakeRoku();
     buttonPress(event.currentTarget, buttonPressTimerId, setButtonPressTimerId);
   };
 

@@ -61,7 +61,9 @@ export function sendRokuKeyup(button: ValueButton): void {
 }
 
 export function sendRokuLaunchCommand(button: ValueButton): void {
+  const wasOn = simulator.roku.getState().powerOn;
   simulator.roku.handleLaunch(button);
+  simulator.applyCec(wasOn);
 }
 
 export function sendRokuSearchQuery(query: string): void {
