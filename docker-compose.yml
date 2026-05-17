@@ -12,7 +12,7 @@ services:
     expose:
       - "3000"
     ports:
-      - "127.0.0.1:3000:3000"
+      - "${HTPC_REMOTE_BIND_IP:-0.0.0.0}:3000:3000"
     networks:
       - htpc-remote
 
