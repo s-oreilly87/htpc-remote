@@ -8,6 +8,7 @@ import {
 } from "react";
 
 import { fetchTplinkInfo } from "@/utilities/http";
+import { TPLINK_DEVICES } from "@/constants/smartHome";
 
 export interface TplinkDeviceState {
   powerState: boolean;
@@ -16,27 +17,25 @@ export interface TplinkDeviceState {
 }
 
 export interface TplinkState {
-  "yard-fence": TplinkDeviceState;
-  "yard-dining": TplinkDeviceState;
-  bedroom: TplinkDeviceState;
-  stairway: TplinkDeviceState;
-  basement: TplinkDeviceState;
+  devices: Record<string, TplinkDeviceState>;
   loading: boolean;
 }
 
 export type TplinkContextValue = [
   TplinkState,
-  (props: Partial<TplinkState>) => void,
+  (props: Record<string, TplinkDeviceState>) => void,
   (switchName: string) => Promise<void>,
   React.Dispatch<React.SetStateAction<TplinkState>>,
 ];
 
 const DEFAULT_STATE: TplinkState = {
-  "yard-fence": { powerState: false },
-  "yard-dining": { powerState: false },
-  bedroom:  { powerState: false },
-  stairway: { powerState: false },
-  basement: { powerState: false, brightness: 50 },
+  devices: TPLINK_DEVICES.reduce<Record<string, TplinkDeviceState>>((devices, device) => {
+    devices[device.id] = {
+      powerState: false,
+      ...(device.kind === "dimmer" ? { brightness: 50 } : {}),
+    };
+    return devices;
+  }, {}),
   loading: false,
 };
 
@@ -45,14 +44,17 @@ const Context = createContext<TplinkContextValue | undefined>(undefined);
 export function TplinkProvider({ children }: { children: ReactNode }) {
   const [tplinkState, setTplinkState] = useState<TplinkState>(DEFAULT_STATE);
 
-  const updateTplinkState = useCallback((props: Partial<TplinkState>) => {
-    setTplinkState((prevState) => ({ ...prevState, ...props }));
+  const updateTplinkState = useCallback((props: Record<string, TplinkDeviceState>) => {
+    setTplinkState((prevState) => ({
+      ...prevState,
+      devices: { ...prevState.devices, ...props },
+    }));
   }, []);
 
   const refreshSwitchInfo = useCallback(async (switchName: string) => {
-    updateTplinkState({ loading: true });
+    setTplinkState((prevState) => ({ ...prevState, loading: true }));
     if (switchName === "all") {
-      const ids = Object.keys(DEFAULT_STATE).filter((k) => k !== "loading");
+      const ids = TPLINK_DEVICES.map((device) => device.id);
       const results = await Promise.all(ids.map((id) => fetchTplinkInfo(id).then((r) => ({ id, r }))));
       const patch: Record<string, TplinkDeviceState> = {};
       for (const { id, r } of results) {
@@ -67,7 +69,7 @@ export function TplinkProvider({ children }: { children: ReactNode }) {
         updateTplinkState({ [switchName]: result.data });
       }
     }
-    updateTplinkState({ loading: false });
+    setTplinkState((prevState) => ({ ...prevState, loading: false }));
   }, [updateTplinkState]);
 
   const contextValue = useMemo<TplinkContextValue>(

@@ -2,8 +2,8 @@ import { Dialog, DialogPanel } from "@headlessui/react";
 import { useEffect, useRef } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
-import { useTplinkContext, TplinkState, TplinkDeviceState } from "@/context/tplink";
-import { LIGHTSWITCHES, PLUGS } from "@/constants/smartHome";
+import { useTplinkContext, TplinkDeviceState } from "@/context/tplink";
+import { TPLINK_DEVICES } from "@/constants/smartHome";
 import LightswitchToggle from "@/components/RemotePanels/SmartHome/LightswitchToggle";
 import LoadingSpinner from "@/components/UI/LoadingSpinner";
 import { toggleTplinkSwitch, setTplinkBrightness } from "@/utilities/http";
@@ -34,19 +34,25 @@ const SmartHomeModal = ({ isOpen, setIsOpen }: SmartHomeModalProps) => {
   const handleToggle = (event: React.MouseEvent<HTMLButtonElement>) => {
     const [deviceId, onOff] = event.currentTarget.value.split("/");
     const on = onOff === "on";
-    const existing = tplinkState[deviceId as keyof TplinkState];
-    const current: TplinkDeviceState = existing && typeof existing === "object" ? existing as TplinkDeviceState : { powerState: false };
+    const current: TplinkDeviceState = tplinkState.devices[deviceId] ?? { powerState: false };
     updateTplinkState({ [deviceId]: { ...current, powerState: on } });
     toggleTplinkSwitch(deviceId, on);
   };
 
-  const handleChangeBasementBrightness = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChangeBrightness = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const deviceId = event.currentTarget.dataset.deviceId;
+    if (!deviceId) return;
+
     const brightness = Number(event.currentTarget.value);
     if (!(brightness >= 1 && brightness <= 100)) return;
-    updateTplinkState({ basement: { powerState: tplinkState.basement.powerState, brightness } });
+    const current = tplinkState.devices[deviceId] ?? { powerState: false };
+    updateTplinkState({ [deviceId]: { ...current, brightness } });
     if (brightnessThrottleTimer.current) clearTimeout(brightnessThrottleTimer.current);
-    brightnessThrottleTimer.current = setTimeout(() => setTplinkBrightness("basement", brightness), 300);
+    brightnessThrottleTimer.current = setTimeout(() => setTplinkBrightness(deviceId, brightness), 300);
   };
+
+  const dimmers = TPLINK_DEVICES.filter((device) => device.kind === "dimmer");
+  const nonDimmers = TPLINK_DEVICES.filter((device) => device.kind !== "dimmer");
 
   return (
     <>
@@ -57,7 +63,7 @@ const SmartHomeModal = ({ isOpen, setIsOpen }: SmartHomeModalProps) => {
           <div className="flex min-h-full items-center justify-center p-4 text-center">
             <DialogPanel
               transition
-              className="w-full max-w-md relative transform overflow-visible rounded-2xl bg-slate-800 p-6 text-left align-middle shadow-xl -top-3
+              className="w-full max-w-md relative transform overflow-visible rounded-2xl border border-slate-700/70 bg-slate-800 p-6 text-left align-middle shadow-xl -top-3
                 transition duration-300 ease-out data-closed:opacity-0 data-closed:scale-95
                 data-enter:duration-300 data-leave:duration-200 data-leave:ease-in"
             >
@@ -71,50 +77,42 @@ const SmartHomeModal = ({ isOpen, setIsOpen }: SmartHomeModalProps) => {
                     </button>
                   </div>
                   {!tplinkState.loading && (
-                    <div className="flex flex-col gap-4 items-center">
-                      <span className="text-2xl text-center text-amber-400">Smart Light Control</span>
+                    <div className="flex flex-col items-center gap-6">
+                      <span className="text-center text-xl font-semibold tracking-wide text-amber-300">
+                        Smart Lights
+                      </span>
 
-                      {/* Outdoor plugs: Yard (fence) + Yard (dining) */}
-                      <div className="flex w-full gap-4 items-start justify-center">
-                        {Object.values(PLUGS).map((plug) => (
+                      <div className="grid w-full grid-cols-2 gap-x-5 gap-y-5">
+                        {nonDimmers.map((device) => (
                           <LightswitchToggle
-                            key={plug.id}
-                            lightSwitch={plug}
+                            key={device.id}
+                            lightSwitch={device}
                             handleToggle={handleToggle}
                           />
                         ))}
                       </div>
 
-                      {/* Indoor switches: Bedroom + Stairway */}
-                      <div className="flex w-full gap-4 items-start justify-center">
-                        {[LIGHTSWITCHES.BEDROOM, LIGHTSWITCHES.STAIRWAY].map((ls) => (
+                      {dimmers.map((device) => (
+                        <div key={device.id} className="flex w-full flex-col items-center">
                           <LightswitchToggle
-                            key={ls.id}
-                            lightSwitch={ls}
+                            lightSwitch={device}
                             handleToggle={handleToggle}
                           />
-                        ))}
-                      </div>
-
-                      {/* Basement dimmer */}
-                      <div className="flex flex-col items-center w-full">
-                        <LightswitchToggle
-                          lightSwitch={LIGHTSWITCHES.BASEMENT}
-                          handleToggle={handleToggle}
-                        />
-                        <div className="flex gap-2 items-center justify-center text-amber-400 w-3/4 -mt-3">
-                          <span className="text-sm">1</span>
-                          <input
-                            type="range"
-                            min={1}
-                            max={100}
-                            value={tplinkState.basement.brightness ?? 50}
-                            className="w-full h-2 bg-gray-700 accent-amber-400 rounded-lg appearance-none cursor-pointer"
-                            onChange={handleChangeBasementBrightness}
-                          />
-                          <span className="text-sm">100</span>
+                          <div className="mt-4 flex w-4/5 items-center justify-center gap-3 text-amber-300">
+                            <span className="w-5 text-right text-xs font-medium">1</span>
+                            <input
+                              type="range"
+                              min={1}
+                              max={100}
+                              data-device-id={device.id}
+                              value={tplinkState.devices[device.id]?.brightness ?? 50}
+                              className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-slate-600 accent-amber-400"
+                              onChange={handleChangeBrightness}
+                            />
+                            <span className="w-8 text-xs font-medium">100</span>
+                          </div>
                         </div>
-                      </div>
+                      ))}
                     </div>
                   )}
                   {tplinkState.loading && (

@@ -126,6 +126,7 @@ NEXT_PUBLIC_LINUX_HTPC_AGENT_PORT=3001       # linux/htpc-agent port (must be NE
 NEXT_PUBLIC_DENON_IP=192.168.1.xxx           # Denon/Marantz AVR IP
 NEXT_PUBLIC_ROKU_IP=192.168.1.xxx            # Roku device IP
 NEXT_PUBLIC_GAMESTREAM_IP=192.168.1.xxx      # GameStream PC IP (Windows/EventGhost only)
+NEXT_PUBLIC_TPLINK_DEVICES=[{"id":"basement","label":"Basement","ip":"192.168.1.xxx","kind":"dimmer"}]
 ```
 
 See `.env.example` for complete setup examples covering Linux-as-host, Mac-as-host with remote Linux HTPC, and Windows-as-host configurations.
@@ -178,7 +179,7 @@ See **[windows/README.md](windows/README.md)** for the Windows setup guide.
 
 #### TP-Link Kasa smart home
 
-Configure device IPs and child IDs in `src/constants/smartHome.ts`. Devices must be on the same LAN; all communication happens locally with no cloud dependency.
+Configure devices with `NEXT_PUBLIC_TPLINK_DEVICES`, a JSON array of objects with `id`, `label`, `ip`, `kind`, and optional `childId`. Supported `kind` values are `plug`, `switch`, and `dimmer`. Leave the variable unset to hide the smart-home UI entirely. Devices must be on the same LAN; all communication happens locally with no cloud dependency.
 
 *TODO: How to find the child IDs for TP-Link smart strips (currently requires a discovery script or the Kasa app's device info). I think i just curled the switch ips with some command and got a device info object back*
 

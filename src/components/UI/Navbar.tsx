@@ -5,6 +5,7 @@ import { RemoteType } from "@/constants/remotes";
 import QRCode from "@/components/UI/QRCode";
 import SmartHomeModal from "@/components/RemotePanels/SmartHome/SmartHomeModal";
 import { buttonPress } from "@/utilities/utils";
+import { HAS_TPLINK_DEVICES } from "@/constants/smartHome";
 
 interface NavbarProps {
   className?: string;
@@ -35,7 +36,9 @@ function Navbar({ className, selectedRemote, onClickHandler }: NavbarProps) {
   return (
     <>
       <QRCode isOpen={qrModalOpen} setIsOpen={setQrModalOpen} />
-      <SmartHomeModal isOpen={smartHomeModalOpen} setIsOpen={setSmartHomeModalOpen} />
+      {HAS_TPLINK_DEVICES && (
+        <SmartHomeModal isOpen={smartHomeModalOpen} setIsOpen={setSmartHomeModalOpen} />
+      )}
       <nav className={className}>
         <div className="max-w-7xl h-16 w-full mx-auto px-3 z-10 flex relative justify-center">
           <div className="py-1 absolute left-0 top-0 z-20 aspect-video">
@@ -48,15 +51,17 @@ function Navbar({ className, selectedRemote, onClickHandler }: NavbarProps) {
               onClick={handleIconClick}
             />
           </div>
-          <div className="py-1 absolute right-2 top-3 z-20 hover:cursor-pointer">
-            <Image
-              src={"/icons/lightbulb.png"}
-              alt="Lights"
-              width={40}
-              height={40}
-              onClick={handleLightClick}
-            />
-          </div>
+          {HAS_TPLINK_DEVICES && (
+            <div className="py-1 absolute right-2 top-3 z-20 hover:cursor-pointer">
+              <Image
+                src={"/icons/lightbulb.png"}
+                alt="Lights"
+                width={40}
+                height={40}
+                onClick={handleLightClick}
+              />
+            </div>
+          )}
           <div className="flex w-3/4 max-w-[550px] min-w-[270px] justify-center">
             <div className="w-full flex items-end">
               <button

@@ -38,7 +38,7 @@ export function EventLog({ events }: Props) {
       </div>
       <div
         ref={containerRef}
-        className="overflow-y-auto max-h-48 rounded bg-slate-950 border border-slate-800"
+        className="overflow-y-auto h-48 rounded bg-slate-950 border border-slate-800"
         style={{ fontFamily: "monospace" }}
       >
         {events.length === 0 ? (

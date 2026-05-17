@@ -1,39 +1,36 @@
-import client from '@/api-modules/tplink/tplink-client'
-import { LIGHTSWITCHES, PLUGS } from "@/constants/smartHome";
+import type { NextApiRequest, NextApiResponse } from "next";
 
-export default function handleToggleSwitch(req, res) {
-  let { params } = req.query;
-  const light = params[0];
-  const powerState = params[1] === "on";
+import client from "@/api-modules/tplink/tplink-client";
+import { TPLINK_DEVICE_MAP } from "@/constants/smartHome";
 
-  let ip;
-  let childId;
-  switch (light) {
-    case PLUGS.YARD_DINING.id: {
-      ip = PLUGS.YARD_DINING.ip;
-      childId = PLUGS.YARD_DINING.childId
-      break;
-    }
-    case PLUGS.YARD_FENCE.id: {
-      ip = PLUGS.YARD_FENCE.ip;
-      childId = PLUGS.YARD_FENCE.childId
-      break;
-    }
-    case LIGHTSWITCHES.BASEMENT.id: {
-      ip = LIGHTSWITCHES.BASEMENT.ip;
-      break;
-    }
-    case LIGHTSWITCHES.STAIRWAY.id: {
-      ip = LIGHTSWITCHES.STAIRWAY.ip;
-      break;
-    }
-    case LIGHTSWITCHES.BEDROOM.id: {
-      ip = LIGHTSWITCHES.BEDROOM.ip;
-    }
+type ToggleResponse = { ok: boolean; error?: string };
+
+interface PowerDevice {
+  setPowerState(powerState: boolean): Promise<unknown> | unknown;
+}
+
+export default async function handleToggleSwitch(
+  req: NextApiRequest,
+  res: NextApiResponse<ToggleResponse>,
+) {
+  const { params } = req.query;
+  const [deviceId, onOff] = Array.isArray(params) ? params : [];
+  const deviceConfig = deviceId ? TPLINK_DEVICE_MAP[deviceId] : undefined;
+
+  if (!deviceConfig || (onOff !== "on" && onOff !== "off")) {
+    res.status(400).json({ ok: false, error: "Invalid TP-Link toggle target" });
+    return;
   }
 
-  client.getDevice({ host: ip, childId: childId }).then((device) => {
-    device.setPowerState(powerState);
-  });
-  res.send("TPLink command sent!");
+  try {
+    const device = await client.getDevice({
+      host: deviceConfig.ip,
+      childId: deviceConfig.childId,
+    }) as PowerDevice;
+    await device.setPowerState(onOff === "on");
+    res.status(200).json({ ok: true });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    res.status(500).json({ ok: false, error: message });
+  }
 }
