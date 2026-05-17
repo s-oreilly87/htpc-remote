@@ -18,7 +18,7 @@ interface SpeakerDef {
 const SPEAKERS: SpeakerDef[] = [
   { label: "FL", relX: 0.1, relY: 0.35 },
   { label: "FR", relX: 0.9, relY: 0.35 },
-  { label: "C",  relX: 0.5, relY: 0.2  },
+  { label: "C",  relX: 0.5, relY: 0.4  },
   { label: "SL", relX: 0.15, relY: 0.75 },
   { label: "SR", relX: 0.85, relY: 0.75 },
 ];
