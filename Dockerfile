@@ -1,6 +1,13 @@
 FROM node:22-alpine AS deps
 
-RUN apk add --no-cache libc6-compat
+RUN apk add --no-cache \
+  build-base \
+  libc6-compat \
+  libpng-dev \
+  libx11-dev \
+  libxtst-dev \
+  python3 \
+  zlib-dev
 WORKDIR /app
 
 COPY package.json package-lock.json ./
@@ -20,6 +27,8 @@ RUN npm run build
 FROM node:22-alpine AS runner
 
 WORKDIR /app
+
+RUN apk add --no-cache libpng libstdc++ libx11 libxtst zlib
 
 ENV NODE_ENV=production
 ENV PORT=3000
