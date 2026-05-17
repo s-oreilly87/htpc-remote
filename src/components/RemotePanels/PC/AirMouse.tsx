@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faLocationCrosshairs } from "@fortawesome/free-solid-svg-icons";
 import { hasRelativeOrientationSensor, type OrientationReading } from "@/utilities/sensors";
 import AirMouseCalibrationModal from "@/components/RemotePanels/PC/AirMouseCalibrationModal";
+import AirMouseDemoInfoModal from "@/components/RemotePanels/PC/AirMouseDemoInfoModal";
 import RelativeOrientationSensor from "@/components/Sensors/RelativeOrientationSensor";
 import { io, type Socket } from "socket.io-client";
 import { sendClickToRobot, sendDisableCommandToRobot } from "@/utilities/http";
@@ -13,6 +14,7 @@ import { getPlatformInfo } from "@/hooks/usePlatform";
 
 const htpcIp = process.env.NEXT_PUBLIC_HTPC_IP ?? "";
 const agentPort = process.env.NEXT_PUBLIC_LINUX_HTPC_AGENT_PORT ?? "3001";
+const IS_DEMO = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
 
 const { isRemoteHtpc } = getPlatformInfo();
 
@@ -25,9 +27,12 @@ const AirMouse = () => {
   const [enabled, setEnabled] = useState(false);
   const [hasRelOrientationSensor, setHasRelOrientationSensor] = useState(false);
   const [showCalibration, setShowCalibration] = useState(false);
+  const [showDemoInfo, setShowDemoInfo] = useState(false);
 
   const { isSupported, released, request, release, type } = useWakeLock({});
   useEffect(() => {
+    if (IS_DEMO) return;
+
     if (type !== undefined) {
       if (enabled) {
         request();
@@ -84,6 +89,14 @@ const AirMouse = () => {
   }, [socket]);
 
   const handleEnable = (isEnabled: boolean) => {
+    if (IS_DEMO) {
+      setEnabled(isEnabled);
+      if (isEnabled) {
+        setShowDemoInfo(true);
+      }
+      return;
+    }
+
     if (isEnabled) {
       closeSocket().then(() => initializeSocket());
     } else {
@@ -93,9 +106,27 @@ const AirMouse = () => {
     setEnabled(isEnabled);
   };
 
-  const handleLeftClick = () => sendClickToRobot(ClickType.LEFT);
-  const handleRightClick = () => sendClickToRobot(ClickType.RIGHT);
-  const handleDoubleClick = () => sendClickToRobot(ClickType.DOUBLE);
+  const handleDemoClick = () => {
+    if (IS_DEMO) {
+      setShowDemoInfo(true);
+      return true;
+    }
+
+    return false;
+  };
+
+  const handleLeftClick = () => {
+    if (handleDemoClick()) return;
+    sendClickToRobot(ClickType.LEFT);
+  };
+  const handleRightClick = () => {
+    if (handleDemoClick()) return;
+    sendClickToRobot(ClickType.RIGHT);
+  };
+  const handleDoubleClick = () => {
+    if (handleDemoClick()) return;
+    sendClickToRobot(ClickType.DOUBLE);
+  };
 
   const handleSetTopLeft = () => {
     if (!currentOrientation.current) return;
@@ -123,7 +154,7 @@ const AirMouse = () => {
     <>
       {hasRelOrientationSensor && (
         <>
-          {enabled && (
+          {enabled && !IS_DEMO && (
             <RelativeOrientationSensor
               frequency={120}
               updateOrientation={updateOrientation}
@@ -135,6 +166,11 @@ const AirMouse = () => {
             setShowCalibration={setShowCalibration}
             handleSetTopLeft={handleSetTopLeft}
             handleSetBottomRight={handleSetBottomRight}
+          />
+
+          <AirMouseDemoInfoModal
+            isOpen={showDemoInfo}
+            setIsOpen={setShowDemoInfo}
           />
 
           <div className="flex gap-3 mx-auto self-end">

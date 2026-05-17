@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import Head from "next/head";
+import dynamic from "next/dynamic";
 
 import RemotePanelSlideScroll from "@/components/RemotePanels/RemotePanelSlideScroll";
 import Navbar from "@/components/UI/Navbar";
@@ -10,6 +11,12 @@ import { TplinkProvider } from "@/context/tplink";
 import { RemoteType, REMOTE_INDEX } from "@/constants/remotes";
 import { archivo_narrow } from "@/styles/fonts";
 import { getKeyByValue, usePrevious } from "@/utilities/utils";
+
+const IS_DEMO = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
+const DemoPanel = dynamic(
+  () => import("@/components/Demo/DemoPanel").then((mod) => mod.DemoPanel),
+  { ssr: false },
+);
 
 const App = () => {
   const [selectedRemote, setSelectedRemote] = useState<RemoteType>(RemoteType.ROKU);
@@ -75,20 +82,27 @@ const App = () => {
               <meta name="viewport" content="width=device-width, initial-scale=1" />
               <link rel="icon" href="/favicon.ico" />
             </Head>
-            <div className="flex flex-col">
+            <div className={IS_DEMO ? "flex flex-col lg:flex-row" : "flex flex-col"}>
               <Navbar
-                className="fixed top-0 w-screen"
+                className={IS_DEMO ? "fixed top-0 w-screen lg:max-w-[550px] lg:min-w-[330px]" : "fixed top-0 w-screen"}
                 onClickHandler={handleSelectRemote}
                 selectedRemote={selectedRemote}
               />
-              <SwipeDetector onSwipe={handleSwipe}>
-                <RemotePanelSlideScroll
-                  className="mx-auto min-w-[330px] max-w-[550px] w-full mt-16"
-                  selectedRemote={selectedRemote}
-                  setSelectedRemote={setSelectedRemote}
-                  prevRemote={prevRemote}
-                />
-              </SwipeDetector>
+              <div className={IS_DEMO ? "lg:w-[550px] lg:shrink-0" : ""}>
+                <SwipeDetector onSwipe={handleSwipe}>
+                  <RemotePanelSlideScroll
+                    className={`min-w-[330px] max-w-[550px] w-full mt-16 mx-auto${IS_DEMO ? " lg:mx-0" : ""}`}
+                    selectedRemote={selectedRemote}
+                    setSelectedRemote={setSelectedRemote}
+                    prevRemote={prevRemote}
+                  />
+                </SwipeDetector>
+              </div>
+              {IS_DEMO && (
+                <div className="hidden lg:flex flex-1 overflow-hidden">
+                  <DemoPanel />
+                </div>
+              )}
             </div>
           </div>
         </TplinkProvider>

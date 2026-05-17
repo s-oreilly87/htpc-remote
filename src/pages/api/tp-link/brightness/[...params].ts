@@ -1,34 +1,64 @@
-import client from '@/api-modules/tplink/tplink-client'
-import {toNumber} from "lodash";
-import { LIGHTSWITCHES } from "@/constants/smartHome";
-import {Plug} from "tplink-smarthome-api";
+import type { NextApiRequest, NextApiResponse } from "next";
+import { toNumber } from "lodash";
 
-export default function handleBrightness(req, res) {
-  let { params } = req.query;
-  const light = params[0];
-  const brightnessLevel = toNumber(params[1]);
+import client from "@/api-modules/tplink/tplink-client";
+import { TPLINK_DEVICE_MAP } from "@/constants/smartHome";
+
+type BrightnessResponse = { ok: boolean; error?: string };
+
+interface DimmableDevice {
+  dimmer: {
+    setBrightness(brightness: number): Promise<void> | void;
+  };
+}
+
+function isDimmableDevice(device: unknown): device is DimmableDevice {
+  if (typeof device !== "object" || device === null || !("dimmer" in device)) {
+    return false;
+  }
+
+  const dimmer = (device as { dimmer?: unknown }).dimmer;
+  return (
+    typeof dimmer === "object" &&
+    dimmer !== null &&
+    "setBrightness" in dimmer &&
+    typeof dimmer.setBrightness === "function"
+  );
+}
+
+export default async function handleBrightness(
+  req: NextApiRequest,
+  res: NextApiResponse<BrightnessResponse>,
+) {
+  const { params } = req.query;
+  const [deviceId, brightnessParam] = Array.isArray(params) ? params : [];
+  const deviceConfig = deviceId ? TPLINK_DEVICE_MAP[deviceId] : undefined;
+  const brightnessLevel = toNumber(brightnessParam);
+
+  if (!deviceConfig || deviceConfig.kind !== "dimmer") {
+    res.status(400).json({ ok: false, error: "Switch is not dimmable" });
+    return;
+  }
 
   if (!(brightnessLevel >= 1 && brightnessLevel <= 100)) {
-    return res.send("Error: No brightness value received!");
+    res.status(400).json({ ok: false, error: "Invalid brightness value" });
+    return;
   }
 
-  let ip;
-  switch (light) {
-    case "basement": {
-      ip = LIGHTSWITCHES.BASEMENT.ip;
-      break;
+  try {
+    const device = await client.getDevice({
+      host: deviceConfig.ip,
+      childId: deviceConfig.childId,
+    });
+    if (!isDimmableDevice(device)) {
+      res.status(400).json({ ok: false, error: "Configured device does not support dimming" });
+      return;
     }
-    default: {
-      return res.send("Error: Switch not dimmable!");
-    }
+
+    await device.dimmer.setBrightness(brightnessLevel);
+    res.status(200).json({ ok: true });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    res.status(500).json({ ok: false, error: message });
   }
-
-  client.on("error", (error) => console.log(error));
-  client.getDevice({ host: ip }).then((device) => {
-          if (device instanceof Plug) {
-              device.dimmer.setBrightness(brightnessLevel);
-          }
-  });
-
-  res.send("TPLink command sent!");
 }

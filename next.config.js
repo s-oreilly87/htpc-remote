@@ -2,6 +2,7 @@
 // next.config.js
 import withPWA from '@ducanh2912/next-pwa'
 
+const IS_DEMO = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
 const DENON_IP = process.env.NEXT_PUBLIC_DENON_IP ?? "192.168.1.252";
 const ROKU_IP = process.env.NEXT_PUBLIC_ROKU_IP ?? "192.168.1.222";
 const ROKU_PORT = 8060;
@@ -18,8 +19,8 @@ const nextConfig = {
   serverExternalPackages: ['@jitsi/robotjs'],
   // Allow the phone (network IP) to receive HMR updates in dev.
   allowedDevOrigins: ['192.168.1.231'],
-  // next-pwa injects a webpack plugin even when disabled in dev, which triggers a
-  // "webpack config with no turbopack config" error. Empty turbopack config silences it.
+  // next-pwa injects a webpack plugin even when disabled in dev/demo, which triggers
+  // a "webpack config with no turbopack config" error. Empty turbopack config silences it.
   turbopack: {},
   async rewrites() {
     return [
@@ -43,7 +44,6 @@ export default withPWA({
   dest: 'public',
   register: true,
   skipWaiting: true,
-  disable: process.env.NODE_ENV === 'development',
-  sw: 'sw.js'
+  disable: process.env.NODE_ENV === 'development' || IS_DEMO,
+  sw: 'sw.js',
 })(nextConfig)
-

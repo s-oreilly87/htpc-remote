@@ -85,15 +85,21 @@ export interface RokuApps {
 
 // ── Smart home ───────────────────────────────────────────────────────────────
 
-export interface PlugConfig {
+export type SmartHomeDeviceKind = "plug" | "switch" | "dimmer";
+
+export interface SmartHomeDeviceConfig {
   id: string;
   ip: string;
-  childId: string;
   label: string;
+  kind: SmartHomeDeviceKind;
+  childId?: string;
 }
 
-export interface LightSwitchConfig {
-  id: string;
-  ip: string;
-  label: string;
-}
+export type PlugConfig = SmartHomeDeviceConfig & {
+  kind: "plug";
+  childId?: string;
+};
+
+export type LightSwitchConfig = SmartHomeDeviceConfig & {
+  kind: "switch" | "dimmer";
+};

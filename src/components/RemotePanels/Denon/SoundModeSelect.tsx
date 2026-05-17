@@ -40,7 +40,7 @@ const SelectSoundMode = ({ cycleTimeout }) => {
         by="value"
         onChange={handleListBoxSelect}
       >
-        <div className="relative mt-1 w-full ">
+        <div className="relative w-full">
           <ListboxButton className="relative w-full h-10 cursor-default rounded-lg bg-slate-800 pt-1 pb-2 pl-3 pr-10 text-center shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm">
             {!isLoading && (
               <span

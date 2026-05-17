@@ -1,10 +1,11 @@
 import {NextApiRequest, NextApiResponse} from "next";
 
 import client from "@/api-modules/tplink/tplink-client";
-import { LIGHTSWITCHES, PLUGS } from "@/constants/smartHome";
+import { TPLINK_DEVICES, TPLINK_DEVICE_MAP } from "@/constants/smartHome";
 
 interface KasaChildSysInfo {
   alias: string;
+  id?: string;
   state: number;
 }
 
@@ -38,10 +39,7 @@ export default async function handleInfo(
   const responseObject: DeviceResponseMap = {};
 
   async function getDeviceInfo(targetDeviceId: string) {
-    const allDeviceObjects = {...LIGHTSWITCHES, ...PLUGS};
-    const device = Object.values(allDeviceObjects).find(
-      (deviceObject) => deviceObject.id === targetDeviceId,
-    );
+    const device = TPLINK_DEVICE_MAP[targetDeviceId];
 
     if (!device) {
       return;
@@ -56,9 +54,11 @@ export default async function handleInfo(
       if (sysInfo.children?.length) {
         // sysInfo will have children for devices with multiple plugs
         sysInfo.children.forEach((child) => {
-          // This is matching on the label set in the KASA app
-          const object = Object.values(allDeviceObjects).find(
-            (deviceObject) => `${deviceObject.label}` === child.alias,
+          // Prefer childId when available; otherwise match on the label set in the Kasa app.
+          const object = TPLINK_DEVICES.find(
+            (deviceObject) =>
+              (deviceObject.childId && deviceObject.childId === child.id) ||
+              `${deviceObject.label}` === child.alias,
           );
           if (object) {
             responseObject[object.id] = {
@@ -78,25 +78,13 @@ export default async function handleInfo(
     }
   }
 
-  if (
-    deviceId === PLUGS.YARD_DINING.id ||
-    deviceId === PLUGS.YARD_FENCE.id ||
-    deviceId === "all"
-  ) {
-    await getDeviceInfo(PLUGS.YARD_DINING.id);
-    await getDeviceInfo(PLUGS.YARD_FENCE.id);
-  }
-
-  if (deviceId === LIGHTSWITCHES.BEDROOM.id || deviceId === "all") {
-    await getDeviceInfo(LIGHTSWITCHES.BEDROOM.id);
-  }
-
-  if (deviceId === LIGHTSWITCHES.STAIRWAY.id || deviceId === "all") {
-    await getDeviceInfo(LIGHTSWITCHES.STAIRWAY.id);
-  }
-
-  if (deviceId === LIGHTSWITCHES.BASEMENT.id || deviceId === "all") {
-    await getDeviceInfo(LIGHTSWITCHES.BASEMENT.id);
+  if (deviceId === "all") {
+    await Promise.all(TPLINK_DEVICES.map((device) => getDeviceInfo(device.id)));
+  } else if (TPLINK_DEVICE_MAP[deviceId]) {
+    await getDeviceInfo(deviceId);
+  } else {
+    res.status(404).json({ error: "device-not-configured" });
+    return;
   }
 
   res.status(200).json(responseObject);

@@ -12,11 +12,11 @@ import {parseDialogueAdjustLevel, useDenonContext} from "@/context/denon";
 
 const remote = RemoteType.DENON;
 
-const DIALOGUE_ADJUST_DISABLED_MODES = [
-  DENON_SOUND_MODES.STEREO,
-  DENON_SOUND_MODES.DIRECT,
-  DENON_SOUND_MODES.PURE_DIRECT,
-];
+const DIALOGUE_ADJUST_DISABLED_MODES = new Set([
+  DENON_SOUND_MODES.STEREO.value,
+  DENON_SOUND_MODES.DIRECT.value,
+  DENON_SOUND_MODES.PURE_DIRECT.value,
+]);
 const AdvancedVolumeControl = ({}) => {
   const { denonState, isLoading, updateDenonState } = useDenonContext();
 
@@ -62,28 +62,22 @@ const AdvancedVolumeControl = ({}) => {
   };
 
   return (
-    <div className="flex gap-4 w-full max-h-18">
+    <div className="flex gap-4 w-full px-8">
       <div className="flex flex-col w-1/3 items-center justify-center">
         <Toggle
           label={"Dialogue Adjust"}
           labelColor={"teal-500"}
           labelPos={"above"}
           color={isLoading ? "teal-600" : "teal-500"}
-          enabled={
-            denonState.psDilOn &&
-            !DIALOGUE_ADJUST_DISABLED_MODES.includes(denonState.soundMode)
-          }
+          enabled={denonState.psDilOn}
           onToggle={handlePsDilToggle}
-          disabled={DIALOGUE_ADJUST_DISABLED_MODES.includes(
-            denonState.soundMode,
-          )}
+          disabled={DIALOGUE_ADJUST_DISABLED_MODES.has(denonState.soundMode?.value)}
         />
 
         <div
           id="dialog-level"
           className={`flex w-full p-2 gap-1 ${
-            denonState.psDilOn &&
-            !DIALOGUE_ADJUST_DISABLED_MODES.includes(denonState.soundMode)
+            denonState.psDilOn && !DIALOGUE_ADJUST_DISABLED_MODES.has(denonState.soundMode?.value)
               ? "opacity-100"
               : "opacity-0"
           } transition-all-500`}
@@ -122,7 +116,7 @@ const AdvancedVolumeControl = ({}) => {
         </div>
       </div>
 
-      <div className="flex flex-col gap-3 w-2/3 justify-end">
+      <div className="flex flex-col gap-2 w-2/3">
         <div className="flex flex-col gap-2 justify-center items-center">
           <label
             htmlFor="dynamic-volume"

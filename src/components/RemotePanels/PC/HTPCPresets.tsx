@@ -17,11 +17,14 @@ import {
   sendRokuLaunchCommand,
   setLinuxAudioMode,
   setLinuxDisplayMode,
+  setTplinkBrightness,
+  toggleTplinkSwitch,
 } from "@/utilities/http";
 import { usePlatform } from "@/hooks/usePlatform";
 import { openPlexampAndroidApp, openQobuzAndroidApp } from "@/utilities/utils";
 import type { AudioMode, DisplayMode, RokuChannel } from "@/types/remote";
 import type { LinuxAudioModeCommand, LinuxDisplayModeCommand } from "@/constants/htpcControls";
+import { BASEMENT_LIGHT } from "@/constants/smartHome";
 
 const remote = RemoteType.PC;
 
@@ -34,6 +37,10 @@ interface PresetEffects {
   launchApp?: string;
   killApp?: string;
   androidApp?: string;
+  lightMode?: {
+    deviceId: string;
+    brightness?: number;
+  };
 }
 
 let presetInProgress = false;
@@ -58,6 +65,7 @@ function AudioVideoPresets() {
         displayModeGamestreamEventGhost: "displayDummy4K60",
         rokuApp: ROKU_APPS.HDMI.HDMI4,
         launchApp: "launchMoonlight",
+        lightMode: basementLightMode(),
       },
       presetGamestream1440p120: {
         audioMode: AUDIO_MODES.SURROUND51,
@@ -65,6 +73,7 @@ function AudioVideoPresets() {
         displayModeGamestreamEventGhost: "displayDummy1440p120",
         rokuApp: ROKU_APPS.HDMI.HDMI4,
         launchApp: "launchMoonlight",
+        lightMode: basementLightMode(),
       },
       presetWatchPlex: {
         // Linux: Kodi is set up to bitstream — don't change audio mode
@@ -73,6 +82,7 @@ function AudioVideoPresets() {
         rokuApp: ROKU_APPS.HDMI.HDMI4,
         launchApp: isLinux ? "launchKodi" : "launchPlex",
         killApp: isLinux ? "launchPlexamp" : undefined,
+        lightMode: basementLightMode(),
       },
       presetPlexampStereo: {
         audioMode: AUDIO_MODES.STEREO,
@@ -136,7 +146,15 @@ function AudioVideoPresets() {
         await sleep(2000);
       }
 
-      // 3. HTPC display mode (Linux → kscreen-doctor, else → EventGhost)
+      // 3. Smart lights
+      if (preset.lightMode) {
+        await toggleTplinkSwitch(preset.lightMode.deviceId, true);
+        if (preset.lightMode.brightness !== undefined) {
+          await setTplinkBrightness(preset.lightMode.deviceId, preset.lightMode.brightness);
+        }
+      }
+
+      // 4. HTPC display mode (Linux → kscreen-doctor, else → EventGhost)
       if (preset.displayModeHTPC) {
         setSelectedDisplayMode(preset.displayModeHTPC);
         const value = displayModeValue(preset.displayModeHTPC, isLinux);
@@ -151,7 +169,7 @@ function AudioVideoPresets() {
         await sleep(3000);
       }
 
-      // 4. Audio mode
+      // 5. Audio mode
       if (preset.audioMode) {
         setSelectedAudioMode(preset.audioMode);
         const value = audioModeValue(preset.audioMode, isLinux);
@@ -168,10 +186,10 @@ function AudioVideoPresets() {
         }
       }
 
-      // 5. Launch app on HTPC
+      // 6. Launch app on HTPC
       await maybeLaunchApp(preset, htpcEventGhostCommand);
 
-      // 6. GameStream display mode on Windows (does not affect KWin)
+      // 7. GameStream display mode on Windows (does not affect KWin)
       if (preset.displayModeGamestreamEventGhost) {
         await sendEventToGameStreamEventGhost({
           value: preset.displayModeGamestreamEventGhost,
@@ -259,3 +277,12 @@ function AudioVideoPresets() {
 }
 
 export default AudioVideoPresets;
+
+function basementLightMode(): PresetEffects["lightMode"] {
+  if (!BASEMENT_LIGHT) return undefined;
+
+  return {
+    deviceId: BASEMENT_LIGHT.id,
+    ...(BASEMENT_LIGHT.kind === "dimmer" ? { brightness: 40 } : {}),
+  };
+}

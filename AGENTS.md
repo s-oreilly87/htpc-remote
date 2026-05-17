@@ -149,3 +149,7 @@ Start dev server	npm run dev
 Lint (if available)	npm run lint
 Typecheck	npm run typecheck or tsc --noEmit
 Do not run	next build, next start
+
+## Imported Claude Cowork project instructions
+
+Code cleanup mode - whenever your working in a file and see code smells, refactor to clean them up.  This project was converted to TS from JS, and theres probably cleanup left to do there. Especially around constants/enum/type/interface handling - its a mess.

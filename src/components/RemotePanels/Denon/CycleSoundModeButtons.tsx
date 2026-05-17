@@ -127,7 +127,7 @@ function CycleSoundModes({ cycleTimeout, setCycleTimeout }) {
         </KeypressButton>
         <KeypressButton
           remote={remote}
-          className="btn h-10 w-1/4 bg-indigo-700 hover:bg-indigo-600 shadow-inner shadow-indigo-500/60"
+          className="btn h-10 w-1/4 bg-blue-600 hover:bg-blue-500 shadow-inner shadow-indigo-500/60"
           value="MSGAME"
           onClick={handleCycleClick}
         >
@@ -135,7 +135,7 @@ function CycleSoundModes({ cycleTimeout, setCycleTimeout }) {
         </KeypressButton>
         <KeypressButton
           remote={remote}
-          className="btn h-10 w-1/4 bg-amber-600 hover:bg-amber-500 shadow-inner shadow-amber-400/60"
+          className="btn h-10 w-1/4 bg-amber-400 hover:bg-amber-300 shadow-inner shadow-amber-400/60"
           value="MSDIRECT"
           onClick={handleClick}
         >
