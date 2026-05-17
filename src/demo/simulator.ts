@@ -27,6 +27,7 @@ import { DeviceTarget } from "@/demo/types";
 import { DenonSimulator } from "@/demo/devices/denon";
 import { RokuSimulator } from "@/demo/devices/roku";
 import { HtpcSimulator } from "@/demo/devices/htpc";
+import { GameStreamPcSimulator } from "@/demo/devices/gamestream-pc";
 import { TplinkSimulator } from "@/demo/devices/tplink";
 
 const EVENT_LOG_MAX = 100;
@@ -40,6 +41,7 @@ class VirtualHomeTheater {
   readonly denon: DenonSimulator;
   readonly roku: RokuSimulator;
   readonly htpc: HtpcSimulator;
+  readonly gamestreamPc: GameStreamPcSimulator;
   readonly tplink: TplinkSimulator;
 
   constructor() {
@@ -58,6 +60,10 @@ class VirtualHomeTheater {
 
     this.denon = new DenonSimulator(INITIAL_STATE.denon, makeNotify(DeviceTarget.DENON));
     this.htpc = new HtpcSimulator(INITIAL_STATE.htpc, makeNotify(DeviceTarget.HTPC));
+    this.gamestreamPc = new GameStreamPcSimulator(
+      INITIAL_STATE.gamestreamPc,
+      makeNotify(DeviceTarget.GAMESTREAM_PC),
+    );
     this.tplink = new TplinkSimulator(INITIAL_STATE.tplink, makeNotify(DeviceTarget.TPLINK));
 
     this.roku = new RokuSimulator(INITIAL_STATE.roku, makeNotify(DeviceTarget.ROKU));
@@ -106,11 +112,53 @@ class VirtualHomeTheater {
     }
   }
 
+  /**
+   * HDMI CEC side-effect for volume keypresses from Roku.
+   * The Roku TV forwards VolumeUp / VolumeDown / VolumeMute to the Denon AVR
+   * over CEC — the app never sends these commands directly to the AVR.
+   */
+  applyCecVolumeKey(rokuKey: string): void {
+    const state = this.denon.getState();
+
+    if (rokuKey === "VolumeUp") {
+      const MV = Math.min(98, (state.MV ?? 50) + 0.5);
+      this.denon.patchState({ MV });
+      this._pushEvent(
+        DeviceTarget.DENON,
+        "CEC: VolumeUp",
+        `Vol ${MV} — forwarded by Roku TV via HDMI CEC`,
+      );
+      this._rebuildState();
+      this._notifySubscribers();
+    } else if (rokuKey === "VolumeDown") {
+      const MV = Math.max(0, (state.MV ?? 50) - 0.5);
+      this.denon.patchState({ MV });
+      this._pushEvent(
+        DeviceTarget.DENON,
+        "CEC: VolumeDown",
+        `Vol ${MV} — forwarded by Roku TV via HDMI CEC`,
+      );
+      this._rebuildState();
+      this._notifySubscribers();
+    } else if (rokuKey === "VolumeMute") {
+      const muteOn = !state.muteOn;
+      this.denon.patchState({ muteOn });
+      this._pushEvent(
+        DeviceTarget.DENON,
+        "CEC: VolumeMute",
+        `Mute ${muteOn ? "ON" : "OFF"} — forwarded by Roku TV via HDMI CEC`,
+      );
+      this._rebuildState();
+      this._notifySubscribers();
+    }
+  }
+
   /** Resets all device states to their initial values and clears the event log. */
   reset(): void {
     this.denon.reset(INITIAL_STATE.denon);
     this.roku.reset(INITIAL_STATE.roku);
     this.htpc.reset(INITIAL_STATE.htpc);
+    this.gamestreamPc.reset(INITIAL_STATE.gamestreamPc);
     this.tplink.reset(INITIAL_STATE.tplink);
     this._events = [];
     this._rebuildState();
@@ -135,6 +183,7 @@ class VirtualHomeTheater {
       denon: this.denon.getState(),
       roku: this.roku.getState(),
       htpc: this.htpc.getState(),
+      gamestreamPc: this.gamestreamPc.getState(),
       tplink: this.tplink.getState(),
     };
   }

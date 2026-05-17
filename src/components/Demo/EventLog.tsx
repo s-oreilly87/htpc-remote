@@ -10,6 +10,7 @@ const TARGET_COLORS: Record<DeviceTarget, string> = {
   [DeviceTarget.DENON]: "#0d9488",
   [DeviceTarget.ROKU]: "#6d28d9",
   [DeviceTarget.HTPC]: "#2563eb",
+  [DeviceTarget.GAMESTREAM_PC]: "#7c3aed",
   [DeviceTarget.TPLINK]: "#f59e0b",
 };
 

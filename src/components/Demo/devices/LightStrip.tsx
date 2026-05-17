@@ -11,7 +11,7 @@ const DEVICE_LABELS: Record<string, string> = {
   "yard-dining": "Dining",
   "bedroom":  "Bed",
   "stairway": "Stairs",
-  "basement": "Bsmt",
+  "basement": "TV Room",
 };
 
 interface Props {
@@ -23,90 +23,69 @@ interface Props {
   isRecent: boolean;
 }
 
+/**
+ * Horizontal light strip. Devices are evenly distributed across the full width
+ * so the strip fills nicely regardless of how wide the container is.
+ */
 export function LightStrip({ state, x, y, width, height, isRecent }: Props) {
   const devices = Object.entries(state.devices);
-  const dotR = 8;
-  const dotSpacing = devices.length > 0 ? Math.min(36, (width - 20) / devices.length) : 36;
+  const DOT_R = 8;
+  const TITLE_H = 14;
+  const LABEL_H = 10;
+
+  // Evenly distribute dots across the full width
+  const dotCY = y + TITLE_H + (height - TITLE_H - LABEL_H) / 2;
+  const labelY = dotCY + DOT_R + LABEL_H / 2 + 2;
+  const slotW = devices.length > 0 ? width / devices.length : width;
 
   return (
     <g>
       <title>TP-Link smart home — toggled via Next.js API routes that proxy to the TP-Link Kasa local REST API</title>
-      {/* Background */}
+
       <rect
-        x={x}
-        y={y}
-        width={width}
-        height={height}
-        rx={8}
-        fill={CARD_BG}
+        x={x} y={y} width={width} height={height}
+        rx={8} fill={CARD_BG}
         stroke={isRecent ? AMBER : "#1e293b"}
         strokeWidth={isRecent ? 2 : 1}
         className={isRecent ? "line-recent" : undefined}
       />
 
-      {/* Title */}
       <text
-        x={x + width / 2}
-        y={y + 12}
-        textAnchor="middle"
+        x={x + 10} y={y + TITLE_H / 2}
         dominantBaseline="middle"
-        fill={TEXT_MUTED}
-        fontSize={9}
+        fill={TEXT_MUTED} fontSize={9}
       >
         Lights
       </text>
 
-      {/* Device bulbs */}
       {devices.length === 0 ? (
         <text
-          x={x + width / 2}
-          y={y + height / 2}
-          textAnchor="middle"
-          dominantBaseline="middle"
-          fill={TEXT_MUTED}
-          fontSize={9}
+          x={x + width / 2} y={y + height / 2}
+          textAnchor="middle" dominantBaseline="middle"
+          fill={TEXT_MUTED} fontSize={9}
         >
           No devices
         </text>
       ) : (
         devices.map(([id, dev], i) => {
-          const cx = x + 10 + dotSpacing * i + dotSpacing / 2;
-          const cy = y + height / 2 - 4;
+          const cx = x + slotW * i + slotW / 2;
           const brightness = dev.brightness ?? 100;
-          const opacity = dev.powerState ? 0.1 + (brightness / 100) * 0.6 : 0.2;
+          const opacity = dev.powerState ? 0.15 + (brightness / 100) * 0.75 : 0.2;
           const fill = dev.powerState ? AMBER : GRAY;
-          const shortId = DEVICE_LABELS[id] ?? (id.length > 6 ? id.slice(0, 6) : id);
+          const shortLabel = DEVICE_LABELS[id] ?? id.slice(0, 6);
 
           return (
             <g key={id}>
-              {/* Glow effect for on bulbs */}
               {dev.powerState && (
-                <circle
-                  className="transition-all-500"
-                  cx={cx}
-                  cy={cy}
-                  r={dotR + 4}
-                  fill={AMBER}
-                  opacity={0.15}
-                />
+                <circle cx={cx} cy={dotCY} r={DOT_R + 5} fill={AMBER} opacity={0.12} />
               )}
-              <circle
-                className="transition-all-500"
-                cx={cx}
-                cy={cy}
-                r={dotR}
-                fill={fill}
-                opacity={opacity}
-              />
+              <circle cx={cx} cy={dotCY} r={DOT_R} fill={fill} opacity={opacity} />
               <text
-                x={cx}
-                y={cy + dotR + 9}
-                textAnchor="middle"
-                dominantBaseline="middle"
-                fill={TEXT}
-                fontSize={7}
+                x={cx} y={labelY}
+                textAnchor="middle" dominantBaseline="middle"
+                fill={TEXT} fontSize={7}
               >
-                {shortId}
+                {shortLabel}
               </text>
             </g>
           );

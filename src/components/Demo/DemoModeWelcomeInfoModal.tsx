@@ -50,7 +50,7 @@ export function DemoModeWelcomeInfoModal({
               as="h3"
               className="pr-10 text-2xl font-semibold tracking-wide text-slate-50"
             >
-              Welcome to the HTPC Remote Demo
+              Welcome to the Home Theater Remote Demo!
             </DialogTitle>
 
             <div className="mt-4 space-y-5 text-sm leading-6 text-slate-300">
@@ -68,7 +68,7 @@ export function DemoModeWelcomeInfoModal({
                   <p className="mt-1">
                     The remote itself is fully usable on mobile, but the demo theater
                     panel, virtual device state, and event log are displayed on desktop
-                    layouts only. Feel free to try the controls on mobile, then switch
+                    layouts only. Feel free to try out the controls/haptics on mobile, then switch
                     to a desktop-width viewport to watch the simulated system respond.
                   </p>
                 </div>

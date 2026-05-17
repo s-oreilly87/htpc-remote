@@ -265,7 +265,7 @@ export class DenonSimulator {
       case DenonKeystroke.BACK:
       case DenonKeystroke.OPTION:
       case DenonKeystroke.INFO:
-        this.onMutate(command);
+        this.onMutate(command, "Sent via Denon Telnet API (port 23)");
         return { msg: `${command} sent` };
 
       default:

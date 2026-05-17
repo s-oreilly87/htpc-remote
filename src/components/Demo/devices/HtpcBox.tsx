@@ -17,7 +17,8 @@ interface Props {
 }
 
 export function HtpcBox({ state, x, y, width, height, isRecent }: Props) {
-  const isOn = state.activeApp !== null;
+  // HTPC has no power control integration — it's always on.
+  const isOn = true;
 
   return (
     <g>
@@ -61,54 +62,27 @@ export function HtpcBox({ state, x, y, width, height, isRecent }: Props) {
       />
 
       {/* Active app */}
-      <text
-        x={x + 12}
-        y={y + 50}
-        dominantBaseline="middle"
-        fill={TEXT_MUTED}
-        fontSize={10}
-      >
+      <text x={x + 12} y={y + 38} dominantBaseline="middle" fill={TEXT_MUTED} fontSize={9}>
         APP
       </text>
-      <text
-        x={x + 12}
-        y={y + 66}
-        dominantBaseline="middle"
-        fill={TEXT}
-        fontSize={11}
-      >
+      <text x={x + 12} y={y + 52} dominantBaseline="middle" fill={TEXT} fontSize={11} fontWeight="bold">
         {state.activeApp ?? "—"}
       </text>
 
       {/* Display mode */}
-      <text
-        x={x + 12}
-        y={y + 90}
-        dominantBaseline="middle"
-        fill={TEXT_MUTED}
-        fontSize={10}
-      >
+      <text x={x + 12} y={y + 72} dominantBaseline="middle" fill={TEXT_MUTED} fontSize={9}>
         DISPLAY
       </text>
-      <text
-        x={x + 12}
-        y={y + 106}
-        dominantBaseline="middle"
-        fill={TEXT}
-        fontSize={10}
-      >
+      <text x={x + 12} y={y + 86} dominantBaseline="middle" fill={TEXT} fontSize={11}>
         {state.displayMode ?? "—"}
       </text>
 
       {/* Audio mode */}
-      <text
-        x={x + 12}
-        y={y + 122}
-        dominantBaseline="middle"
-        fill={TEXT_MUTED}
-        fontSize={9}
-      >
-        {state.audioMode ?? ""}
+      <text x={x + 12} y={y + 106} dominantBaseline="middle" fill={TEXT_MUTED} fontSize={9}>
+        AUDIO
+      </text>
+      <text x={x + 12} y={y + 120} dominantBaseline="middle" fill={TEXT} fontSize={11}>
+        {state.audioMode ?? "—"}
       </text>
     </g>
   );
