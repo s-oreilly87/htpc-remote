@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import Head from "next/head";
+import dynamic from "next/dynamic";
 
 import RemotePanelSlideScroll from "@/components/RemotePanels/RemotePanelSlideScroll";
 import Navbar from "@/components/UI/Navbar";
@@ -10,9 +11,12 @@ import { TplinkProvider } from "@/context/tplink";
 import { RemoteType, REMOTE_INDEX } from "@/constants/remotes";
 import { archivo_narrow } from "@/styles/fonts";
 import { getKeyByValue, usePrevious } from "@/utilities/utils";
-import { DemoPanel } from "@/components/Demo/DemoPanel";
 
 const IS_DEMO = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
+const DemoPanel = dynamic(
+  () => import("@/components/Demo/DemoPanel").then((mod) => mod.DemoPanel),
+  { ssr: false },
+);
 
 const App = () => {
   const [selectedRemote, setSelectedRemote] = useState<RemoteType>(RemoteType.ROKU);

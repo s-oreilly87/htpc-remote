@@ -11,7 +11,7 @@
     "build": "next build && cp -r public .next/standalone/public && mkdir -p .next/standalone/.next && cp -r .next/static .next/standalone/.next/static",
     "start": "node .next/standalone/server.js",
     "deploy": "npm run build && npm run start",
-    "lint": "next lint"
+    "lint": "eslint ."
   },
   "dependencies": {
     "@achingbrain/ssdp": "^4.0.1",
@@ -24,7 +24,7 @@
     "@jitsi/robotjs": "^0.6.22",
     "@tanstack/react-query": "^5.100.9",
     "lodash": "^4.17.21",
-    "next": "16.2.5",
+    "next": "^16.2.6",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-screen-wake-lock": "^3.0.1",
@@ -40,11 +40,18 @@
     "@tailwindcss/postcss": "^4.2.4",
     "@types/react": "19.2.7",
     "eslint": "^9.0.0",
-    "eslint-config-next": "16.2.5",
+    "eslint-config-next": "^16.2.6",
     "lightningcss": "^1.32.0",
-    "postcss": "^8.4.21",
+    "postcss": "^8.5.10",
     "prettier": "^3.1.0",
     "tailwindcss": "^4.2.4",
     "typescript": "5.9.3"
+  },
+  "overrides": {
+    "postcss": "^8.5.10",
+    "workbox-build": "7.4.1",
+    "workbox-webpack-plugin": "7.4.1",
+    "@rollup/plugin-terser": "1.0.0",
+    "serialize-javascript": "7.0.5"
   }
 }

@@ -7,9 +7,15 @@ import type { ApiResponse } from "@/types/api";
 import type { TplinkDeviceState } from "@/context/tplink";
 import { convertKebabToCamel } from "@/utilities/utils";
 import { getPlatformInfo } from "@/hooks/usePlatform";
-import * as demoBridge from "@/demo/http-bridge";
+import type * as DemoBridge from "@/demo/http-bridge";
 
 const IS_DEMO = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
+let demoBridgePromise: Promise<typeof DemoBridge> | null = null;
+
+function getDemoBridge(): Promise<typeof DemoBridge> {
+  demoBridgePromise ??= import("@/demo/http-bridge");
+  return demoBridgePromise;
+}
 
 const ROKU_POST_OPTIONS: RequestInit = {
   method: "POST",
@@ -68,22 +74,22 @@ async function postJson(path: string, body: unknown): Promise<ApiResponse> {
 // ########   HTPC Control (Linux)   ########
 
 export async function launchLinuxApp(app: LinuxLaunchAppCommand): Promise<ApiResponse> {
-  if (IS_DEMO) return demoBridge.launchLinuxApp(app);
+  if (IS_DEMO) return (await getDemoBridge()).launchLinuxApp(app);
   return postJson(`/api/linux/launch`, { app });
 }
 
 export async function killLinuxApp(app: LinuxLaunchAppCommand): Promise<ApiResponse> {
-  if (IS_DEMO) return demoBridge.killLinuxApp(app);
+  if (IS_DEMO) return (await getDemoBridge()).killLinuxApp(app);
   return postJson(`/api/linux/kill`, { app });
 }
 
 export async function setLinuxDisplayMode(mode: LinuxDisplayModeCommand): Promise<ApiResponse> {
-  if (IS_DEMO) return demoBridge.setLinuxDisplayMode(mode);
+  if (IS_DEMO) return (await getDemoBridge()).setLinuxDisplayMode(mode);
   return postJson(`/api/linux/display`, { mode });
 }
 
 export async function setLinuxAudioMode(mode: LinuxAudioModeCommand): Promise<ApiResponse> {
-  if (IS_DEMO) return demoBridge.setLinuxAudioMode(mode);
+  if (IS_DEMO) return (await getDemoBridge()).setLinuxAudioMode(mode);
   return postJson(`/api/linux/audio`, { mode });
 }
 
@@ -97,7 +103,7 @@ export async function fetchRokuChannels(): Promise<FetchResult<{
   id: string;
   label: string;
 }[]>> {
-  if (IS_DEMO) return demoBridge.fetchRokuChannels();
+  if (IS_DEMO) return (await getDemoBridge()).fetchRokuChannels();
 
   const response = await fetch("api/roku/query/apps");
 
@@ -128,7 +134,7 @@ export async function fetchRokuChannels(): Promise<FetchResult<{
 }
 
 export async function fetchRokuDeviceInfo(): Promise<FetchResult<Record<string, string>>> {
-  if (IS_DEMO) return demoBridge.fetchRokuDeviceInfo();
+  if (IS_DEMO) return (await getDemoBridge()).fetchRokuDeviceInfo();
 
   let data: Record<string, string> | undefined;
   const response = await fetch(`api/roku/query/device-info`);
@@ -158,27 +164,27 @@ export async function fetchRokuDeviceInfo(): Promise<FetchResult<Record<string, 
 }
 
 export function sendRokuKeypress(button: ValueButton): void {
-  if (IS_DEMO) { demoBridge.sendRokuKeypress(button); return; }
+  if (IS_DEMO) { void getDemoBridge().then((demoBridge) => demoBridge.sendRokuKeypress(button)); return; }
   fetch(`api/roku/keypress/${button.value}`, ROKU_POST_OPTIONS);
 }
 
 export function sendRokuKeydown(button: ValueButton): void {
-  if (IS_DEMO) { demoBridge.sendRokuKeydown(button); return; }
+  if (IS_DEMO) { void getDemoBridge().then((demoBridge) => demoBridge.sendRokuKeydown(button)); return; }
   fetch(`api/roku/keydown/${button.value}`, ROKU_POST_OPTIONS);
 }
 
 export function sendRokuKeyup(button: ValueButton): void {
-  if (IS_DEMO) { demoBridge.sendRokuKeyup(button); return; }
+  if (IS_DEMO) { void getDemoBridge().then((demoBridge) => demoBridge.sendRokuKeyup(button)); return; }
   fetch(`api/roku/keyup/${button.value}`, ROKU_POST_OPTIONS);
 }
 
 export function sendRokuLaunchCommand(button: ValueButton): void {
-  if (IS_DEMO) { demoBridge.sendRokuLaunchCommand(button); return; }
+  if (IS_DEMO) { void getDemoBridge().then((demoBridge) => demoBridge.sendRokuLaunchCommand(button)); return; }
   fetch(`api/roku/launch/${button.value}`, ROKU_POST_OPTIONS);
 }
 
 export function sendRokuSearchQuery(query: string): void {
-  if (IS_DEMO) { demoBridge.sendRokuSearchQuery(query); return; }
+  if (IS_DEMO) { void getDemoBridge().then((demoBridge) => demoBridge.sendRokuSearchQuery(query)); return; }
   fetch(`api/roku/search/browse?${query}`, ROKU_POST_OPTIONS);
 }
 
@@ -188,7 +194,7 @@ export async function sendEventToHTPCEventGhost(
   button: ValueButton,
   payload = "",
 ): Promise<void> {
-  if (IS_DEMO) return demoBridge.sendEventToHTPCEventGhost(button, payload);
+  if (IS_DEMO) return (await getDemoBridge()).sendEventToHTPCEventGhost(button, payload);
   await fetch(`api/eventghost/htpc/${button.value}${payload ? `&${payload}` : ""}`);
 }
 
@@ -196,17 +202,17 @@ export async function sendEventToGameStreamEventGhost(
   button: ValueButton,
   payload = "",
 ): Promise<void> {
-  if (IS_DEMO) return demoBridge.sendEventToGameStreamEventGhost(button, payload);
+  if (IS_DEMO) return (await getDemoBridge()).sendEventToGameStreamEventGhost(button, payload);
   await fetch(`api/eventghost/gamestream/${button.value}${payload ? `&${payload}` : ""}`);
 }
 
 export function sendClickToRobot(type: string): void {
-  if (IS_DEMO) { demoBridge.sendClickToRobot(type); return; }
+  if (IS_DEMO) { void getDemoBridge().then((demoBridge) => demoBridge.sendClickToRobot(type)); return; }
   fetch(`api/robot/click/${type}`, { mode: "no-cors" });
 }
 
 export async function sendKeystrokeToHtpc(key: string): Promise<void> {
-  if (IS_DEMO) return demoBridge.sendKeystrokeToHtpc(key);
+  if (IS_DEMO) return (await getDemoBridge()).sendKeystrokeToHtpc(key);
 
   if (USE_YDOTOOL) {
     await fetch(`/api/linux/ydotool/${key}`, { mode: "no-cors" });
@@ -217,7 +223,7 @@ export async function sendKeystrokeToHtpc(key: string): Promise<void> {
 }
 
 export function sendDisableCommandToRobot(): void {
-  if (IS_DEMO) { demoBridge.sendDisableCommandToRobot(); return; }
+  if (IS_DEMO) { void getDemoBridge().then((demoBridge) => demoBridge.sendDisableCommandToRobot()); return; }
   fetch(`api/robot/disable`, { mode: "no-cors" });
 }
 
@@ -227,7 +233,7 @@ export async function sendDenonCommand(
   button: ValueButton,
   path: "command" | "query" = "command",
 ): Promise<FetchResult<string[]>> {
-  if (IS_DEMO) return demoBridge.sendDenonCommand(button, path);
+  if (IS_DEMO) return (await getDemoBridge()).sendDenonCommand(button, path);
 
   const command = button.value;
 
@@ -250,7 +256,7 @@ export async function sendDenonQuery(query: string): Promise<FetchResult<string[
 }
 
 export async function fetchMainZoneData(): Promise<FetchResult<Record<string, string>>> {
-  if (IS_DEMO) return demoBridge.fetchMainZoneData();
+  if (IS_DEMO) return (await getDemoBridge()).fetchMainZoneData();
 
   let data: Record<string, string> | undefined;
   const response = await fetch(`api/denon-http/queryMainZone`);
@@ -291,7 +297,7 @@ export async function fetchMainZoneData(): Promise<FetchResult<Record<string, st
 export async function fetchTplinkInfo(
   deviceId: string,
 ): Promise<FetchResult<TplinkDeviceState>> {
-  if (IS_DEMO) return demoBridge.fetchTplinkInfo(deviceId);
+  if (IS_DEMO) return (await getDemoBridge()).fetchTplinkInfo(deviceId);
   try {
     const response = await fetch(`api/tp-link/info/${deviceId}`);
     if (response.status !== 200) return { error: response.statusText };
@@ -307,7 +313,7 @@ export async function toggleTplinkSwitch(
   deviceId: string,
   on: boolean,
 ): Promise<ApiResponse> {
-  if (IS_DEMO) return demoBridge.toggleTplinkSwitch(deviceId, on);
+  if (IS_DEMO) return (await getDemoBridge()).toggleTplinkSwitch(deviceId, on);
   try {
     await fetch(`api/tp-link/toggle/${deviceId}/${on ? "on" : "off"}`);
     return { ok: true };
@@ -320,7 +326,7 @@ export async function setTplinkBrightness(
   deviceId: string,
   brightness: number,
 ): Promise<ApiResponse> {
-  if (IS_DEMO) return demoBridge.setTplinkBrightness(deviceId, brightness);
+  if (IS_DEMO) return (await getDemoBridge()).setTplinkBrightness(deviceId, brightness);
   try {
     await fetch(`api/tp-link/brightness/${deviceId}/${brightness}`);
     return { ok: true };
