@@ -24,6 +24,22 @@ export const ROKU_APPS: RokuApps = {
   },
 };
 
+/**
+ * Static channel art bundled for demo mode, keyed by Roku channel id.
+ * Demo mode never talks to a real Roku (see IS_DEMO gating in
+ * src/utilities/http.ts), so these local assets stand in for the live
+ * `/icon/{id}` ECP fetch — see useRokuChannelIcon.
+ */
+export const DEMO_CHANNEL_ICONS: Record<string, string> = {
+  [ROKU_APPS.CHANNELS.PLEX.id]: "/roku-icons/plex.svg",
+  [ROKU_APPS.CHANNELS.NETFLIX.id]: "/roku-icons/netflix.svg",
+  [ROKU_APPS.CHANNELS.PEACOCK.id]: "/roku-icons/peacock.svg",
+  [ROKU_APPS.CHANNELS.FOX_SPORTS.id]: "/roku-icons/fox-sports.svg",
+  [ROKU_APPS.CHANNELS.HBO.id]: "/roku-icons/hbo-max.svg",
+  [ROKU_APPS.CHANNELS.PRIME.id]: "/roku-icons/prime.svg",
+  [ROKU_APPS.CHANNELS.APPLE_TV.id]: "/roku-icons/apple-tv.svg",
+};
+
 export const ROKU_STATE_DEFAULTS = {
   powerOn: false,
 } as const;

@@ -96,6 +96,12 @@ export async function setLinuxAudioMode(mode: LinuxAudioModeCommand): Promise<Ap
 // ########   Roku Control   ########
 
 export async function sendRokuQuery(query: string): Promise<Response> {
+  // Every other Roku function below routes through the demo bridge when
+  // IS_DEMO is set. This one has no simulator equivalent (it's a raw ECP
+  // passthrough), so it fails loudly instead of silently reaching the LAN.
+  if (IS_DEMO) {
+    throw new Error("sendRokuQuery is unavailable in demo mode — no real Roku to query.");
+  }
   return fetch(`api/roku/query/${query}`);
 }
 
