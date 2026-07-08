@@ -1,6 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { sendRokuQuery } from "@/utilities/http";
+import { DEMO_CHANNEL_ICONS } from "@/constants/roku";
 
+const IS_DEMO = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 const STORAGE_PREFIX = "rokuIcon:";
 // Legacy key format used by the old blob-URL implementation — safe to remove.
@@ -73,18 +75,23 @@ async function fetchChannelIcon(channelId: string): Promise<string> {
  *
  * Only runs for numeric channel IDs; HDMI-type IDs (e.g. "tvinput.hdmi1")
  * have no icon endpoint and are skipped via `enabled: false`.
+ *
+ * In demo mode the query never runs — there's no real Roku to ask — and the
+ * bundled DEMO_CHANNEL_ICONS asset is supplied synchronously via `initialData`
+ * instead.
  */
 export function useRokuChannelIcon(channelId: string) {
   const isNumeric = !isNaN(parseInt(channelId));
+  const demoIconUrl = IS_DEMO ? DEMO_CHANNEL_ICONS[channelId] : undefined;
 
   return useQuery({
     queryKey: ["rokuChannelIcon", channelId],
     queryFn: () => fetchChannelIcon(channelId),
     staleTime: CACHE_TTL_MS,
-    enabled: isNumeric,
+    enabled: isNumeric && !IS_DEMO,
     // Inject persisted data synchronously on mount — no loading flash for cached icons.
-    initialData: () => readIconCache(channelId)?.dataUrl,
+    initialData: () => demoIconUrl ?? readIconCache(channelId)?.dataUrl,
     // Tell TanStack when the cached data was written so it can evaluate staleTime correctly.
-    initialDataUpdatedAt: () => readIconCache(channelId)?.cachedAt,
+    initialDataUpdatedAt: () => (demoIconUrl ? Date.now() : readIconCache(channelId)?.cachedAt),
   });
 }
