@@ -11,7 +11,7 @@ export const ROKU_APPS: RokuApps = {
     PLEX:      { id: "13535",  label: "Plex - Free Movies & TV" },
     NETFLIX:   { id: "12",     label: "Netflix" },
     PEACOCK:   { id: "593099", label: "Peacock TV" },
-    FOX_SPORTS:{ id: "95307",  label: "FOX Sports" },
+    DISNEY:    { id: "291097", label: "Disney Plus" },
     HBO:       { id: "61322",  label: "HBOMax" },
     PRIME:     { id: "13",     label: "Prime" },
     APPLE_TV:  { id: "551012", label: "AppleTV" },
@@ -31,13 +31,13 @@ export const ROKU_APPS: RokuApps = {
  * `/icon/{id}` ECP fetch — see useRokuChannelIcon.
  */
 export const DEMO_CHANNEL_ICONS: Record<string, string> = {
-  [ROKU_APPS.CHANNELS.PLEX.id]: "/roku-icons/plex.svg",
-  [ROKU_APPS.CHANNELS.NETFLIX.id]: "/roku-icons/netflix.svg",
-  [ROKU_APPS.CHANNELS.PEACOCK.id]: "/roku-icons/peacock.svg",
-  [ROKU_APPS.CHANNELS.FOX_SPORTS.id]: "/roku-icons/fox-sports.svg",
-  [ROKU_APPS.CHANNELS.HBO.id]: "/roku-icons/hbo-max.svg",
-  [ROKU_APPS.CHANNELS.PRIME.id]: "/roku-icons/prime.svg",
-  [ROKU_APPS.CHANNELS.APPLE_TV.id]: "/roku-icons/apple-tv.svg",
+  [ROKU_APPS.CHANNELS.PLEX.id]: "/roku-icons/plex.png",
+  [ROKU_APPS.CHANNELS.NETFLIX.id]: "/roku-icons/netflix.jpeg",
+  [ROKU_APPS.CHANNELS.PEACOCK.id]: "/roku-icons/peacock.png",
+  [ROKU_APPS.CHANNELS.DISNEY.id]: "/roku-icons/disney.png",
+  [ROKU_APPS.CHANNELS.HBO.id]: "/roku-icons/hbo-max.png",
+  [ROKU_APPS.CHANNELS.PRIME.id]: "/roku-icons/prime.jpeg",
+  [ROKU_APPS.CHANNELS.APPLE_TV.id]: "/roku-icons/apple-tv.png",
 };
 
 export const ROKU_STATE_DEFAULTS = {
