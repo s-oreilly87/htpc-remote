@@ -1,0 +1,9 @@
+# Narrow KRFB guard. The table is dedicated to this service, so the complete
+# table can be rebuilt as one nft transaction without touching other tables.
+add table inet htpc_desktop_guard
+flush table inet htpc_desktop_guard
+destroy chain inet htpc_desktop_guard input
+add chain inet htpc_desktop_guard input {
+    type filter hook input priority -10; policy accept;
+}
+add rule inet htpc_desktop_guard input iifname != "lo" tcp dport 5900 reject with tcp reset

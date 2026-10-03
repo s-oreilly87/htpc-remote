@@ -1,0 +1,18 @@
+[Unit]
+Description=HTPC existing KDE Wayland desktop over authenticated VNC
+After=pipewire.service wireplumber.service
+Wants=pipewire.service wireplumber.service
+PartOf=graphical-session.target
+
+[Service]
+Type=simple
+# TigerVNC's w0vncserver shares the current Wayland session. It does not
+# create a second virtual desktop. Keep the RFB listener local to this user
+# session; websockify is the only process that should receive browser traffic.
+ExecStart=/usr/bin/w0vncserver -localhost -rfbport=5900 -PasswordFile=%h/.config/tigervnc/passwd -QueryConnect=0 -RememberDisplayChoice=Always
+Restart=on-failure
+RestartSec=3
+PassEnvironment=WAYLAND_DISPLAY XDG_RUNTIME_DIR DBUS_SESSION_BUS_ADDRESS DISPLAY XAUTHORITY
+
+[Install]
+WantedBy=graphical-session.target

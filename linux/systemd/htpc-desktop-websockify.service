@@ -1,0 +1,16 @@
+[Unit]
+Description=HTPC desktop VNC to WebSocket bridge
+Requires=htpc-desktop-vnc.service
+After=htpc-desktop-vnc.service
+PartOf=graphical-session.target
+
+[Service]
+Type=simple
+# Bind the browser-facing side to loopback. Caddy terminates HTTPS and
+# upgrades /desktop/websockify on the same origin before proxying here.
+ExecStart=/usr/bin/websockify 127.0.0.1:6080 127.0.0.1:5900
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=graphical-session.target
