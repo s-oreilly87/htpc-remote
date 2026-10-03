@@ -18,10 +18,12 @@ WAIT_SECS=6
 WAIT_STEP=0.2
 # ==============
 
-# Extra args to avoid white / blank Electron window under Wine
+# Disable the software GPU fallback too; --disable-gpu alone leaves it enabled.
+# This avoids white / blank Electron windows under Wine.
 PLEXAMP_ARGS=(
   --disable-gpu
   --disable-gpu-rasterization
+  --disable-software-rasterizer
   --force-device-scale-factor=2
 )
 
