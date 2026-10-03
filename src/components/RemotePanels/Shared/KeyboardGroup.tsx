@@ -103,13 +103,10 @@ function KeyboardGroup({ remote }: KeyboardGroupProps) {
   const sendChar = (char) => {
     waitForSendInput.current = 80 + 10; //arbitrary extra delay?
 
-    if (URL_ENCODED_SYMBOLS.hasOwnProperty(char)) {
-      char = URL_ENCODED_SYMBOLS[char];
-    }
-
     if (remote === RemoteType.ROKU) {
       if (!rokuSearchOpen) {
-        sendKey("Lit_" + char);
+        const rokuChar = URL_ENCODED_SYMBOLS[char] ?? char;
+        sendKey("Lit_" + rokuChar);
       }
     } else {
       sendKey(char);

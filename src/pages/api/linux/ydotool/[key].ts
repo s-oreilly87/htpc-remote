@@ -3,6 +3,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import type { ApiResponse } from "@/types/api";
 import { LinuxKeyAction } from "@/constants/htpcControls";
 import { KEYSTROKE } from "@/constants/remotes";
+import { resolveKeystrokeRequestKey } from "@/utilities/keystrokeTransport";
 
 import { runCommand } from "../../lib/command";
 
@@ -41,8 +42,9 @@ export default async function handleYdotoolKeystroke(
   }
 
   const queryKey = req.query.key;
+  const queryValue = req.query.value;
 
-  const key = Array.isArray(queryKey) ? queryKey[0] ?? "" : queryKey ?? "";
+  const key = resolveKeystrokeRequestKey(queryKey, queryValue);
 
   if (!key) {
     res.status(400).json({ ok: false, error: "Missing key" });
