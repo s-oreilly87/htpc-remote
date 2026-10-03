@@ -11,7 +11,15 @@
 remote.sean.home {
 	tls /etc/ssl/localcerts/remote.sean.home.pem /etc/ssl/localcerts/remote.sean.home-key.pem
 
-	reverse_proxy localhost:3000
+	# noVNC's RFB WebSocket is kept on the same HTTPS origin as the app.
+	# The bridge listens on loopback; Caddy is the only network-facing hop.
+	handle /desktop/websockify {
+		reverse_proxy 127.0.0.1:6080
+	}
+
+	handle {
+		reverse_proxy localhost:3000
+	}
 }
 
 # Refer to the Caddy docs for more information:

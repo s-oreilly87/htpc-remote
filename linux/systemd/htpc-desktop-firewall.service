@@ -1,0 +1,16 @@
+[Unit]
+Description=Restrict KRFB VNC to the local host
+After=network-pre.target nftables.service
+Wants=network-pre.target
+Before=graphical.target
+ConditionPathExists=/etc/htpc-desktop-firewall.nft
+
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/nft -f /etc/htpc-desktop-firewall.nft
+# Keep the guard installed if this unit is stopped. Remove it explicitly only
+# after KRFB has stopped: nft destroy table inet htpc_desktop_guard
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

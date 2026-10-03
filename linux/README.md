@@ -188,6 +188,15 @@ sudo systemctl enable --now caddy
 
 Caddy runs as a system service (not a user service) because it needs to bind port 443. The `linux/systemd/caddy.service` file is the standard upstream Caddy service, included here for reference only; it is normally installed by the Caddy apt package.
 
+## Browser desktop preview
+
+The optional [desktop-sharing setup](desktop-sharing/README.md) exposes the
+existing KDE Wayland desktop to the app through an authenticated VNC server,
+loopback websockify, and the same-origin `/desktop/websockify` Caddy route.
+The setup includes a reversible user-service generator and keeps credentials
+on the host. It does not create a separate virtual X11 session. Read its
+KRFB firewall and unattended-access requirements before enabling it.
+
 ---
 
 ## Systemd services
