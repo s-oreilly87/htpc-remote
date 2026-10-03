@@ -1,0 +1,30 @@
+# thrifty:project-workflow:begin (generated from thrifty.project.yml; do not edit)
+name: agent-conventions
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  conventions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install .
+      - name: Check branch name
+        env:
+          THRIFTY_BRANCH: ${{ github.head_ref }}
+        run: thrifty workflow check-branch "$THRIFTY_BRANCH"
+      - name: Check PR title
+        env:
+          THRIFTY_PR_TITLE: ${{ github.event.pull_request.title }}
+        run: thrifty workflow check-pr-title "$THRIFTY_PR_TITLE"
+# thrifty:project-workflow:end

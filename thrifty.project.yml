@@ -1,0 +1,29 @@
+version: 1
+workflow:
+  default_branch: master
+  ticket:
+    key: HTPC
+    branch_case: lower
+    commit_case: upper
+  agents:
+  - claude
+  - cursor
+  - codex
+  - junie
+  branch:
+    ticket: '{agent}/{ticket_lower}-{number}-{slug}'
+    misc: '{agent}/misc-{slug}'
+  commit:
+    types:
+    - feat
+    - fix
+    - chore
+    - refactor
+    - docs
+    - test
+    ticket: '{type}({ticket_upper}-{number}): {description}'
+    misc: '{type}(MISC): {description}'
+  pull_request:
+    ticket_title: '{ticket_upper}-{number}: {title}'
+    misc_title: 'MISC: {title}'
+    target_branch: master
