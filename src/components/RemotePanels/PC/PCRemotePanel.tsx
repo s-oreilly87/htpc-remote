@@ -4,6 +4,7 @@ import AppButtons from "./AppButtons";
 import MediaButtons from "../Shared/MediaButtons";
 import BottomSection from "../Shared/BottomSection";
 import AirMouse from "@/components/RemotePanels/PC/AirMouse";
+import DesktopViewer from "@/components/RemotePanels/PC/DesktopViewer";
 import KeypressButton from "@/components/UI/KeypressButton";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faStar, faCircleInfo, faBars} from "@fortawesome/free-solid-svg-icons";
@@ -28,6 +29,7 @@ function PCRemote() {
       className="absolute w-full panel-height p-3 flex flex-col justify-between"
     >
       <div className="flex flex-col gap-4 justify-between">
+        <DesktopViewer className="w-full" />
         {hasFullHtpcControl
           ? <HTPCPresets />
           // LINUX_X11 remote: only ydotool keystrokes work — no shell scripts
