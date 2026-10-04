@@ -94,7 +94,7 @@
     --remote-brand-height: 3.5rem;
     --remote-header-height: 0px;
     --remote-frame-top: 0px;
-    --remote-frame-bottom: 8px;
+    --remote-frame-bottom: 0px;
     --remote-border-height: 2px;
     --remote-chrome-width: 550px;
   }
@@ -175,6 +175,9 @@
   }
   .remote-shell-inner {
     @apply isolate mx-auto flex h-full w-full max-w-[550px] min-h-0 flex-col overflow-hidden rounded-3xl border border-slate-600/70 bg-slate-800/30 shadow-xl shadow-black/30;
+  }
+  .remote-area[data-layout="compact"] .remote-shell-inner {
+    @apply rounded-t-none;
   }
   .remote-content {
     @apply min-h-0 flex-1 overflow-y-auto overflow-x-hidden;
