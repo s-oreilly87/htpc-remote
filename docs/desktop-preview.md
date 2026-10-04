@@ -65,21 +65,34 @@ restarted successfully, KRFB is listening on 5900 and websockify on loopback
 cursor/click mapping, portal permission persistence after restart, and TV-off
 behavior remain pending.
 
+Before applying or compiling, verify that the official 26.04.3 source retains
+these interfaces: `frameBuffer()` returns a shared pointer passed as `.data()`
+to a helper taking `FrameBuffer *`; `FrameBuffer::customProperty` returns
+`QVariant`; stream metadata exposes a `size` decodable as `QSize` or a
+two-integer `QDBusArgument` structure; and the generated RemoteDesktop proxy
+accepts floating-point absolute coordinates plus an unsigned button state. The
+patch uses `QSize::isEmpty()` guards and accesses `streamLogicalSize` directly
+inside `PWFrameBuffer::Private`. Stop rather than forcing the patch if source
+paths or APIs differ. Use the normal Neon Qt 6, KDE Frameworks, PipeWire, and
+XDG Desktop Portal build dependencies.
+
 Build the exact Neon source package with Debian quilt registration and the
-local `+htpc1` revision. Keep the source directory explicit so a wrapper or
-build-output directory cannot be selected accidentally:
+exact local `+htpc1` revision. Keep the source directory explicit so a wrapper
+or build-output directory cannot be selected accidentally:
 
 ```bash
 KRFB_VERSION='4:26.04.3-0zneon+24.04+noble+release+build53'
+LOCAL_VERSION="${KRFB_VERSION}+htpc1"
 apt-cache policy krfb
 apt-cache showsrc krfb | grep -E '^(Package|Version):'
-apt source "krfb=${KRFB_VERSION}"
+apt source "${KRFB_VERSION}"
 KRFB_SOURCE="$PWD/krfb-26.04.3"
 test -f "$KRFB_SOURCE/debian/rules"
 cd "$KRFB_SOURCE"
 install -m 0644 /path/to/htpc-remote/linux/desktop-sharing/patches/krfb-26.04.3-logical-input.patch debian/patches/htpc-logical-input.patch
 grep -qxF 'htpc-logical-input.patch' debian/patches/series || printf '%s\n' 'htpc-logical-input.patch' >> debian/patches/series
-dch --local +htpc1 'Fix logical pointer scaling for a 300% Wayland output'
+dch --newversion "$LOCAL_VERSION" 'Fix logical pointer scaling for a 300% Wayland output'
+test "$(dpkg-parsechangelog -S Version)" = "$LOCAL_VERSION"
 dpkg-source --before-build
 dpkg-buildpackage -us -uc -b -j4
 ```
@@ -88,41 +101,44 @@ Verify the resulting package metadata and plugin payload before installation:
 
 ```bash
 BUILT_PACKAGE="$KRFB_SOURCE/../krfb_26.04.3-0zneon+24.04+noble+release+build53+htpc1_amd64.deb"
+test "$(dpkg-deb -f "$BUILT_PACKAGE" Version)" = "$LOCAL_VERSION"
 dpkg-deb -f "$BUILT_PACKAGE" Package Version Architecture Size
 sha256sum "$BUILT_PACKAGE"
 dpkg-deb -c "$BUILT_PACKAGE" | grep -E '/(events/xdp|framebuffer/pw)\.so$'
 ```
 
-Before compiling, verify that the 26.04.3 source retains these interfaces:
-`frameBuffer()` returns a shared pointer passed as `.data()` to a helper taking
-`FrameBuffer *`; `FrameBuffer::customProperty` returns `QVariant`; stream
-metadata exposes a `size` decodable as `QSize` or a two-integer
-`QDBusArgument` structure; and the generated RemoteDesktop proxy accepts
-floating-point absolute coordinates plus an unsigned button state. The patch
-uses `QSize::isEmpty()` guards and accesses `streamLogicalSize` directly inside
-`PWFrameBuffer::Private`. Stop rather than forcing the patch if source paths or
-APIs differ. Use the normal Neon Qt 6, KDE Frameworks, PipeWire, and XDG Desktop
-Portal build dependencies.
-
-Back up the pinned official package before installing a locally built one, and
-keep its metadata and digest with the recovery copy:
+Back up the pinned official package before installing a locally built one. The
+recovery directory may also contain an older 26.08.1 package; always use this
+exact pinned filename and validate its version, never a wildcard:
 
 ```bash
 RECOVERY_DIR="$HOME/.local/share/htpc-desktop/recovery-20261004"
+OFFICIAL_PACKAGE="$RECOVERY_DIR/krfb_26.04.3-0zneon+24.04+noble+release+build53_amd64.deb"
 mkdir -p "$RECOVERY_DIR"
-(cd "$RECOVERY_DIR" && apt download "krfb=${KRFB_VERSION}")
-dpkg-deb -f "$RECOVERY_DIR"/krfb_*.deb Package Version Architecture Size
-sha256sum "$RECOVERY_DIR"/krfb_*.deb
+if [ ! -f "$OFFICIAL_PACKAGE" ]; then
+  (cd "$RECOVERY_DIR" && apt download "krfb=${KRFB_VERSION}")
+fi
+test -f "$OFFICIAL_PACKAGE"
+test "$(dpkg-deb -f "$OFFICIAL_PACKAGE" Version)" = "$KRFB_VERSION"
+dpkg-deb -f "$OFFICIAL_PACKAGE" Package Version Architecture Size
+sha256sum "$OFFICIAL_PACKAGE"
 ```
 
-Install the reviewed package only after checking its metadata. If the live
-package must be restored, use the saved official `.deb`, hold that exact
-version, and restart the user services:
+Install the reviewed local package in its own step, allowing the explicitly
+held package to change, then hold the exact local version and restart services:
 
 ```bash
-sudo apt install "$BUILT_PACKAGE"
-# rollback
-sudo apt install --allow-downgrades "$RECOVERY_DIR"/krfb_*.deb
+sudo apt install --allow-change-held-packages "$BUILT_PACKAGE"
+sudo apt-mark hold krfb
+systemctl --user restart htpc-desktop-vnc.service htpc-desktop-websockify.service
+```
+
+Rollback is a separate operation. Validate the exact official package again,
+then install only that file with downgrade and held-package allowances:
+
+```bash
+test "$(dpkg-deb -f "$OFFICIAL_PACKAGE" Version)" = "$KRFB_VERSION"
+sudo apt install --allow-downgrades --allow-change-held-packages "$OFFICIAL_PACKAGE"
 sudo apt-mark hold krfb
 systemctl --user restart htpc-desktop-vnc.service htpc-desktop-websockify.service
 ```
