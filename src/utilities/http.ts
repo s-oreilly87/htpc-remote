@@ -8,6 +8,7 @@ import type { TplinkDeviceState } from "@/context/tplink";
 import { convertKebabToCamel } from "@/utilities/utils";
 import { getPlatformInfo } from "@/hooks/usePlatform";
 import type * as DemoBridge from "@/demo/http-bridge";
+import { buildKeystrokeEndpoint } from "@/utilities/keystrokeTransport";
 
 const IS_DEMO = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
 let demoBridgePromise: Promise<typeof DemoBridge> | null = null;
@@ -221,11 +222,11 @@ export async function sendKeystrokeToHtpc(key: string): Promise<void> {
   if (IS_DEMO) return (await getDemoBridge()).sendKeystrokeToHtpc(key);
 
   if (USE_YDOTOOL) {
-    await fetch(`/api/linux/ydotool/${key}`, { mode: "no-cors" });
+    await fetch(buildKeystrokeEndpoint("/api/linux/ydotool", key), { mode: "no-cors" });
     return;
   }
 
-  fetch(`api/robot/keystroke/${key}`, { mode: "no-cors" });
+  await fetch(buildKeystrokeEndpoint("/api/robot/keystroke", key), { mode: "no-cors" });
 }
 
 export function sendDisableCommandToRobot(): void {

@@ -1,8 +1,10 @@
 import * as robot from "@jitsi/robotjs";
 import type { NextApiRequest, NextApiResponse } from "next";
 
+import type { ApiResponse } from "@/types/api";
 import { KEYSTROKE } from "@/constants/remotes";
 import { getPlatformInfo } from "@/hooks/usePlatform";
+import { resolveKeystrokeRequestKey } from "@/utilities/keystrokeTransport";
 import { libnutTypeString } from "../libnut-macos";
 
 const { platform: PLATFORM, isMac, isLinux, isWindows } = getPlatformInfo();
@@ -45,59 +47,76 @@ let altReleaseTimeout: NodeJS.Timeout | null = null;
 
 export default function handleKeystroke(
   req: NextApiRequest,
-  res: NextApiResponse<string>,
-) {
+  res: NextApiResponse<ApiResponse>,
+): void {
+  if (req.method !== "GET") {
+    res.setHeader("Allow", ["GET"]);
+    res.status(405).json({ ok: false, error: "Method Not Allowed" });
+    return;
+  }
+
   const queryKey = req.query.key;
-  const keyParam = Array.isArray(queryKey) ? (queryKey[0] ?? "") : (queryKey ?? "");
-
-  // Single printable character — type it directly.
-  if (keyParam.length === 1) {
-    // On macOS, use libnut which posts via kCGHIDEventTap so it reaches Spotlight
-    // and other Secure Input Mode-protected fields.  robotjs uses kCGSessionEventTap
-    // which SIM filters out.
-    if (isMac) {
-      libnutTypeString(keyParam);
-    } else {
-      robot.typeString(keyParam);
-    }
-    res.send(`typed '${keyParam}'`);
+  const queryValue = req.query.value;
+  const keyParam = resolveKeystrokeRequestKey(queryKey, queryValue);
+  if (!keyParam) {
+    res.status(400).json({ ok: false, error: "Missing key" });
     return;
   }
 
-  const mapped = keyMap[keyParam];
-  if (!mapped) {
-    // Unknown multi-char token — best-effort type it as a string.
-    if (isMac) {
-      libnutTypeString(keyParam);
-    } else {
-      robot.typeString(keyParam);
+  try {
+    // Single printable character — type it directly.
+    if (keyParam.length === 1) {
+      // On macOS, use libnut which posts via kCGHIDEventTap so it reaches Spotlight
+      // and other Secure Input Mode-protected fields.  robotjs uses kCGSessionEventTap
+      // which SIM filters out.
+      if (isMac) {
+        libnutTypeString(keyParam);
+      } else {
+        robot.typeString(keyParam);
+      }
+      res.status(200).json({ ok: true });
+      return;
     }
-    res.send(`typed '${keyParam}'`);
-    return;
-  }
 
-  // Alt+Tab: hold Alt across repeated taps, release after 1.5 s of inactivity.
-  if (keyParam === KEYSTROKE.PC.ALT_TAB) {
-    if (altReleaseTimeout) {
-      clearTimeout(altReleaseTimeout);
-    } else {
-      robot.keyToggle("alt", "down");
+    const mapped = keyMap[keyParam];
+    if (!mapped) {
+      // Unknown multi-char token — best-effort type it as a string.
+      if (isMac) {
+        libnutTypeString(keyParam);
+      } else {
+        robot.typeString(keyParam);
+      }
+      res.status(200).json({ ok: true });
+      return;
     }
-    robot.keyTap("tab");
-    altReleaseTimeout = setTimeout(() => {
-      robot.keyToggle("alt", "up");
-      altReleaseTimeout = null;
-    }, 1500);
-    res.send("alt+tab");
-    return;
-  }
 
-  // Never pass undefined as the second arg — the native addon sees it as 2 args and throws
-  // "Invalid key flag specified". Only pass modifiers when actually present.
-  if (mapped.modifiers && mapped.modifiers.length > 0) {
-    robot.keyTap(mapped.key, mapped.modifiers);
-  } else {
-    robot.keyTap(mapped.key);
+    // Alt+Tab: hold Alt across repeated taps, release after 1.5 s of inactivity.
+    if (keyParam === KEYSTROKE.PC.ALT_TAB) {
+      if (altReleaseTimeout) {
+        clearTimeout(altReleaseTimeout);
+      } else {
+        robot.keyToggle("alt", "down");
+      }
+      robot.keyTap("tab");
+      altReleaseTimeout = setTimeout(() => {
+        robot.keyToggle("alt", "up");
+        altReleaseTimeout = null;
+      }, 1500);
+      res.status(200).json({ ok: true });
+      return;
+    }
+
+    // Never pass undefined as the second arg — the native addon sees it as 2 args and throws
+    // "Invalid key flag specified". Only pass modifiers when actually present.
+    if (mapped.modifiers && mapped.modifiers.length > 0) {
+      robot.keyTap(mapped.key, mapped.modifiers);
+    } else {
+      robot.keyTap(mapped.key);
+    }
+    res.status(200).json({ ok: true });
+  } catch (error) {
+    console.error(error);
+    const message = error instanceof Error ? error.message : "Unknown error";
+    res.status(500).json({ ok: false, error: message });
   }
-  res.send(`key '${keyParam}' pressed`);
 }
