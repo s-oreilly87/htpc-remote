@@ -34,17 +34,25 @@ existing TigerVNC build containing `w0vncserver` (the upstream 1.16+ line) or
 another host-managed install. This repository does not build TigerVNC during
 app deployment.
 
-KDE KRFB is available as a current KDE Neon package (the connected host's
-candidate is 26.08.1) and its current code selects the PipeWire framebuffer
-plugin on Wayland (and corrects a stale framebuffer setting to `pw` at
-startup). KRFB stores its passwords through KDE
-Desktop Sharing/KWallet, which requires one-time graphical configuration.
-Current KRFB's VNC listener binds `0.0.0.0`, so it is an explicit host
-configuration path. The setup script refuses it unless
-`--allow-krfb-external-bind` is passed. This repository supplies a dedicated
-nftables guard that rejects TCP 5900 unless the input interface is `lo`, while
-preserving other firewall traffic. Install and verify that guard before
-starting KRFB; the websockify listener remains loopback-only.
+KDE KRFB is the practical backend on this KDE Neon host, but the confirmed
+26.08.0 and 26.08.1 releases have a listener regression: the process can
+remain active while never opening its RFB socket. KDE Bug 524610 documents
+the regression and the verified 26.04.3 workaround. The connected host
+therefore pins the official Neon build
+`4:26.04.3-0zneon+24.04+noble+release+build53` until an official release
+containing the upstream fix is verified. Both releases select the
+PipeWire framebuffer plugin on Wayland and use the same portal persistence
+path, so the downgrade changes the listener code without changing the
+browser protocol or the portal model.
+
+KRFB stores its passwords through KDE Desktop Sharing/KWallet, which requires
+one-time graphical configuration. KRFB 26.04.3's VNC listener binds
+`0.0.0.0`, so it is an explicit host configuration path. The setup script
+refuses it unless `--allow-krfb-external-bind` is passed. This repository
+supplies a dedicated nftables guard that rejects TCP 5900 unless the input
+interface is `lo`, while preserving other firewall traffic. Install and
+verify that guard before starting KRFB; the websockify listener remains
+loopback-only.
 
 For unattended browser access, KRFB needs its **Allow connections without an
 invitation** setting enabled and the unattended-access password configured.
@@ -75,7 +83,12 @@ Run these commands as the logged-in KDE user. The script does not install
 packages, write credentials, or modify firewall policy.
 
 ```bash
-sudo apt install krfb python3-websockify
+# Confirm the pinned build is available before applying the rollback.
+apt-cache policy krfb
+sudo apt install --allow-downgrades \
+  krfb=4:26.04.3-0zneon+24.04+noble+release+build53 \
+  python3-websockify
+sudo apt-mark hold krfb
 
 # On the connected KDE Neon host, launch KRFB once and set these graphical
 # options: unattended access + its password, remote desktop control, and
@@ -117,11 +130,18 @@ ss -ltnp | grep -E ':(5900|6080)\b'
 systemctl --user status htpc-desktop-vnc.service htpc-desktop-websockify.service
 ```
 
-With the strict backend, `5900` and `6080` should show loopback addresses.
-With KRFB, `5900` may show all interfaces because KRFB controls the bind;
-verify the dedicated guard with `sudo nft list chain inet htpc_desktop_guard input`
-and test that a LAN client cannot connect. Never publish TCP 5900 directly
-through Caddy or the router.
+An active service is not enough: with this KRFB build, `5900` should show
+`0.0.0.0:5900` (and usually `[::]:5900`) while `6080` must show
+`127.0.0.1:6080`. Verify the dedicated guard with
+`sudo nft list chain inet htpc_desktop_guard input` and test that a LAN client
+cannot connect. Never publish TCP 5900 directly through Caddy or the router.
+The noVNC login should reject an incorrect password and accept the host's
+unattended-access password. A successful password handshake proves listener
+and authentication only; it does not prove that PipeWire has supplied a
+framebuffer. Check the negotiated ServerInit dimensions and treat `0x0` as
+an unresolved capture state: check for a physical-monitor portal prompt and
+confirm that the chosen monitor/output is available before assuming a new
+approval will fix it.
 
 The firewall unit rebuilds only its dedicated table in one nft transaction and
 leaves the rule installed if the unit is stopped. Stop KRFB before removing
@@ -131,6 +151,33 @@ the guard explicitly:
 systemctl --user stop htpc-desktop-vnc.service htpc-desktop-websockify.service
 sudo nft destroy table inet htpc_desktop_guard
 ```
+
+When official release notes or source identify a fixed KRFB release, inspect
+it before changing the hold:
+
+Only remove the hold after the fixed release is confirmed. Then install only
+the KRFB candidate and restart the user services:
+
+```bash
+apt-cache policy krfb
+sudo apt-mark unhold krfb
+sudo apt install --only-upgrade krfb
+systemctl --user restart htpc-desktop-vnc.service htpc-desktop-websockify.service
+ss -ltnp | grep -E ':(5900|6080)\b'
+```
+
+This installs only the KRFB candidate; repeat the authentication, portal, and
+LAN-block checks.
+If the listener regresses, restore the pinned build and hold it immediately:
+
+```bash
+sudo apt install --allow-downgrades \
+  krfb=4:26.04.3-0zneon+24.04+noble+release+build53
+sudo apt-mark hold krfb
+```
+
+The rollback package can remain in the host-local recovery directory; it is
+not an application or repository artifact.
 
 If the Next.js/Caddy host is separate from the HTPC, run the VNC server and
 websockify on the HTPC. Change only Caddy's websockify upstream to the HTPC's
@@ -153,7 +200,9 @@ Validate that behavior on the actual HTPC after the service is working.
 
 ## App integration notes
 
-The app can use noVNC's `RFB` client with a same-origin WebSocket URL:
+The app can use noVNC's `RFB` client with a same-origin WebSocket URL. The
+fixed `/desktop/websockify` route means this integration needs no frontend or
+deployment application environment variables:
 
 ```ts
 const rfb = new RFB(
@@ -185,6 +234,11 @@ controls but the usable size depends on the phone browser viewport.
 - [KDE KRFB current listener](https://raw.githubusercontent.com/KDE/krfb/master/krfb/invitationsrfbserver.cpp)
 - [KDE KRFB current client consent path](https://raw.githubusercontent.com/KDE/krfb/master/krfb/invitationsrfbclient.cpp)
 - [KDE KRFB settings schema](https://github.com/KDE/krfb/blob/master/krfb/krfb.kcfg)
+- [KDE Bug 524610: KRFB 26.08.0/26.08.1 have no VNC listener](https://bugs.kde.org/show_bug.cgi?id=524610)
+- [KDE KRFB 26.04.3 PipeWire source](https://raw.githubusercontent.com/KDE/krfb/v26.04.3/framebuffers/pipewire/pw_framebuffer.cpp)
+- [KDE KRFB 26.08.1 PipeWire source](https://raw.githubusercontent.com/KDE/krfb/v26.08.1/framebuffers/pipewire/pw_framebuffer.cpp)
+- [KDE KRFB 26.04.3 listener source](https://raw.githubusercontent.com/KDE/krfb/v26.04.3/krfb/rfbserver.cpp)
+- [XDG Desktop Portal RemoteDesktop API](https://github.com/flatpak/xdg-desktop-portal/blob/main/data/org.freedesktop.portal.RemoteDesktop.xml)
 - [KDE KRFB virtual monitor helper](https://github.com/KDE/krfb)
 - [Ubuntu Noble KRFB package](https://packages.ubuntu.com/noble/krfb)
 - [Ubuntu Noble TigerVNC scraping package file list](https://packages.ubuntu.com/noble/all/tigervnc-scraping-server/filelist)
