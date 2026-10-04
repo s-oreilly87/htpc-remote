@@ -14,8 +14,9 @@ available Neon/Ubuntu packages are `krfb` (Neon's current KDE build) and
 and does not provide the existing Wayland desktop server needed here.
 
 KRFB is the practical backend for this host, with one version constraint. KDE
-Bug 524610 affects KRFB 26.08.x: the process can be active while its RFB
-listener is never created. The connected host is therefore running the
+Bug 524610 affects the confirmed KRFB 26.08.0 and 26.08.1 releases: the
+process can be active while its RFB listener is never created. The connected
+host is therefore running the
 official Neon build `4:26.04.3-0zneon+24.04+noble+release+build53`, with
 `krfb` held at that version until a fixed release is verified. Its Wayland
 entry point selects the PipeWire framebuffer plugin, which uses the XDG
@@ -60,21 +61,33 @@ krfb
 ```
 
 The exact version must be present in `apt-cache policy`; do not substitute an
-unverified 26.08.x build. Keep the original package in a host-local recovery
-directory if a later rollback is needed. The package hold is a temporary
+unverified 26.08.0 or 26.08.1 build. Keep the original package in a host-local
+recovery directory if a later rollback is needed. The package hold is a temporary
 operational guard, not an application dependency.
 
-When a release newer than 26.08.1 is documented as containing the listener
-fix, inspect it before removing the hold:
+When official release notes or source document a fixed KRFB release, inspect
+the candidate before removing the hold:
+
+Only remove the hold after the fixed version has been confirmed. Then install
+only the KRFB candidate and restart the user services:
 
 ```bash
 apt-cache policy krfb
 sudo apt-mark unhold krfb
+sudo apt install --only-upgrade krfb
+systemctl --user restart htpc-desktop-vnc.service htpc-desktop-websockify.service
+ss -ltnp | grep -E ':(5900|6080)\b'
 ```
 
-Restart the user services and repeat the listener, authentication, portal, and
-LAN-block checks after that package change. Reapply the hold if the listener
-regresses.
+This installs only the KRFB candidate. Repeat the authentication, portal, and
+LAN-block checks. If the listener regresses, restore the pinned build and hold
+it again:
+
+```bash
+sudo apt install --allow-downgrades \
+  krfb=4:26.04.3-0zneon+24.04+noble+release+build53
+sudo apt-mark hold krfb
+```
 
 In KRFB's graphical settings, enable **Allow connections without an
 invitation**, set its unattended-access password, and keep **Allow remote
@@ -127,7 +140,7 @@ systemctl --user status htpc-desktop-vnc.service htpc-desktop-websockify.service
 
 The host guard and both user units are enabled. Verify the actual listeners
 after every restart; service `active` status alone is insufficient because
-the 26.08.x regression left KRFB active without an RFB socket:
+the 26.08.0/26.08.1 regression left KRFB active without an RFB socket:
 
 ```bash
 ss -ltnp | grep -E ':(5900|6080)\b'
@@ -138,10 +151,11 @@ The recovered host should show KRFB on `0.0.0.0:5900` (and commonly
 noVNC login through `/desktop/websockify`; an incorrect unattended password
 must be rejected and the host's private unattended password must complete the
 RFB handshake. A successful handshake is only an authentication check: if
-ServerInit reports `0x0` dimensions, PipeWire has not supplied a capture
-frame yet and the logged-in user must complete the physical-monitor portal
-approval. Capture, remote input, reconnect, and TV-off behavior remain
-pending the live test matrix.
+ServerInit reports `0x0` dimensions, the capture state is unresolved. Check
+for a physical-monitor portal prompt and confirm that the chosen
+monitor/output is available before assuming a new approval will fix it.
+Capture, remote input, reconnect, and TV-off behavior remain pending the live
+test matrix.
 
 The dedicated guard has an `accept` policy and only rejects non-loopback TCP
 5900, preserving unrelated firewall traffic. It is installed by
@@ -184,7 +198,9 @@ off, and that reconnecting does not require a dialog on the unavailable TV.
 
 ## App scope
 
-The browser can use noVNC's `RFB` client with the same-origin WebSocket URL:
+The browser can use noVNC's `RFB` client with the same-origin WebSocket URL.
+The fixed `/desktop/websockify` route requires no frontend or deployment
+application environment variables:
 
 ```ts
 const rfb = new RFB(
@@ -223,7 +239,7 @@ host prerequisites meet it.
 - [KDE KRFB listener and KWallet credentials](https://raw.githubusercontent.com/KDE/krfb/master/krfb/invitationsrfbserver.cpp)
 - [KDE KRFB consent and unattended access](https://raw.githubusercontent.com/KDE/krfb/master/krfb/invitationsrfbclient.cpp)
 - [KDE KRFB settings schema](https://raw.githubusercontent.com/KDE/krfb/master/krfb/krfb.kcfg)
-- [KDE Bug 524610: KRFB 26.08.x has no VNC listener](https://bugs.kde.org/show_bug.cgi?id=524610)
+- [KDE Bug 524610: KRFB 26.08.0/26.08.1 have no VNC listener](https://bugs.kde.org/show_bug.cgi?id=524610)
 - [KDE KRFB 26.04.3 PipeWire source](https://raw.githubusercontent.com/KDE/krfb/v26.04.3/framebuffers/pipewire/pw_framebuffer.cpp)
 - [KDE KRFB 26.08.1 PipeWire source](https://raw.githubusercontent.com/KDE/krfb/v26.08.1/framebuffers/pipewire/pw_framebuffer.cpp)
 - [KDE KRFB 26.04.3 listener source](https://raw.githubusercontent.com/KDE/krfb/v26.04.3/krfb/rfbserver.cpp)
