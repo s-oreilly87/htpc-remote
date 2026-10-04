@@ -13,11 +13,16 @@ available Neon/Ubuntu packages are `krfb` (Neon's current KDE build) and
 `python3-websockify`; Ubuntu's packaged TigerVNC scraping server is for X11
 and does not provide the existing Wayland desktop server needed here.
 
-KRFB is the practical first backend for this host. Its current Wayland entry
-point selects the PipeWire framebuffer plugin, which uses the XDG Desktop
-Portal for screen capture and remote keyboard, pointer, and touch control.
-If the saved framebuffer setting is not `pw`, KRFB corrects it to `pw` when it
-starts under Wayland.
+KRFB is the practical backend for this host, with one version constraint. KDE
+Bug 524610 affects KRFB 26.08.x: the process can be active while its RFB
+listener is never created. The connected host is therefore running the
+official Neon build `4:26.04.3-0zneon+24.04+noble+release+build53`, with
+`krfb` held at that version until a fixed release is verified. Its Wayland
+entry point selects the PipeWire framebuffer plugin, which uses the XDG
+Desktop Portal for screen capture and remote keyboard, pointer, and touch
+control. The 26.04.3 and 26.08.1 PipeWire sources use the same
+`persist_mode=2` and restore-token flow, so this rollback preserves the
+portal permission model while restoring the listener.
 The host setup files are under `linux/desktop-sharing/` and generate user
 services for the logged-in graphical session.
 
@@ -46,9 +51,30 @@ Install the host packages and configure KRFB once from the logged-in Plasma
 session:
 
 ```bash
-sudo apt install krfb python3-websockify
+apt-cache policy krfb
+sudo apt install --allow-downgrades \
+  krfb=4:26.04.3-0zneon+24.04+noble+release+build53 \
+  python3-websockify
+sudo apt-mark hold krfb
 krfb
 ```
+
+The exact version must be present in `apt-cache policy`; do not substitute an
+unverified 26.08.x build. Keep the original package in a host-local recovery
+directory if a later rollback is needed. The package hold is a temporary
+operational guard, not an application dependency.
+
+When a release newer than 26.08.1 is documented as containing the listener
+fix, inspect it before removing the hold:
+
+```bash
+apt-cache policy krfb
+sudo apt-mark unhold krfb
+```
+
+Restart the user services and repeat the listener, authentication, portal, and
+LAN-block checks after that package change. Reapply the hold if the listener
+regresses.
 
 In KRFB's graphical settings, enable **Allow connections without an
 invitation**, set its unattended-access password, and keep **Allow remote
@@ -99,10 +125,23 @@ sudo nft list chain inet htpc_desktop_guard input
 systemctl --user status htpc-desktop-vnc.service htpc-desktop-websockify.service
 ```
 
-The host guard and both user units are now enabled. websockify is verified on
-`127.0.0.1:6080`; KRFB is waiting for its first physical-monitor portal
-approval, so TCP 5900 is not listening yet. Capture, remote input, reconnect,
-and TV-off behavior remain pending that approval and the live test matrix.
+The host guard and both user units are enabled. Verify the actual listeners
+after every restart; service `active` status alone is insufficient because
+the 26.08.x regression left KRFB active without an RFB socket:
+
+```bash
+ss -ltnp | grep -E ':(5900|6080)\b'
+```
+
+The recovered host should show KRFB on `0.0.0.0:5900` (and commonly
+`[::]:5900`) and websockify on `127.0.0.1:6080`. The browser should reach the
+noVNC login through `/desktop/websockify`; an incorrect unattended password
+must be rejected and the host's private unattended password must complete the
+RFB handshake. A successful handshake is only an authentication check: if
+ServerInit reports `0x0` dimensions, PipeWire has not supplied a capture
+frame yet and the logged-in user must complete the physical-monitor portal
+approval. Capture, remote input, reconnect, and TV-off behavior remain
+pending the live test matrix.
 
 The dedicated guard has an `accept` policy and only rejects non-loopback TCP
 5900, preserving unrelated firewall traffic. It is installed by
@@ -125,9 +164,17 @@ KRFB's PipeWire backend requests remote desktop device types `7` (keyboard,
 pointer, and touchscreen), asks the portal to persist permission until
 revoked, and saves the returned restore token in its KDE state config. The
 portal still needs an initial screen/source selection and approval in the
-active session; if a monitor disappears, the portal specification allows the
-restore token to be ignored and a new prompt to appear. A TV-off test must
-therefore confirm both capture and reconnect behavior on this host.
+active session; choose the physical monitor and the keyboard/pointer/touch
+permissions, then choose the persistent approval option when offered. The
+portal permission is separate from the KRFB unattended VNC password. The
+26.04.3 downgrade normally reuses the same app identity and KDE state, so a
+previous persisted approval should survive a restart/package change. The
+portal may still ask again if its restore token is missing or invalid, the
+permission was revoked, or the physical output is unavailable. If a monitor
+disappears, the portal specification explicitly allows a restore token to be
+ignored. A TV-off test must therefore confirm both capture and reconnect
+behavior on this host; the repository's EDID assets are not proof that this
+works.
 
 The repository's EDID override preserves display modes where the HDMI chain
 supports it, but it does not prove that KWin continues to expose a
@@ -176,6 +223,10 @@ host prerequisites meet it.
 - [KDE KRFB listener and KWallet credentials](https://raw.githubusercontent.com/KDE/krfb/master/krfb/invitationsrfbserver.cpp)
 - [KDE KRFB consent and unattended access](https://raw.githubusercontent.com/KDE/krfb/master/krfb/invitationsrfbclient.cpp)
 - [KDE KRFB settings schema](https://raw.githubusercontent.com/KDE/krfb/master/krfb/krfb.kcfg)
+- [KDE Bug 524610: KRFB 26.08.x has no VNC listener](https://bugs.kde.org/show_bug.cgi?id=524610)
+- [KDE KRFB 26.04.3 PipeWire source](https://raw.githubusercontent.com/KDE/krfb/v26.04.3/framebuffers/pipewire/pw_framebuffer.cpp)
+- [KDE KRFB 26.08.1 PipeWire source](https://raw.githubusercontent.com/KDE/krfb/v26.08.1/framebuffers/pipewire/pw_framebuffer.cpp)
+- [KDE KRFB 26.04.3 listener source](https://raw.githubusercontent.com/KDE/krfb/v26.04.3/krfb/rfbserver.cpp)
 - [KDE KWallet API](https://api.kde.org/kwallet-wallet.html)
 - [XDG Desktop Portal RemoteDesktop API](https://github.com/flatpak/xdg-desktop-portal/blob/main/data/org.freedesktop.portal.RemoteDesktop.xml)
 - [TigerVNC `x0vncserver` manual](https://github.com/TigerVNC/tigervnc/blob/master/unix/x0vncserver/x0vncserver.man)
