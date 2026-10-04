@@ -1,41 +1,23 @@
 import React from "react";
 import { RemoteType, KEYSTROKE } from "@/constants/remotes";
 import KeypressButton from "@/components/UI/KeypressButton";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faPowerOff} from "@fortawesome/free-solid-svg-icons";
-import {sendDenonCommand} from "@/utilities/http";
-import {useDenonContext} from "@/context/denon";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPowerOff } from "@fortawesome/free-solid-svg-icons";
+import { useDenonContext } from "@/context/denon";
 
 const remote = RemoteType.DENON;
 
 function DenonBottomLeftButtons() {
-  const { denonState, updateDenonState } = useDenonContext();
-
-  const handleClickPowerButton = async (event: React.MouseEvent<HTMLButtonElement>) => {
-    updateDenonState({
-      powerOn: !denonState.powerOn,
-    });
-
-    // Unless power state could be unknown, awaiting response is unnecessary and could be dropped for responsiveness
-    // For now it will change it back, if response is unexpected
-    const response = await sendDenonCommand(event.currentTarget);
-    if (response.error) {
-      return console.error(response.error);
-    }
-
-    const powerOn = response.data;
-
-    updateDenonState({
-      powerOn: !!powerOn,
-    });
-  };
+  const { togglePower, isPowerPending } = useDenonContext();
   return (
     <div className="flex flex-col w-full pb-4">
       <KeypressButton
         remote={remote}
         className="relative z-50 size-12 p-3 bg-red-600 rounded-full flex items-center justify-center text-white shadow-inner shadow-red-400/70 select-none self-start"
         value={KEYSTROKE.DENON.POWER}
-        onClick={handleClickPowerButton}
+        onClick={togglePower}
+        disabled={isPowerPending}
+        aria-busy={isPowerPending}
       >
         <FontAwesomeIcon icon={faPowerOff} />
       </KeypressButton>

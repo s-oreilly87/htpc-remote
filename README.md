@@ -23,6 +23,8 @@ Built as a personal development project and fully typed in TypeScript.
 
 **HTPC** — Full HTPC control supporting both Windows (EventGhost) and Linux/macOS (robotjs + ydotool + scripts). D-pad navigation, media keys, volume, keyboard input, app launching (Kodi, Plex, Plexamp, Qobuz, Moonlight), and audio/display mode switching.
 
+Denon main-zone power, mute, input and sound mode refresh through HTTP every 10 seconds, independently of advanced controls. Advanced settings refresh over Telnet every 60 seconds while the receiver is on and are skipped in standby. Failed requests retain the last known state. Power clicks wait for confirmation, prevent repeated toggles while pending, and then refresh the receiver state. Sound-mode cycle buttons keep the receiver's two-press behavior: the first press opens its display; a second press within five seconds changes the mode.
+
 ### Responsive remote layout
 
 When the remote area has at least 1730 CSS pixels available, Denon, Roku, and HTPC appear side by side in 550px bordered shells, with fixed device headings and independently scrolling controls. This includes 24px gaps and 16px outer gutters. Below that width, the interface returns directly to one remote with tabs and swipe navigation; the selected remote survives resizing, including selection triggered by Roku HDMI controls. QR and lights remain in the top bar in either layout.

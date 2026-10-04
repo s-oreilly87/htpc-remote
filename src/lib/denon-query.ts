@@ -6,8 +6,11 @@ export const DENON_QUERY_KEY = ["denon-state"] as const;
 
 // ── Low-level telnet fetch helpers ───────────────────────────────────────────
 
-async function fetchLevel(query: string): Promise<string | undefined> {
-  const response = await sendDenonQuery(query);
+async function fetchLevel(
+  query: string,
+  signal?: AbortSignal,
+): Promise<string | undefined> {
+  const response = await sendDenonQuery(query, signal);
   if (response.error) {
     console.error(response.error);
     return undefined;
@@ -15,17 +18,23 @@ async function fetchLevel(query: string): Promise<string | undefined> {
   return response.data?.[0]?.split(" ")[1];
 }
 
-async function fetchOnState(query: string): Promise<boolean | undefined> {
-  const response = await sendDenonQuery(query);
+async function fetchOnState(
+  query: string,
+  signal?: AbortSignal,
+): Promise<boolean | undefined> {
+  const response = await sendDenonQuery(query, signal);
   if (response.error) {
     console.error(response.error);
     return undefined;
   }
-  return response.data?.[0]?.split(" ")[1] === "ON";
+  const value = response.data?.[0]?.split(" ")[1];
+  return value === "ON" ? true : value === "OFF" ? false : undefined;
 }
 
-async function fetchMasterVolume(): Promise<number | undefined> {
-  const masterVolResponse = await sendDenonQuery("MV");
+async function fetchMasterVolume(
+  signal?: AbortSignal,
+): Promise<number | undefined> {
+  const masterVolResponse = await sendDenonQuery("MV", signal);
   if (masterVolResponse.error) {
     console.error(masterVolResponse.error);
     return undefined;
@@ -46,29 +55,19 @@ async function fetchMasterVolume(): Promise<number | undefined> {
   return Number(parseFloat(value).toFixed(1));
 }
 
-export async function fetchDialogueAdjust(): Promise<[boolean, number] | undefined> {
-  const response = await sendDenonQuery("PSDIL");
+export async function fetchDialogueAdjust(
+  signal?: AbortSignal,
+): Promise<[boolean, number] | undefined> {
+  const response = await sendDenonQuery("PSDIL", signal);
   if (response.error) {
     console.error(response.error);
     return undefined;
   }
-  if (!response.data) return undefined;
-
-  const psDilOn = response.data[0].split(" ")[1] === "ON";
-  let PSDIL = 0;
-
-  let levelIndex = 1;
-  while (response.data[levelIndex] === response.data[0] && levelIndex < 8) {
-    levelIndex++;
-  }
-
-  if (response.data[levelIndex]) {
-    PSDIL = parseDialogueAdjustLevel(response.data[levelIndex].split(" ")[1]);
-  } else {
-    console.error("Didn't get 2-part PSDIL data:", response.data);
-  }
-
-  return [psDilOn, PSDIL];
+  const values = response.data?.map((line) => line.split(" ")[1]) ?? [];
+  const onState = values.find((value) => value === "ON" || value === "OFF");
+  const level = values.find((value) => /^\d+(?:\.\d+)?$/.test(value));
+  if (onState === undefined || level === undefined) return undefined;
+  return [onState === "ON", parseDialogueAdjustLevel(level)];
 }
 
 // PSDIL values arrive as integers with an implicit decimal place and a 50 offset.
@@ -84,50 +83,24 @@ export const parseDialogueAdjustLevel = (levelString: string): number => {
   return level - 50;
 };
 
-// ── Main query function ──────────────────────────────────────────────────────
-//
-// The HTTP zone request runs concurrently with the telnet chain, but the
-// telnet queries are kept SEQUENTIAL. The telnet client is a single-connection
-// queue with a 50ms inter-command gap — firing multiple requests in parallel
-// causes commands to overlap, responses to mix, and cascading timeouts.
-//
-// If any telnet field returns undefined (timeout / AVR unresponsive) we throw
-// so TanStack keeps the previous cached state intact rather than writing
-// partial/undefined values into the cache.
-
-export async function fetchDenonState(): Promise<DenonState> {
-  // Run HTTP and telnet chain concurrently — they use completely separate
-  // connections so there's no contention between them.
-  const [mainZoneResponse, telnetResults] = await Promise.all([
-    fetchMainZoneData(),
-    (async () => {
-      const MV = await fetchMasterVolume();
-      const PSDYNVOL = await fetchLevel("PSDYNVOL");
-      const psDynEqOn = await fetchOnState("PSDYNEQ");
-      const PSREFLEV = await fetchLevel("PSREFLEV");
-      const dialogueAdjust = await fetchDialogueAdjust();
-      return { MV, PSDYNVOL, psDynEqOn, PSREFLEV, dialogueAdjust };
-    })(),
-  ]);
-
-  const { MV, PSDYNVOL, psDynEqOn, PSREFLEV, dialogueAdjust } = telnetResults;
-
-  if (
-    MV === undefined ||
-    PSDYNVOL === undefined ||
-    psDynEqOn === undefined ||
-    PSREFLEV === undefined ||
-    dialogueAdjust === undefined
-  ) {
-    throw new Error("Denon: one or more telnet queries failed — keeping previous state");
+// Basic HTTP state has its own poll and does not wait for optional telnet fields.
+export async function fetchDenonState(
+  previous: DenonState,
+  signal?: AbortSignal,
+): Promise<DenonState> {
+  const mainZoneResponse = await fetchMainZoneData(signal);
+  if (mainZoneResponse.error || !mainZoneResponse.data) {
+    throw new Error("Denon: main-zone state unavailable");
   }
-
+  if (!["ON", "OFF"].includes(mainZoneResponse.data.zonePower)) {
+    throw new Error("Denon: invalid main-zone power state");
+  }
   let input = null;
   let powerOn = false;
   let muteOn = false;
   let soundMode: DenonSoundMode = DENON_SOUND_MODES.NONE;
 
-  if (!mainZoneResponse.error && mainZoneResponse.data) {
+  {
     const data = mainZoneResponse.data;
 
     input =
@@ -157,20 +130,26 @@ export async function fetchDenonState(): Promise<DenonState> {
     muteOn = data.mute === "ON";
   }
 
-  const state = {
-    powerOn,
-    muteOn,
-    input,
-    soundMode,
-    dynComp: "",
-    psDilOn: dialogueAdjust?.[0] ?? false,
-    psDynEqOn: psDynEqOn ?? false,
-    MV,
-    PSDIL: dialogueAdjust?.[1] ?? 0,
-    PSREFLEV,
-    PSDYNVOL,
-  };
+  return { ...previous, powerOn, muteOn, input, soundMode };
+}
 
-  console.log(state);
-  return state
+/** Failed optional fields are omitted, preserving their last known values. */
+export async function fetchDenonAdvancedState(
+  signal?: AbortSignal,
+): Promise<Partial<DenonState>> {
+  const MV = await fetchMasterVolume(signal);
+  if (signal?.aborted || MV === undefined) return {};
+  const PSDYNVOL = await fetchLevel("PSDYNVOL", signal);
+  const psDynEqOn = await fetchOnState("PSDYNEQ", signal);
+  const PSREFLEV = await fetchLevel("PSREFLEV", signal);
+  const dialogueAdjust = await fetchDialogueAdjust(signal);
+  return {
+    MV,
+    ...(PSDYNVOL === undefined ? {} : { PSDYNVOL }),
+    ...(psDynEqOn === undefined ? {} : { psDynEqOn }),
+    ...(PSREFLEV === undefined ? {} : { PSREFLEV }),
+    ...(dialogueAdjust === undefined
+      ? {}
+      : { psDilOn: dialogueAdjust[0], PSDIL: dialogueAdjust[1] }),
+  };
 }

@@ -236,11 +236,40 @@ export function sendDisableCommandToRobot(): void {
 
 // ########   Denon Control   ########
 
+// Bound each Denon request, including response-body consumption.
+async function fetchDenon(
+  path: string,
+  signal?: AbortSignal,
+  timeoutMs = 10_000,
+): Promise<Response> {
+  const timeout = AbortSignal.timeout(timeoutMs);
+  return fetch(path, {
+    signal: signal ? AbortSignal.any([signal, timeout]) : timeout,
+  });
+}
+
+export function sendDenonCommand(
+  button: ValueButton,
+  path: "query",
+  signal?: AbortSignal,
+): Promise<FetchResult<string[]>>;
+export function sendDenonCommand(
+  button: ValueButton,
+  path?: "command",
+  signal?: AbortSignal,
+): Promise<FetchResult<string[] | boolean>>;
 export async function sendDenonCommand(
   button: ValueButton,
   path: "command" | "query" = "command",
-): Promise<FetchResult<string[]>> {
-  if (IS_DEMO) return (await getDemoBridge()).sendDenonCommand(button, path);
+  signal?: AbortSignal,
+): Promise<FetchResult<string[] | boolean>> {
+  if (IS_DEMO) {
+    const result = await (await getDemoBridge()).sendDenonCommand(button, path);
+    if (path === "query" && result.data !== undefined && !Array.isArray(result.data)) {
+      return { error: "Denon: invalid query response" };
+    }
+    return result;
+  }
 
   const command = button.value;
 
@@ -249,24 +278,36 @@ export async function sendDenonCommand(
     return { msg: `${command} sent with HTTP request!` };
   }
 
-  const response = await fetch(`api/denon/${path}/${command}`);
-  const body = await response.json();
-
-  if (response.status === 200) {
-    return { data: body.data };
+  try {
+    const response = await fetchDenon(
+      `api/denon/${path}/${command}`,
+      signal,
+      path === "command" ? 20_000 : 10_000,
+    );
+    const body = await response.json();
+    if (response.status === 200) return { data: body.data };
+    return { error: body.error ?? response.statusText };
+  } catch (error) {
+    return {
+      error: error instanceof Error ? error.message : "Denon request failed",
+    };
   }
-  return { error: body.error };
 }
 
-export async function sendDenonQuery(query: string): Promise<FetchResult<string[]>> {
-  return sendDenonCommand({ value: query }, "query");
+export async function sendDenonQuery(
+  query: string,
+  signal?: AbortSignal,
+): Promise<FetchResult<string[]>> {
+  return sendDenonCommand({ value: query }, "query", signal);
 }
 
-export async function fetchMainZoneData(): Promise<FetchResult<Record<string, string>>> {
+export async function fetchMainZoneData(
+  signal?: AbortSignal,
+): Promise<FetchResult<Record<string, string>>> {
   if (IS_DEMO) return (await getDemoBridge()).fetchMainZoneData();
 
   let data: Record<string, string> | undefined;
-  const response = await fetch(`api/denon-http/queryMainZone`);
+  const response = await fetchDenon(`api/denon-http/queryMainZone`, signal);
   if (response.status !== 200) {
     return { error: response.statusText };
   }

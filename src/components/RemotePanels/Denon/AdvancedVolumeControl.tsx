@@ -1,14 +1,14 @@
 import { RemoteType } from "@/constants/remotes";
 import { DENON_SOUND_MODES } from "@/constants/denon";
 import KeypressButton from "@/components/UI/KeypressButton";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faMinus, faPlus} from "@fortawesome/free-solid-svg-icons";
-import {useState} from "react";
-import {sendDenonCommand} from "@/utilities/http";
-import {buttonPress} from "@/utilities/utils";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faMinus, faPlus } from "@fortawesome/free-solid-svg-icons";
+import { useState, type MouseEvent } from "react";
+import { sendDenonCommand } from "@/utilities/http";
+import { buttonPress } from "@/utilities/utils";
 import Toggle from "@/components/UI/Toggle";
-import {dot_matrix} from "@/styles/fonts";
-import {parseDialogueAdjustLevel, useDenonContext} from "@/context/denon";
+import { dot_matrix } from "@/styles/fonts";
+import { parseDialogueAdjustLevel, useDenonContext } from "@/context/denon";
 
 const remote = RemoteType.DENON;
 
@@ -17,21 +17,28 @@ const DIALOGUE_ADJUST_DISABLED_MODES = new Set([
   DENON_SOUND_MODES.DIRECT.value,
   DENON_SOUND_MODES.PURE_DIRECT.value,
 ]);
-const AdvancedVolumeControl = ({}) => {
+const AdvancedVolumeControl = () => {
   const { denonState, isLoading, updateDenonState } = useDenonContext();
 
-  const [buttonPressTimerId, setButtonPressTimerId] = useState<number>(null);
+  const [buttonPressTimerId, setButtonPressTimerId] = useState<number | null>(
+    null,
+  );
 
-  const handleClick = async (event) => {
+  const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
     const button = event.currentTarget;
+    const value = button.value;
     buttonPress(button, buttonPressTimerId, setButtonPressTimerId);
-    const response = await sendDenonCommand(button, "command");
+    return sendAndUpdate(value);
+  };
+
+  const sendAndUpdate = async (value: string) => {
+    const response = await sendDenonCommand({ value }, "command");
     if (response.error) {
       return console.log(response.error);
     }
     // Update denonState based on the response
-    // PSDIL comes in as an array of [PSDIL ON/OFF, PSDIL LEVEL]   BUT we get 4 of each!??
-    for (const line of response.data) {
+    // PSDIL reports its on/off state and level as separate lines.
+    for (const line of Array.isArray(response.data) ? response.data : []) {
       const splitData = line.split(" ");
 
       if (splitData[0] === "PSDIL" && ["ON", "OFF"].includes(splitData[1])) {
@@ -40,25 +47,21 @@ const AdvancedVolumeControl = ({}) => {
         // PSDIL LEVEL needs to be parsed
         const parsedLevel = parseDialogueAdjustLevel(splitData[1]);
         updateDenonState({ PSDIL: parsedLevel });
-        break;  // break after finding first PSDIL LEVEL
-      } else if (denonState.hasOwnProperty(splitData[0])) {
+        break; // break after finding first PSDIL LEVEL
+      } else if (splitData[0] === "PSREFLEV" || splitData[0] === "PSDYNVOL") {
         updateDenonState({ [splitData[0]]: splitData[1] });
       }
     }
   };
 
-  const handleDynEqToggle = (enabled) => {
+  const handleDynEqToggle = (enabled: boolean) => {
     updateDenonState({ psDynEqOn: enabled });
-    handleClick({
-      currentTarget: { value: `PSDYNEQ ${enabled ? "ON" : "OFF"}` },
-    });
+    void sendAndUpdate(`PSDYNEQ ${enabled ? "ON" : "OFF"}`);
   };
 
-  const handlePsDilToggle = (enabled) => {
+  const handlePsDilToggle = (enabled: boolean) => {
     updateDenonState({ psDilOn: enabled });
-    handleClick({
-      currentTarget: { value: `PSDIL ${enabled ? "ON" : "OFF"}` },
-    });
+    void sendAndUpdate(`PSDIL ${enabled ? "ON" : "OFF"}`);
   };
 
   return (
@@ -71,13 +74,16 @@ const AdvancedVolumeControl = ({}) => {
           color={isLoading ? "teal-600" : "teal-500"}
           enabled={denonState.psDilOn}
           onToggle={handlePsDilToggle}
-          disabled={DIALOGUE_ADJUST_DISABLED_MODES.has(denonState.soundMode?.value)}
+          disabled={DIALOGUE_ADJUST_DISABLED_MODES.has(
+            denonState.soundMode?.value,
+          )}
         />
 
         <div
           id="dialog-level"
           className={`flex w-full p-2 gap-1 ${
-            denonState.psDilOn && !DIALOGUE_ADJUST_DISABLED_MODES.has(denonState.soundMode?.value)
+            denonState.psDilOn &&
+            !DIALOGUE_ADJUST_DISABLED_MODES.has(denonState.soundMode?.value)
               ? "opacity-100"
               : "opacity-0"
           } transition-all-500`}
@@ -118,14 +124,15 @@ const AdvancedVolumeControl = ({}) => {
 
       <div className="flex flex-col gap-2 w-2/3">
         <div className="flex flex-col gap-2 justify-center items-center">
-          <label
-            htmlFor="dynamic-volume"
-            className="text-center text-teal-500"
-          >
+          <label htmlFor="dynamic-volume" className="text-center text-teal-500">
             Dynamic Volume
           </label>
 
-          <div id="dynamic-volume" className="flex divide-x divide-slate-500/30" role="group">
+          <div
+            id="dynamic-volume"
+            className="flex divide-x divide-slate-500/30"
+            role="group"
+          >
             <KeypressButton
               remote={remote}
               className={`${denonState.PSDYNVOL === "OFF" ? "btn-primary-denon" : "btn-secondary"} w-1/4 items-center justify-center`}
