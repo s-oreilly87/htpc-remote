@@ -105,7 +105,7 @@ export function sendDisableCommandToRobot(): void {
 export function sendDenonCommand(
   button: ValueButton,
   path: "command" | "query" = "command",
-): Promise<FetchResult<string[]>> {
+): Promise<FetchResult<string[] | boolean>> {
   const result =
     path === "query"
       ? simulator.denon.handleQuery(button.value)

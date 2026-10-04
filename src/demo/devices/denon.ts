@@ -122,7 +122,7 @@ export class DenonSimulator {
 
   // ── Shape: sendDenonCommand (command mutations) ───────────────────────────
 
-  handleCommand(command: string): FetchResult<string[]> {
+  handleCommand(command: string): FetchResult<string[] | boolean> {
     // Input switch — value matches a DENON_INPUTS entry
     const inputEntry = Object.values(DENON_INPUTS).find((i) => i.value === command);
     if (inputEntry) {
@@ -226,9 +226,7 @@ export class DenonSimulator {
         const powerOn = !this.state.powerOn;
         this.state = { ...this.state, powerOn };
         this.onMutate(command, `Power ${powerOn ? "ON" : "OFF"}`);
-        // The UI does !!response.data to confirm the new power state.
-        // Return a truthy array when on, undefined (falsy) when off.
-        return { data: powerOn ? ["PWON"] : undefined };
+        return { data: powerOn };
       }
 
       case DenonKeystroke.MUTE: {

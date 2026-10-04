@@ -1,182 +1,176 @@
 import net from "net";
 import { TelnetSocket } from "telnet-stream";
-import createDenonEventBus, { type DenonEventBus } from "./denon-telnet-wrapper";
 import { DENON_IP } from "@/constants/denon";
 
-// ─── Parameters ────────────────────────────────────────────────────────────────
-
-const DENON_PORT = 23;
-
-/** After the last data chunk, wait this long before treating a response as complete. */
-const RESPONSE_COLLECTION_MS = 100;
-
-/**
- * If no data arrives at all within this window, give up and call the callback
- * with an error. This covers the case where the AVR simply doesn't respond.
- */
-const RESPONSE_TIMEOUT_MS = 3000;
-
-/**
- * Minimum gap between commands. The Denon/Marantz AVR can't handle back-to-back
- * commands with no breathing room.
- *
- * NOTE: this is shorter than RESPONSE_COLLECTION_MS (100ms), which means the next
- * command can be written before the previous response is fully collected. In practice
- * this is fine because the AVR responds very quickly, but it is a latent race if
- * responses are slow. A correct fix would be to send the next command only after the
- * previous callback fires, not on a fixed timer.
- */
-const COMMAND_INTERVAL_MS = 50;
-
-/** TCP inactivity timeout. Socket is destroyed and will reconnect on next command. */
-const SOCKET_INACTIVITY_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
-
-// ─── Types ───────────────────────────────────────────────────────────────────
-
 type NodeCallback<T> = (error: string | null, data?: T) => void;
-
 interface CmdQueueItem {
   cmd: string;
   callback: NodeCallback<string[]>;
+  queueDeadline?: ReturnType<typeof setTimeout>;
+}
+interface Options {
+  port?: number;
+  responseTimeoutMs?: number;
+  collectionMs?: number;
+  connectTimeoutMs?: number;
 }
 
-// ─── Class ───────────────────────────────────────────────────────────────────
-
-class DenonTelnet {
-  private readonly host: string;
-  private connection: DenonEventBus | null = null;
-  private busy = false;
+/** One command owns the stream until its matching response completes. */
+export class DenonTelnet {
+  private socket: net.Socket | null = null;
+  private transport: TelnetSocket | null = null;
+  private connected = false;
   private readonly cmdQueue: CmdQueueItem[] = [];
+  private active: CmdQueueItem | null = null;
+  private lines: string[] = [];
+  private fragment = "";
+  private deadline: ReturnType<typeof setTimeout> | null = null;
+  private collection: ReturnType<typeof setTimeout> | null = null;
+  private connectionDeadline: ReturnType<typeof setTimeout> | null = null;
+  private nextCommand: ReturnType<typeof setTimeout> | null = null;
 
-  // Shared state for the active response handler. Only one command is in-flight
-  // at a time, so a single shared buffer is safe as long as commands aren't
-  // dispatched before the previous response is collected (see COMMAND_INTERVAL_MS note).
-  private receivedLines: string[] = [];
-  private responseTimer: ReturnType<typeof setTimeout> | null = null;
-  private activeHandler: ((data: Buffer) => void) | null = null;
+  constructor(
+    private readonly host: string,
+    private readonly options: Options = {},
+  ) {}
 
-  constructor(host: string) {
-    this.host = host;
+  private clearResponseTimers(): void {
+    if (this.deadline) clearTimeout(this.deadline);
+    if (this.collection) clearTimeout(this.collection);
+    this.deadline = this.collection = null;
   }
 
-  // ─── Connection ──────────────────────────────────────────────────────────
-
-  private resetConnectionState(): void {
-    this.connection = null;
-    // Clear any in-flight response handler so it doesn't leak
-    if (this.responseTimer) {
-      clearTimeout(this.responseTimer);
-      this.responseTimer = null;
+  /** Disconnect fails the whole pending batch once; a later request may reconnect. */
+  private failConnection(socket: net.Socket, error: string): void {
+    if (this.socket !== socket) return; // Ignore events from an old connection.
+    this.clearResponseTimers();
+    if (this.connectionDeadline) clearTimeout(this.connectionDeadline);
+    if (this.nextCommand) clearTimeout(this.nextCommand);
+    this.connectionDeadline = this.nextCommand = null;
+    this.socket = null;
+    this.transport = null;
+    this.connected = false;
+    this.fragment = "";
+    this.lines = [];
+    const pending = [
+      ...(this.active ? [this.active] : []),
+      ...this.cmdQueue.splice(0),
+    ];
+    this.active = null;
+    socket.destroy();
+    for (const item of pending) {
+      if (item.queueDeadline) clearTimeout(item.queueDeadline);
+      item.callback(error);
     }
-    this.activeHandler = null;
-    this.receivedLines = [];
-    // Reset busy so the next enqueue() call kicks off a fresh connect attempt
-    this.busy = false;
   }
 
   connect(): void {
-    try {
-      const socket = net.createConnection({ port: DENON_PORT, host: this.host }, () => {
-        console.log("Denon: telnet connected");
-        this.processQueue();
-      });
+    if (this.socket) return;
+    const socket = net.createConnection({
+      port: this.options.port ?? 23,
+      host: this.host,
+    });
+    this.socket = socket;
+    const fail = (message: string) => this.failConnection(socket, message);
+    // net.Socket emits errors independently of the Telnet transform.
+    socket.on("error", (error) => fail(`Denon: ${error.message}`));
+    socket.on("close", () => fail("Denon: connection closed"));
+    socket.setTimeout(5 * 60 * 1000, () => fail("Denon: socket idle timeout"));
+    this.connectionDeadline = setTimeout(
+      () => fail("Denon: connection timed out"),
+      this.options.connectTimeoutMs ?? 3000,
+    );
+    const transport = new TelnetSocket(socket);
+    this.transport = transport;
+    transport.on("error", (error: Error) => fail(`Denon: ${error.message}`));
+    transport.on("data", (data: Buffer) => {
+      if (this.socket === socket) this.receive(data);
+    });
+    socket.on("connect", () => {
+      if (this.socket !== socket) return;
+      if (this.connectionDeadline) clearTimeout(this.connectionDeadline);
+      this.connectionDeadline = null;
+      this.connected = true;
+      this.processQueue();
+    });
+  }
 
-      // Set TCP-level inactivity timeout. If no bytes flow for this long, destroy
-      // the socket. The next command sent to the queue will trigger a reconnect.
-      socket.setTimeout(SOCKET_INACTIVITY_TIMEOUT_MS);
-      socket.on("timeout", () => {
-        console.log("Denon: socket idle timeout — closing");
-        socket.destroy();
-      });
+  private matchesResponse(line: string, command: string): boolean {
+    const prefix = command.replace(/\s*\?.*$/, "").trim();
+    if (prefix === "ZM") return /^ZM(ON|OFF)$/.test(line);
+    if (prefix === "MU") return /^MU(ON|OFF)$/.test(line);
+    if (prefix === "MV") return /^MV\d+$/.test(line); // MVMAX is unsolicited metadata.
+    if (!command.includes("?")) {
+      const zonePower = /^(Z[2-3]|ZM)(ON|OFF)$/.exec(command);
+      if (zonePower || /^(MU(ON|OFF)|MV\d+)$/.test(command))
+        return line === command;
+      return line.startsWith(command.split(" ")[0].slice(0, 2));
+    }
+    return line.startsWith(prefix);
+  }
 
-      const telnetSocket = new TelnetSocket(socket);
-
-      // Forward raw data from the transport layer into our wrapper's registry.
-      // See denon-telnet-wrapper.ts for why this indirection is necessary.
-      telnetSocket.on("data", (data: Buffer) => {
-        this.connection?.emit("data", data);
-      });
-
-      telnetSocket.on("close", () => {
-        console.log("Denon: telnet connection closed");
-        this.resetConnectionState();
-      });
-
-      telnetSocket.on("error", (error: Error) => {
-        console.error("Denon: telnet error:", error.message);
-        // Do NOT auto-reconnect here — if the AVR is off or unreachable this
-        // becomes a tight infinite loop. Instead, reset state so the next
-        // queued command triggers a fresh connect attempt.
-        this.resetConnectionState();
-      });
-
-      this.connection = createDenonEventBus(telnetSocket);
-    } catch (err) {
-      console.error("Denon: failed to open telnet connection:", err);
+  private receive(data: Buffer): void {
+    this.fragment += data.toString();
+    const complete = this.fragment.split("\r");
+    this.fragment = complete.pop() ?? "";
+    for (const raw of complete) {
+      const line = raw.trim();
+      if (!this.active || !this.matchesResponse(line, this.active.cmd))
+        continue;
+      this.lines.push(line);
+      if (this.collection) clearTimeout(this.collection);
+      this.collection = setTimeout(
+        () => this.finish(),
+        this.options.collectionMs ?? 100,
+      );
     }
   }
 
-  // ─── Queue Processing ────────────────────────────────────────────────────
+  private finish(): void {
+    const item = this.active;
+    if (!item) return;
+    this.clearResponseTimers();
+    this.active = null;
+    const lines = this.lines;
+    this.lines = [];
+    // Enqueues during the callback must also respect the inter-command gap.
+    this.nextCommand = setTimeout(() => {
+      this.nextCommand = null;
+      this.processQueue();
+    }, 50);
+    item.callback(null, lines);
+  }
 
   private processQueue(): void {
-    if (this.cmdQueue.length === 0) {
-      this.busy = false;
-      return;
-    }
-
-    if (!this.connection) {
-      this.connect();
-      return;
-    }
-
+    if (this.active || this.nextCommand || !this.cmdQueue.length) return;
+    if (!this.socket) return this.connect();
+    if (!this.connected) return;
     const item = this.cmdQueue.shift()!;
-    this.registerResponseHandler(item.callback);
-    this.connection.write(item.cmd + "\r");
-
-    // No-response guard — cleared by the data handler when data arrives
-    this.responseTimer = setTimeout(() => {
-      if (this.activeHandler) {
-        this.connection?.removeListener("data", this.activeHandler);
-        this.activeHandler = null;
-      }
-      this.receivedLines = [];
-      item.callback(`Denon: no response to "${item.cmd}"`);
-    }, RESPONSE_TIMEOUT_MS);
-
-    setTimeout(() => this.processQueue(), COMMAND_INTERVAL_MS);
-  }
-
-  private registerResponseHandler(callback: NodeCallback<string[]>): void {
-    const handler = (data: Buffer): void => {
-      // First chunk of data — cancel the no-response timer
-      if (this.responseTimer) {
-        clearTimeout(this.responseTimer);
-      }
-
-      const lines = data.toString().trim().split("\r").filter(Boolean);
-      this.receivedLines.push(...lines);
-
-      // After a gap with no more data, the response is complete
-      this.responseTimer = setTimeout(() => {
-        this.connection?.removeListener("data", handler);
-        this.activeHandler = null;
-
-        const collected = this.receivedLines;
-        this.receivedLines = [];
-        callback(null, collected);
-      }, RESPONSE_COLLECTION_MS);
-    };
-
-    this.activeHandler = handler;
-    this.connection?.on("data", handler);
+    if (item.queueDeadline) clearTimeout(item.queueDeadline);
+    this.active = item;
+    this.lines = [];
+    this.fragment = "";
+    this.deadline = setTimeout(() => {
+      if (this.socket)
+        this.failConnection(this.socket, `Denon: no response to "${item.cmd}"`);
+    }, this.options.responseTimeoutMs ?? 3000);
+    try {
+      this.transport!.write(item.cmd + "\r");
+    } catch (error) {
+      this.failConnection(this.socket, `Denon: ${String(error)}`);
+    }
   }
 
   private enqueue(cmd: string, callback: NodeCallback<string[]>): void {
-    this.cmdQueue.push({ cmd, callback });
-    if (!this.busy) {
-      this.busy = true;
-      this.processQueue();
-    }
+    const item: CmdQueueItem = { cmd, callback };
+    item.queueDeadline = setTimeout(() => {
+      const index = this.cmdQueue.indexOf(item);
+      if (index < 0) return;
+      this.cmdQueue.splice(index, 1);
+      callback(`Denon: queue timed out for "${cmd}"`);
+    }, 8000);
+    this.cmdQueue.push(item);
+    this.processQueue();
   }
 
   // ─── Public API ──────────────────────────────────────────────────────────
@@ -210,7 +204,8 @@ class DenonTelnet {
     const regexp = RegExp(`(?:^|[\r])${prefix}MU(ON|OFF)`);
 
     this.enqueue(`${prefix}MU?`, (error, data) => {
-      if (error || !data) return callback(error ?? "Denon: no data for mute query");
+      if (error || !data)
+        return callback(error ?? "Denon: no data for mute query");
       const state = this.parseFirstMatch(data, regexp);
       if (state) {
         callback(null, state === "ON");
@@ -220,7 +215,11 @@ class DenonTelnet {
     });
   }
 
-  setMuteState(muted: boolean, zone: string | null, callback: NodeCallback<boolean>): void {
+  setMuteState(
+    muted: boolean,
+    zone: string | null,
+    callback: NodeCallback<boolean>,
+  ): void {
     const prefix = !zone || zone === "ZM" ? "" : zone;
     this.enqueue(`${prefix}MU${muted ? "ON" : "OFF"}`, (error) => {
       if (error) return callback(error);
@@ -228,13 +227,17 @@ class DenonTelnet {
     });
   }
 
-  getZonePowerState(zone: string | null, callback: NodeCallback<boolean>): void {
+  getZonePowerState(
+    zone: string | null,
+    callback: NodeCallback<boolean>,
+  ): void {
     // Main zone power uses "ZM"; other zones use their own prefix (Z2, Z3…)
     const prefix = !zone || zone === "ZM" ? "ZM" : zone;
     const regexp = RegExp(`(?:^|[\r])${prefix}(ON|OFF)`);
 
     this.enqueue(`${prefix}?`, (error, data) => {
-      if (error || !data) return callback(error ?? "Denon: no data for power query");
+      if (error || !data)
+        return callback(error ?? "Denon: no data for power query");
       const state = this.parseFirstMatch(data, regexp);
       if (state) {
         callback(null, state === "ON");
@@ -244,7 +247,11 @@ class DenonTelnet {
     });
   }
 
-  setZonePowerState(on: boolean, zone: string | null, callback: NodeCallback<boolean>): void {
+  setZonePowerState(
+    on: boolean,
+    zone: string | null,
+    callback: NodeCallback<boolean>,
+  ): void {
     const prefix = !zone || zone === "ZM" ? "ZM" : zone;
     this.enqueue(`${prefix}${on ? "ON" : "OFF"}`, (error) => {
       if (error) return callback(error);
@@ -265,7 +272,8 @@ class DenonTelnet {
     const regexp = RegExp(`(?:^|[\r])${prefix}(\\d+)`);
 
     this.enqueue(`${prefix}?`, (error, data) => {
-      if (error || !data) return callback(error ?? "Denon: no data for volume query");
+      if (error || !data)
+        return callback(error ?? "Denon: no data for volume query");
       const raw = this.parseFirstMatch(data, regexp);
       if (raw) {
         callback(null, parseInt((raw + "0").slice(0, 3), 10) * 0.1);
@@ -283,7 +291,11 @@ class DenonTelnet {
    *   80.5 → "805" → MV805 ✓
    *    5.0 →  "50" → "050" → MV050 ✓
    */
-  setVolume(volume: number, zone: string | null, callback: NodeCallback<number>): void {
+  setVolume(
+    volume: number,
+    zone: string | null,
+    callback: NodeCallback<number>,
+  ): void {
     const prefix = !zone || zone === "ZM" ? "MV" : zone;
     const encoded = String(Math.round(volume * 10)).padStart(3, "0");
 
@@ -302,7 +314,6 @@ class DenonTelnet {
 // request.
 
 declare global {
-  // eslint-disable-next-line no-var
   var _denonTelnet: DenonTelnet | undefined;
 }
 

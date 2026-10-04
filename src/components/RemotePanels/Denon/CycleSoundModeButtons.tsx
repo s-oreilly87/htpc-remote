@@ -35,7 +35,7 @@ function CycleSoundModes({ cycleTimeout, setCycleTimeout }) {
       return console.error(response.error);
     }
 
-    const soundMode = await parseSoundModeFromResponseData(response.data);
+    const soundMode = await parseSoundModeFromResponseData(Array.isArray(response.data) ? response.data : []);
     if (soundMode) {
       updateDenonState({ soundMode });
     }

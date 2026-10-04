@@ -31,7 +31,7 @@ const AdvancedVolumeControl = ({}) => {
     }
     // Update denonState based on the response
     // PSDIL comes in as an array of [PSDIL ON/OFF, PSDIL LEVEL]   BUT we get 4 of each!??
-    for (const line of response.data) {
+    for (const line of Array.isArray(response.data) ? response.data : []) {
       const splitData = line.split(" ");
 
       if (splitData[0] === "PSDIL" && ["ON", "OFF"].includes(splitData[1])) {
