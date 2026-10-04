@@ -8,8 +8,7 @@ import PCRemotePanel from "@/components/RemotePanels/PC/PCRemotePanel";
 import RokuRemotePanel from "@/components/RemotePanels/Roku/RokuRemotePanel";
 import DenonRemotePanel from "@/components/RemotePanels/Denon/DenonRemotePanel";
 import SlideScrollTransition from "@/components/UI/SlideScrollTransition";
-import { buttonPress, usePrevious } from "@/utilities/utils";
-import { useState, type MouseEvent } from "react";
+import { usePrevious } from "@/utilities/utils";
 import { shouldAnimateRemoteChange } from "./remoteLayout";
 
 interface Props {
@@ -26,41 +25,11 @@ function RemotePanelSlideScroll({
   prevRemote,
 }: Props) {
   const previousDesktop = usePrevious(isDesktop);
-  const [buttonPressTimerId, setButtonPressTimerId] = useState<number | null>(
-    null,
-  );
-  const selectRemote = (
-    event: MouseEvent<HTMLButtonElement>,
-    remote: RemoteType,
-  ) => {
-    setSelectedRemote(remote);
-    buttonPress(event.currentTarget, buttonPressTimerId, setButtonPressTimerId);
-  };
   // A mode change snaps the same mounted panels into place. Subsequent compact
   // selections resume the usual swipe/tab animation.
   const animate = shouldAnimateRemoteChange(isDesktop, previousDesktop);
   return (
     <div className="remote-panels" aria-label="Remote controls">
-      {!isDesktop && (
-        <div
-          className="remote-tabs"
-          data-remote={selectedRemote}
-          aria-label="Remote selection"
-        >
-          {REMOTE_ORDER.map((remote) => (
-            <button
-              key={remote}
-              type="button"
-              className="remote-tab"
-              data-remote={remote}
-              aria-pressed={selectedRemote === remote}
-              onClick={(event) => selectRemote(event, remote)}
-            >
-              {REMOTE_LABEL[remote]}
-            </button>
-          ))}
-        </div>
-      )}
       <div className="remote-slides">
         {REMOTE_ORDER.map((remote) => (
           <SlideScrollTransition
