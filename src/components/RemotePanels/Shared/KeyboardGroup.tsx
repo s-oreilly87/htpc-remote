@@ -206,7 +206,7 @@ function KeyboardGroup({ remote }: Props) {
       sendStringAsChars(newString);
       setInputSoFar(inputSoFar + newString);
     } else if (inputType === "insertFromPaste") {
-      const pastedString = event.currentTarget.value.substring(
+      const pastedString = (event.target as HTMLInputElement).value.substring(
         inputSoFar.length,
       );
       sendStringAsChars(pastedString);
