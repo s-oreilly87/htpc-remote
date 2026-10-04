@@ -27,6 +27,81 @@ portal permission model while restoring the listener.
 The host setup files are under `linux/desktop-sharing/` and generate user
 services for the logged-in graphical session.
 
+## KRFB logical input scaling backport
+
+The host's capture stream is currently observed at 3840x2160 physical pixels while
+KWin exposes a 1280x720 logical desktop (300% scaling). KRFB 26.04.3 forwards
+raw framebuffer coordinates to the XDG Desktop Portal, so a pointer can appear
+in the top-left quarter of the noVNC image even when the browser and portal
+connections are healthy. KDE Bug [524406](https://bugs.kde.org/show_bug.cgi?id=524406)
+tracks this physical/logical coordinate mismatch.
+
+The repository records a narrow source backport at
+`linux/desktop-sharing/patches/krfb-26.04.3-logical-input.patch`. It adds the
+PipeWire stream's logical size as a framebuffer custom property, maps absolute
+pointer coordinates from frame pixels to that logical size, falls back to the
+original coordinates when metadata is missing, and reports each changed button
+with the current button state. The patch is for the official Neon 26.04.3
+source package only. It is a source record pending an exact-source build and
+host installation; this repository does not claim that the host has installed
+or validated it.
+
+Build and apply it against a matching Neon source package, without mixing it
+with another KRFB release:
+
+```bash
+KRFB_VERSION='4:26.04.3-0zneon+24.04+noble+release+build53'
+apt-cache policy krfb
+apt-cache showsrc krfb | rg -n "^(Package|Version):"
+apt source "krfb=${KRFB_VERSION}"
+KRFB_SOURCE="$(find . -maxdepth 1 -mindepth 1 -type d -name 'krfb-*' -print -quit)"
+cd "$KRFB_SOURCE"
+patch --dry-run -p0 < /path/to/htpc-remote/linux/desktop-sharing/patches/krfb-26.04.3-logical-input.patch
+patch -p0 < /path/to/htpc-remote/linux/desktop-sharing/patches/krfb-26.04.3-logical-input.patch
+dpkg-buildpackage -b -uc -us
+```
+
+Before compiling, verify that the source is the official 26.04.3 package and
+that these source interfaces still match: `frameBuffer()` returns a shared
+pointer whose `.data()` is a `const FrameBuffer *`; `FrameBuffer::customProperty`
+accepts a property name and returns `QVariant`; the PipeWire stream metadata
+contains a `size` value decodable as `QSize` or a two-integer
+`QDBusArgument` structure; and the generated RemoteDesktop D-Bus proxy accepts
+floating-point absolute coordinates plus an unsigned button mask. Stop rather
+than forcing the patch if any of those ABI or source-path assumptions differ.
+The patch requires the package's normal Qt 6, KDE Frameworks, PipeWire, and
+XDG Desktop Portal development dependencies; `dpkg-buildpackage` should use the
+same Neon build dependencies as the unmodified source package.
+
+Install a reviewed locally built package only after checking its package
+metadata and preserving the pinned Neon package for rollback. The rollback is:
+
+```bash
+sudo apt install --allow-downgrades \
+  krfb=4:26.04.3-0zneon+24.04+noble+release+build53
+sudo apt-mark hold krfb
+systemctl --user restart htpc-desktop-vnc.service htpc-desktop-websockify.service
+```
+
+When a later official source/package is available, inspect that source and its
+release notes before changing the hold. Treat it as fixed only when its XDP
+input path maps physical frame coordinates to the compositor's logical stream
+size, preserves an identity fallback for absent metadata, and sends each
+changed button using the resulting current state. Confirm the candidate source
+contains the equivalent fix (the symbol names may differ), build or install
+that candidate, and repeat listener, capture, and input checks. Only then run:
+
+```bash
+sudo apt-mark unhold krfb
+sudo apt install --only-upgrade krfb
+systemctl --user restart htpc-desktop-vnc.service htpc-desktop-websockify.service
+ss -ltnp | grep -E ':(5900|6080)\b'
+```
+
+Keep the hold and the reviewed 26.04.3 package if the candidate lacks the
+logical-coordinate fix or if any listener, capture, authentication, reconnect,
+or TV-off check regresses.
+
 ## Connection topology
 
 The browser connects through the existing HTTPS site to a WebSocket bridge,

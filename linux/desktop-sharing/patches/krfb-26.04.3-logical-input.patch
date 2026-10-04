@@ -1,0 +1,120 @@
+--- framebuffers/pipewire/pw_framebuffer.cpp
++++ framebuffers/pipewire/pw_framebuffer.cpp
+@@ -13,6 +13,7 @@
+ 
+ // Qt
+ #include <QCoreApplication>
++#include <QDBusArgument>
+ #include <QGuiApplication>
+ #include <QScreen>
+ #include <QSocketNotifier>
+@@ -41,6 +42,29 @@
+ 
+ Q_DECLARE_METATYPE(PWFrameBuffer::Stream);
+ Q_DECLARE_METATYPE(PWFrameBuffer::Streams);
++
++static QSize streamSize(const QVariant &value)
++{
++    if (value.canConvert<QSize>()) {
++        return value.toSize();
++    }
++
++    if (value.userType() != qMetaTypeId<QDBusArgument>()) {
++        return {};
++    }
++
++    const QDBusArgument argument = value.value<QDBusArgument>();
++    if (argument.currentType() != QDBusArgument::StructureType) {
++        return {};
++    }
++
++    int width = 0;
++    int height = 0;
++    argument.beginStructure();
++    argument >> width >> height;
++    argument.endStructure();
++    return QSize(width, height);
++}
+ 
+ const QDBusArgument &operator >> (const QDBusArgument &arg, PWFrameBuffer::Stream &stream)
+ {
+@@ -99,6 +123,9 @@
+ 
+     // screen geometry holder
+     QSize videoSize;
++    // Stream metadata uses the compositor's logical coordinate space while
++    // PipeWire frames and RFB coordinates use pixel dimensions.
++    QSize streamLogicalSize;
+ 
+     // sanity indicator
+     bool isValid = true;
+@@ -322,6 +349,11 @@
+         return;
+     }
+ 
++    d->streamLogicalSize = streamSize(streams.first().map.value(QStringLiteral("size")));
++    if (d->streamLogicalSize.isEmpty()) {
++        qCWarning(KRFB_FB_PIPEWIRE) << "Screencast stream did not provide a logical size; pointer scaling disabled";
++    }
++
+     auto streamReply = dbusXdpScreenCastService->OpenPipeWireRemote(sessionPath, QVariantMap());
+     streamReply.waitForFinished();
+     if (!streamReply.isValid()) {
+@@ -512,6 +544,8 @@
+         return QVariant::fromValue<uint>(d->stream->nodeId());
+     } if (property == QLatin1String("session_handle")) {
+         return QVariant::fromValue<QDBusObjectPath>(d->sessionPath);
++    } if (property == QLatin1String("stream_logical_size")) {
++        return d->streamLogicalSize;
+     }
+ 
+     return FrameBuffer::customProperty(property);
+--- events/xdp/xdpevents.cpp
++++ events/xdp/xdpevents.cpp
+@@ -15,6 +15,8 @@
+ 
+ #include <QApplication>
+ #include <QGlobalStatic>
++#include <QPointF>
++#include <QSize>
+ 
+ class EventData
+ {
+@@ -34,6 +36,18 @@
+ 
+ Q_GLOBAL_STATIC(EventData, data)
+ 
++static QPointF logicalPosition(const FrameBuffer *frameBuffer, int x, int y)
++{
++    const QSize frameSize(frameBuffer->width(), frameBuffer->height());
++    const QSize logicalSize = frameBuffer->customProperty(QStringLiteral("stream_logical_size")).toSize();
++    if (frameSize.isEmpty() || logicalSize.isEmpty()) {
++        return QPointF(x, y);
++    }
++
++    return QPointF(static_cast<qreal>(x) * logicalSize.width() / frameSize.width(),
++                   static_cast<qreal>(y) * logicalSize.height() / frameSize.height());
++}
++
+ EventData::EventData()
+ {
+     init();
+@@ -61,7 +75,8 @@
+     }
+ 
+     if (x != data->x || y != data->y) {
+-        data->dbusXdpRemoteDesktopService->NotifyPointerMotionAbsolute(sessionHandle, QVariantMap(), streamNodeId, x, y);
++        const QPointF position = logicalPosition(frameBuffer().data(), x, y);
++        data->dbusXdpRemoteDesktopService->NotifyPointerMotionAbsolute(sessionHandle, QVariantMap(), streamNodeId, position.x(), position.y());
+         data->x = x;
+         data->y = y;
+     }
+@@ -75,7 +90,7 @@
+ 
+             if (prevButtonState != currentButtonState) {
+                 if (*it) {
+-                    data->dbusXdpRemoteDesktopService->NotifyPointerButton(sessionHandle, QVariantMap(), *it, buttonMask);
++                    data->dbusXdpRemoteDesktopService->NotifyPointerButton(sessionHandle, QVariantMap(), *it, static_cast<uint>(currentButtonState));
+                 } else {
+                     int axis = 0;
+                     int steps = 0;
