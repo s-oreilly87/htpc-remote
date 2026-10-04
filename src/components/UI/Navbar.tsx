@@ -1,20 +1,34 @@
 import Image from "next/image";
 import React, { useState } from "react";
 
-import { RemoteType } from "@/constants/remotes";
+import { RemoteType, REMOTE_ORDER, REMOTE_LABEL } from "@/constants/remotes";
 import QRCode from "@/components/UI/QRCode";
 import SmartHomeModal from "@/components/RemotePanels/SmartHome/SmartHomeModal";
 import { buttonPress } from "@/utilities/utils";
 import { HAS_TPLINK_DEVICES } from "@/constants/smartHome";
 
-interface NavbarProps {
+interface Props {
+  isDesktop?: boolean;
   className?: string;
   selectedRemote: RemoteType;
   onClickHandler: (event: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
-function Navbar({ className, selectedRemote, onClickHandler }: NavbarProps) {
-  const [buttonPressTimerId, setButtonPressTimerId] = useState<number | undefined>();
+const REMOTE_TAB_ACCENT: Record<RemoteType, string> = {
+  [RemoteType.DENON]: "btn-primary-denon",
+  [RemoteType.ROKU]: "btn-primary-roku",
+  [RemoteType.PC]: "btn-primary-pc",
+};
+
+function Navbar({
+  className,
+  selectedRemote,
+  onClickHandler,
+  isDesktop = false,
+}: Props) {
+  const [buttonPressTimerId, setButtonPressTimerId] = useState<
+    number | undefined
+  >();
   const [qrModalOpen, setQrModalOpen] = useState(false);
   const [smartHomeModalOpen, setSmartHomeModalOpen] = useState(false);
 
@@ -37,7 +51,10 @@ function Navbar({ className, selectedRemote, onClickHandler }: NavbarProps) {
     <>
       <QRCode isOpen={qrModalOpen} setIsOpen={setQrModalOpen} />
       {HAS_TPLINK_DEVICES && (
-        <SmartHomeModal isOpen={smartHomeModalOpen} setIsOpen={setSmartHomeModalOpen} />
+        <SmartHomeModal
+          isOpen={smartHomeModalOpen}
+          setIsOpen={setSmartHomeModalOpen}
+        />
       )}
       <nav className={className}>
         <div className="max-w-7xl h-16 w-full mx-auto px-3 z-10 flex relative justify-center">
@@ -62,43 +79,34 @@ function Navbar({ className, selectedRemote, onClickHandler }: NavbarProps) {
               />
             </div>
           )}
-          <div className="flex w-3/4 max-w-[550px] min-w-[270px] justify-center">
-            <div className="w-full flex items-end">
-              <button
-                onClick={handleClick}
-                className={
-                  selectedRemote === RemoteType.DENON
-                    ? "nav-tab-active btn-primary-denon"
-                    : "nav-tab-inactive"
-                }
-                value={RemoteType.DENON}
+          {isDesktop ? (
+            <span className="self-center text-sm tracking-[0.2em] uppercase text-slate-400">
+              Home theater
+            </span>
+          ) : (
+            <div className="flex w-3/4 max-w-[550px] min-w-[270px] justify-center">
+              <div
+                className="w-full flex items-end"
+                aria-label="Remote selection"
               >
-                Denon
-              </button>
-              <button
-                onClick={handleClick}
-                className={
-                  selectedRemote === RemoteType.ROKU
-                    ? "nav-tab-active btn-primary-roku"
-                    : "nav-tab-inactive"
-                }
-                value={RemoteType.ROKU}
-              >
-                Roku
-              </button>
-              <button
-                onClick={handleClick}
-                className={
-                  selectedRemote === RemoteType.PC
-                    ? "nav-tab-active btn-primary-pc"
-                    : "nav-tab-inactive"
-                }
-                value={RemoteType.PC}
-              >
-                HTPC
-              </button>
+                {REMOTE_ORDER.map((remote) => (
+                  <button
+                    key={remote}
+                    onClick={handleClick}
+                    className={
+                      selectedRemote === remote
+                        ? `nav-tab-active ${REMOTE_TAB_ACCENT[remote]}`
+                        : "nav-tab-inactive"
+                    }
+                    value={remote}
+                    aria-pressed={selectedRemote === remote}
+                  >
+                    {REMOTE_LABEL[remote]}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </nav>
     </>

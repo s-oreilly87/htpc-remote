@@ -23,6 +23,12 @@ Built as a personal development project and fully typed in TypeScript.
 
 **HTPC** — Full HTPC control supporting both Windows (EventGhost) and Linux/macOS (robotjs + ydotool + scripts). D-pad navigation, media keys, volume, keyboard input, app launching (Kodi, Plex, Plexamp, Qobuz, Moonlight), and audio/display mode switching.
 
+### Responsive remote layout
+
+When the remote area has at least 1730 CSS pixels available, Denon, Roku, and HTPC appear side by side in 550px bordered shells, with fixed device headings and independently scrolling controls. This includes 24px gaps and 16px outer gutters. Below that width, the interface returns directly to one remote with tabs and swipe navigation; the selected remote survives resizing, including selection triggered by Roku HDMI controls. QR and lights remain in the top bar in either layout.
+
+In demo mode, the desktop simulator occupies a 480px sidebar, so all three remotes require a 2210px viewport while that sidebar is visible. Powered-off overlays stay inside their own remote, and power controls remain accessible. Short viewports scroll each remote's controls below its heading.
+
 ### Scene presets
 
 One button simultaneously switches the Roku to the right HDMI input, changes the HTPC display resolution, sets the audio output mode, sends the appropriate Denon sound mode command, and launches the target app — all in the correct order, with delays tuned so each device has time to settle before the next step. Supported presets:

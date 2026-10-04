@@ -1,21 +1,36 @@
 import { KEYSTROKE, RemoteType } from "@/constants/remotes";
 import { URL_ENCODED_SYMBOLS } from "@/constants/encoding";
-import { useEffect, useRef, useState } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type FormEvent,
+  type KeyboardEvent,
+} from "react";
+import { createPortal } from "react-dom";
 import { Transition } from "@headlessui/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faKeyboard, faMagnifyingGlass, faXmark } from "@fortawesome/free-solid-svg-icons";
+import {
+  faKeyboard,
+  faMagnifyingGlass,
+  faXmark,
+} from "@fortawesome/free-solid-svg-icons";
 import { faWindows, faLinux } from "@fortawesome/free-brands-svg-icons";
 import KeypressButton from "@/components/UI/KeypressButton";
-import { sendKeystrokeToHtpc, sendRokuKeypress, sendRokuSearchQuery } from "@/utilities/http";
+import {
+  sendKeystrokeToHtpc,
+  sendRokuKeypress,
+  sendRokuSearchQuery,
+} from "@/utilities/http";
 import { sleep } from "@/utilities/utils";
 import { throttle } from "lodash";
 import { usePlatform } from "@/hooks/usePlatform";
 
-interface KeyboardGroupProps {
+interface Props {
   remote: RemoteType;
 }
 
-function KeyboardGroup({ remote }: KeyboardGroupProps) {
+function KeyboardGroup({ remote }: Props) {
   const { isMac, isWindows, isLinux } = usePlatform();
   const [inputExpanded, setInputExpanded] = useState(false);
 
@@ -29,7 +44,27 @@ function KeyboardGroup({ remote }: KeyboardGroupProps) {
 
   const waitForSendInput = useRef(100);
 
-  const keyboardInput = useRef(null);
+  const keyboardInput = useRef<HTMLInputElement>(null);
+  const groupRef = useRef<HTMLDivElement>(null);
+  const [remoteControls, setRemoteControls] = useState<HTMLElement | null>(
+    null,
+  );
+  const [expandedWidth, setExpandedWidth] = useState(0);
+
+  useEffect(() => {
+    const controls = groupRef.current?.closest<HTMLElement>(".remote-controls");
+    if (!controls) return;
+    setRemoteControls(controls);
+    const updateWidth = () => {
+      setExpandedWidth(
+        Math.max(0, controls.getBoundingClientRect().width - 24),
+      );
+    };
+    updateWidth();
+    const observer = new ResizeObserver(updateWidth);
+    observer.observe(controls);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     if (!inputExpanded) {
@@ -83,7 +118,7 @@ function KeyboardGroup({ remote }: KeyboardGroupProps) {
     }
   };
 
-  const sendKey = (key) => {
+  const sendKey = (key: string) => {
     if (remote === RemoteType.ROKU) {
       if (!rokuSearchOpen) {
         sendRokuKeypress({ value: key });
@@ -100,7 +135,7 @@ function KeyboardGroup({ remote }: KeyboardGroupProps) {
     }
   };
 
-  const sendChar = (char) => {
+  const sendChar = (char: string) => {
     waitForSendInput.current = 80 + 10; //arbitrary extra delay?
 
     if (remote === RemoteType.ROKU) {
@@ -113,19 +148,20 @@ function KeyboardGroup({ remote }: KeyboardGroupProps) {
     }
   };
 
-  const sendStringAsChars = async (string) => {
-    waitForSendInput.current = string.length * 80 + 10; // arbitrary extra delay?
+  const sendStringAsChars = async (text: string) => {
+    waitForSendInput.current = text.length * 80 + 10; // arbitrary extra delay?
 
-    for (let i = 0; i < string.length; i++) {
+    for (let i = 0; i < text.length; i++) {
       await sleep(100);
-      sendChar(string[i]);
+      sendChar(text[i]);
     }
   };
 
   // Quick mobile debug to use in handleInput
-  //if (inputSoFar.length > 3) {alert(inputType + " : " + event.nativeEvent.data + " : "  + inputSoFar)}
-  const handleInput = async (event) => {
-    const inputType = event.nativeEvent.inputType;
+  //if (inputSoFar.length > 3) {alert(inputType + " : " + inputEvent.data + " : "  + inputSoFar)}
+  const handleInput = async (event: FormEvent<HTMLInputElement>) => {
+    const inputEvent = event.nativeEvent as InputEvent;
+    const inputType = inputEvent.inputType;
 
     // backspace from a keyboard
     if (inputType === "deleteContentBackward") {
@@ -134,21 +170,21 @@ function KeyboardGroup({ remote }: KeyboardGroupProps) {
 
       // input from a keyboard, data = newest char
     } else if (inputType === "insertText") {
-      let newChar = event.nativeEvent.data;
+      const newChar = inputEvent.data ?? "";
       sendChar(newChar);
       setInputSoFar(inputSoFar + newChar);
 
       // Input from Android(mobile?) keyboard -- comes as insertCompositionText - the entire current word at a time (backspace too!)
     } else if (inputType === "insertCompositionText") {
       // Event is null on delete after an autocomplete (or paste?)  - maybe other cases too which could case issues here!!!
-      if (event.nativeEvent.data === null) {
+      if (inputEvent.data === null) {
         sendKey(KEYSTROKE.KEYS.BACKSPACE);
         setInputSoFar(inputSoFar.substring(0, inputSoFar.length - 1));
         await sleep(80);
         return;
       }
 
-      let currentWord = event.nativeEvent.data;
+      const currentWord = inputEvent.data ?? "";
       const lengthOfNewString =
         currentWord.length -
         inputSoFar.substring(inputSoFar.lastIndexOf(" ") + 1).length;
@@ -170,7 +206,9 @@ function KeyboardGroup({ remote }: KeyboardGroupProps) {
       sendStringAsChars(newString);
       setInputSoFar(inputSoFar + newString);
     } else if (inputType === "insertFromPaste") {
-      let pastedString = event.target.value.substring(inputSoFar.length);
+      const pastedString = (event.target as HTMLInputElement).value.substring(
+        inputSoFar.length,
+      );
       sendStringAsChars(pastedString);
       setInputSoFar(inputSoFar + pastedString);
     } else {
@@ -182,8 +220,8 @@ function KeyboardGroup({ remote }: KeyboardGroupProps) {
   const throttledInputHandler = throttle(handleInput, waitForSendInput.current);
 
   // Keydown to handle extra backspaces when input is empty
-  const handleKeyDown = (event) => {
-    if (event.keyCode === 8 && event.target.value === "") {
+  const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Backspace" && event.currentTarget.value === "") {
       // handle backspace when input is empty
       if (remote === RemoteType.ROKU) {
         if (!rokuSearchOpen) {
@@ -195,7 +233,7 @@ function KeyboardGroup({ remote }: KeyboardGroupProps) {
     }
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (rokuSearchOpen) {
       sendRokuSearchQuery(inputSoFar);
@@ -208,8 +246,14 @@ function KeyboardGroup({ remote }: KeyboardGroupProps) {
 
   const handleInputBlur = (event: React.FocusEvent<HTMLInputElement>) => {
     // Let the click handlers on these buttons handle close themselves — don't double-trigger.
-    const actionButtonIds = ["win-key", "search", "toggle-keyboard", "keyboard-submit"];
-    if (actionButtonIds.includes((event.relatedTarget as HTMLElement)?.id)) return;
+    const actionButtonIds = [
+      "win-key",
+      "search",
+      "toggle-keyboard",
+      "keyboard-submit",
+    ];
+    if (actionButtonIds.includes((event.relatedTarget as HTMLElement)?.id))
+      return;
     closeInput();
   };
 
@@ -224,19 +268,27 @@ function KeyboardGroup({ remote }: KeyboardGroupProps) {
   };
 
   return (
-    <div>
-      {inputExpanded && (
-        <div className="bg-slate-900 z-30 panel-height panel-width fixed top-0 left-0 m-3 opacity-90"></div>
-      )}
+    <div ref={groupRef}>
+      {inputExpanded &&
+        remoteControls &&
+        createPortal(
+          <div
+            className="absolute inset-0 z-30 bg-slate-900 opacity-90"
+            aria-hidden="true"
+            data-keyboard-backdrop={remote}
+          />,
+          remoteControls,
+        )}
 
       {/* The form itself handles the width animation via CSS transition — avoids the layout
           reflow jank that HeadlessUI Transition causes when animating width directly. */}
       <form
+        style={inputExpanded ? { width: expandedWidth } : undefined}
         id="keyboard-btn-group"
         autoComplete="off"
         onSubmit={handleSubmit}
         className={`flex absolute bottom-3 h-12 overflow-hidden transition-all duration-300 ease-in-out ${
-          inputExpanded ? "panel-width z-40" : "w-12 z-10"
+          inputExpanded ? "z-40" : "w-12 z-10"
         }`}
       >
         <input type="hidden" value="needed-to-disable-autocomplete" />
@@ -252,10 +304,14 @@ function KeyboardGroup({ remote }: KeyboardGroupProps) {
               }`}
               onClick={handleSearchButton}
             >
-              {!inputExpanded && isMac  && <FontAwesomeIcon icon={faMagnifyingGlass} />}
-              {!inputExpanded && isWindows && <FontAwesomeIcon icon={faWindows} />}
+              {!inputExpanded && isMac && (
+                <FontAwesomeIcon icon={faMagnifyingGlass} />
+              )}
+              {!inputExpanded && isWindows && (
+                <FontAwesomeIcon icon={faWindows} />
+              )}
               {!inputExpanded && isLinux && <FontAwesomeIcon icon={faLinux} />}
-              {inputExpanded           && <FontAwesomeIcon icon={faXmark} />}
+              {inputExpanded && <FontAwesomeIcon icon={faXmark} />}
             </button>
           )}
           {remote === RemoteType.ROKU && (
@@ -270,7 +326,7 @@ function KeyboardGroup({ remote }: KeyboardGroupProps) {
               onClick={handleRokuSearchButton}
             >
               {!inputExpanded && <FontAwesomeIcon icon={faMagnifyingGlass} />}
-              {inputExpanded  && <FontAwesomeIcon icon={faXmark} />}
+              {inputExpanded && <FontAwesomeIcon icon={faXmark} />}
             </button>
           )}
         </div>
@@ -306,7 +362,10 @@ function KeyboardGroup({ remote }: KeyboardGroupProps) {
               className={`btn btn-primary-${remote.toLowerCase()} rounded-r-xl rounded-l-none h-full w-full z-10`}
               value={KEYSTROKE[remote].ENTER}
             >
-              <FontAwesomeIcon icon={faMagnifyingGlass} className="h-1/2 w-1/2 mx-auto" />
+              <FontAwesomeIcon
+                icon={faMagnifyingGlass}
+                className="h-1/2 w-1/2 mx-auto"
+              />
             </button>
           </div>
         </Transition>

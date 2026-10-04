@@ -96,10 +96,65 @@
   .input-active {
     background-color: red !important;
   }
-
 }
 
 /* Available as a direct class in JSX (not @apply — utilities layer resolves after components) */
 .transition-all-500 {
   transition: all 500ms ease-in-out;
+}
+
+/* One persistent remote tree switches between compact slides and desktop shells. */
+@layer components {
+  .remote-panels {
+    @apply relative mx-auto h-full w-full max-w-[550px] overflow-hidden;
+  }
+  .remote-shell {
+    @apply absolute inset-0 w-full;
+  }
+  .remote-shell-inner {
+    @apply flex h-full min-h-0 flex-col;
+  }
+  .remote-content {
+    @apply min-h-0 flex-1 overflow-y-auto overflow-x-hidden;
+  }
+  .remote-controls {
+    @apply relative isolate;
+  }
+  .remote-body {
+    min-height: max(740px, calc(100dvh - 64px));
+  }
+  .remote-area[data-layout="desktop"] .remote-panels {
+    @apply grid max-w-none grid-cols-[repeat(3,550px)] justify-center gap-6 p-4;
+  }
+  .remote-area[data-layout="desktop"] .remote-shell {
+    @apply relative inset-auto min-h-0;
+  }
+  .remote-area[data-layout="desktop"] .remote-shell-inner {
+    @apply isolate overflow-hidden rounded-3xl border border-slate-600/70 bg-slate-800/30 shadow-xl shadow-black/30;
+  }
+  .remote-area[data-layout="desktop"] .remote-shell-inner[data-remote="DENON"] {
+    @apply border-teal-500/40;
+  }
+  .remote-area[data-layout="desktop"] .remote-shell-inner[data-remote="ROKU"] {
+    @apply border-violet-400/40;
+  }
+  .remote-area[data-layout="desktop"] .remote-shell-inner[data-remote="PC"] {
+    @apply border-blue-400/40;
+  }
+  .remote-heading {
+    @apply flex h-14 shrink-0 items-center border-b border-slate-600/40 bg-slate-800/70 px-5 text-xl font-semibold tracking-wide text-slate-100;
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.06);
+  }
+  .remote-shell-inner[data-remote="DENON"] .remote-heading {
+    @apply text-teal-200;
+  }
+  .remote-shell-inner[data-remote="ROKU"] .remote-heading {
+    @apply text-violet-200;
+  }
+  .remote-shell-inner[data-remote="PC"] .remote-heading {
+    @apply text-blue-200;
+  }
+  .remote-area[data-layout="desktop"] .remote-body {
+    min-height: max(850px, calc(100dvh - 154px));
+  }
 }

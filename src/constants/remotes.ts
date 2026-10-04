@@ -4,10 +4,22 @@ export enum RemoteType {
   PC = "PC",
 }
 
+export const REMOTE_ORDER: readonly RemoteType[] = [
+  RemoteType.DENON,
+  RemoteType.ROKU,
+  RemoteType.PC,
+];
+
 export const REMOTE_INDEX: Record<RemoteType, number> = {
   [RemoteType.DENON]: 0,
   [RemoteType.ROKU]: 1,
   [RemoteType.PC]: 2,
+};
+
+export const REMOTE_LABEL: Record<RemoteType, string> = {
+  [RemoteType.DENON]: "Denon",
+  [RemoteType.ROKU]: "Roku",
+  [RemoteType.PC]: "HTPC",
 };
 
 export enum ClickType {
@@ -38,7 +50,7 @@ export enum PcKeystroke {
   FFWD = "KEYSTROKE_RIGHT",
   NEXT = "KEYSTROKE_NEXT",
   OK = "KEYSTROKE_ENTER",
-  CLOSE_WINDOW = "KEYSTROKE_CLOSE_WINDOW"
+  CLOSE_WINDOW = "KEYSTROKE_CLOSE_WINDOW",
 }
 
 export enum RokuKeystroke {
@@ -97,4 +109,3 @@ export const KEYSTROKE = {
   KEYS: KeyCode,
   KEY_COMBOS: KeyCombo,
 } as const;
-
