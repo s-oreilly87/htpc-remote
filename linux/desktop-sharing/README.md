@@ -37,13 +37,14 @@ app deployment.
 KDE KRFB is the practical backend on this KDE Neon host, but the confirmed
 26.08.0 and 26.08.1 releases have a listener regression: the process can
 remain active while never opening its RFB socket. KDE Bug 524610 documents
-the regression and the verified 26.04.3 workaround. The connected host
-therefore pins the official Neon build
-`4:26.04.3-0zneon+24.04+noble+release+build53` until an official release
-containing the upstream fix is verified. Both releases select the
-PipeWire framebuffer plugin on Wayland and use the same portal persistence
-path, so the downgrade changes the listener code without changing the
-browser protocol or the portal model.
+the regression and the verified 26.04.3 workaround. The checked-in source
+targets the official Neon build
+`4:26.04.3-0zneon+24.04+noble+release+build53`; the connected host runs the
+local `+htpc1` logical-input rebuild described below and holds it until both
+the listener and logical-coordinate fixes are covered by a later official
+candidate. Both releases select the PipeWire framebuffer plugin on Wayland and
+use the same portal persistence path, so the pinned-package rollback preserves
+the browser protocol and portal model.
 
 ## Logical input scaling backport
 
@@ -171,32 +172,14 @@ systemctl --user stop htpc-desktop-vnc.service htpc-desktop-websockify.service
 sudo nft destroy table inet htpc_desktop_guard
 ```
 
-When official release notes or source identify a fixed KRFB release, inspect
-it before changing the hold:
-
-Only remove the hold after the fixed release is confirmed. Then install only
-the KRFB candidate and restart the user services:
-
-```bash
-apt-cache policy krfb
-sudo apt-mark unhold krfb
-sudo apt install --only-upgrade krfb
-systemctl --user restart htpc-desktop-vnc.service htpc-desktop-websockify.service
-ss -ltnp | grep -E ':(5900|6080)\b'
-```
-
-This installs only the KRFB candidate; repeat the authentication, portal, and
-LAN-block checks.
-If the listener regresses, restore the pinned build and hold it immediately:
-
-```bash
-sudo apt install --allow-downgrades \
-  krfb=4:26.04.3-0zneon+24.04+noble+release+build53
-sudo apt-mark hold krfb
-```
-
-The rollback package can remain in the host-local recovery directory; it is
-not an application or repository artifact.
+For a fresh machine, complete the graphical setup above, then follow [the
+canonical logical-input backport guide](../../docs/desktop-preview.md#krfb-logical-input-scaling-backport)
+to install the reviewed local package. On the connected host, retain the held
+`+htpc1` package until a later official candidate has been checked against both
+KDE Bug 524610 (listener creation) and KDE Bug 524406 (logical pointer scaling).
+Use the canonical guide's exact package validation, install, rollback, and
+unhold steps; repeat listener, authentication, portal, LAN-block, scaling, and
+TV-off checks before changing the hold.
 
 If the Next.js/Caddy host is separate from the HTPC, run the VNC server and
 websockify on the HTPC. Change only Caddy's websockify upstream to the HTPC's
