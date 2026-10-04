@@ -26,6 +26,7 @@ declare module "@novnc/novnc" {
     viewOnly: boolean;
     scaleViewport: boolean;
     resizeSession: boolean;
+    showDotCursor: boolean;
     addEventListener(
       type: "connect" | "credentialsrequired" | "desktopname" | "disconnect" | "securityfailure",
       listener: (event: RfbEvent) => void,

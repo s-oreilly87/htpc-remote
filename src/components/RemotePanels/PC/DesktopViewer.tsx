@@ -1,5 +1,5 @@
 import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
-import { faDesktop, faKeyboard, faRotateRight, faEye, faGamepad } from "@fortawesome/free-solid-svg-icons";
+import { faDesktop, faKeyboard, faRotateRight, faEye, faGamepad, faRotate } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -9,7 +9,10 @@ import {
   getDesktopViewerWebSocketUrl,
   getKeyboardKeysym,
   getKeyboardInputDelta,
+  getNextDesktopRotation,
 } from "./desktopViewerLogic";
+import type { DesktopRotation } from "./desktopViewerLogic";
+import { attachRotatedDesktopInput, renderRotatedDesktopFrame } from "./desktopViewerInput";
 import type RFB from "@novnc/novnc";
 
 const IS_DEMO = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
@@ -65,12 +68,16 @@ function DesktopViewer({ className = "" }: Props) {
   const [viewOnly, setViewOnly] = useState(false);
   const [keyboardOpen, setKeyboardOpen] = useState(false);
   const [keyboardText, setKeyboardText] = useState("");
+  const [rotation, setRotation] = useState<DesktopRotation>(0);
   const [credentialTypes, setCredentialTypes] = useState<string[]>(["password"]);
   const [credentials, setCredentials] = useState<CredentialFormState>({ password: "", username: "" });
 
   const [viewerTarget, setViewerTarget] = useState<HTMLDivElement | null>(null);
+  const viewerFrameRef = useRef<HTMLDivElement>(null);
+  const visualCanvasRef = useRef<HTMLCanvasElement>(null);
   const rfbRef = useRef<RFB | null>(null);
   const viewOnlyRef = useRef(false);
+  const rotationRef = useRef<DesktopRotation>(0);
   const securityFailureReasonRef = useRef("");
   const connectionDeadlineRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const connectionTimedOutRef = useRef(false);
@@ -99,6 +106,31 @@ function DesktopViewer({ className = "" }: Props) {
     }
 
     setStatus("loading");
+    let detachRotatedInput = () => {};
+    let animationFrame: number | null = null;
+
+    function stopFrameMirror() {
+      detachRotatedInput();
+      detachRotatedInput = () => {};
+      if (animationFrame !== null) {
+        cancelAnimationFrame(animationFrame);
+        animationFrame = null;
+      }
+    }
+
+    function startFrameMirror(sourceCanvas: HTMLCanvasElement) {
+      const visualCanvas = visualCanvasRef.current;
+      const frame = viewerFrameRef.current;
+      if (!visualCanvas || !frame) return;
+
+      detachRotatedInput = attachRotatedDesktopInput(sourceCanvas, visualCanvas, frame, () => rotationRef.current);
+      const drawFrame = () => {
+        if (cancelled) return;
+        renderRotatedDesktopFrame(sourceCanvas, visualCanvas, frame, rotationRef.current);
+        animationFrame = requestAnimationFrame(drawFrame);
+      };
+      drawFrame();
+    }
 
     async function connectViewer() {
       try {
@@ -109,10 +141,13 @@ function DesktopViewer({ className = "" }: Props) {
         const rfb = new RFB(target, websocketUrl, { shared: true });
         rfb.scaleViewport = true;
         rfb.resizeSession = false;
+        rfb.showDotCursor = true;
         rfb.viewOnly = viewOnlyRef.current;
 
         rfb.addEventListener("connect", () => {
           if (cancelled) return;
+          const canvas = target.querySelector("canvas");
+          if (canvas) startFrameMirror(canvas);
           setStatus(CONNECTED_STATUS);
           setErrorMessage("");
           securityFailureReasonRef.current = "";
@@ -135,6 +170,7 @@ function DesktopViewer({ className = "" }: Props) {
         });
         rfb.addEventListener("disconnect", (event) => {
           if (cancelled) return;
+          stopFrameMirror();
           if (connectionTimedOutRef.current) {
             setStatus("error");
             setErrorMessage(securityFailureReasonRef.current || "The desktop connection timed out.");
@@ -161,6 +197,7 @@ function DesktopViewer({ className = "" }: Props) {
 
     return () => {
       cancelled = true;
+      stopFrameMirror();
       connectionTimedOutRef.current = true;
       if (connectionDeadlineRef.current) {
         clearTimeout(connectionDeadlineRef.current);
@@ -176,6 +213,10 @@ function DesktopViewer({ className = "" }: Props) {
       target?.replaceChildren();
     };
   }, [connectAttempt, isOpen, viewerTarget]);
+
+  useEffect(() => {
+    rotationRef.current = rotation;
+  }, [rotation]);
 
   useEffect(() => {
     if (status !== "loading" && status !== "connecting") return;
@@ -346,11 +387,20 @@ function DesktopViewer({ className = "" }: Props) {
                 </span>
               </div>
 
-              <div className="relative min-h-[16rem] bg-black sm:min-h-[24rem]">
+              <div
+                ref={viewerFrameRef}
+                className="relative h-[min(62vh,34rem)] min-h-[16rem] w-full overflow-hidden bg-black sm:min-h-[24rem]"
+              >
                 <div
                   ref={setViewerTargetNode}
-                  className="h-[min(62vh,34rem)] min-h-[16rem] w-full touch-none overflow-hidden bg-black"
+                  className="pointer-events-none absolute inset-0 touch-none overflow-hidden bg-black opacity-0"
+                  aria-hidden="true"
+                />
+                <canvas
+                  ref={visualCanvasRef}
+                  className="absolute inset-0 h-full w-full touch-none"
                   aria-label="Remote desktop display"
+                  style={{ cursor: "crosshair" }}
                 />
                 {(status === "loading" || status === "connecting") && (
                   <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/40 px-6 text-center text-sm text-slate-300">
@@ -418,16 +468,27 @@ function DesktopViewer({ className = "" }: Props) {
               </div>
 
               <div className="flex flex-wrap items-center gap-2 border-t border-slate-800 bg-slate-900/80 p-3">
-                <button
-                  type="button"
-                  className={`btn ${viewOnly ? "btn-secondary" : "btn-primary-pc"} inline-flex items-center gap-2`}
-                  onClick={() => setViewOnly((current) => !current)}
-                  aria-pressed={viewOnly}
-                  disabled={status !== CONNECTED_STATUS}
-                >
-                  <FontAwesomeIcon icon={faEye} />
-                  {viewOnly ? "View only" : "Control"}
-                </button>
+                <div className="flex items-center gap-1" role="group" aria-label="Desktop input mode">
+                  <button
+                    type="button"
+                    className={`btn inline-flex items-center gap-2 ${viewOnly ? "btn-secondary" : "btn-primary-pc"}`}
+                    onClick={() => setViewOnly(false)}
+                    aria-pressed={!viewOnly}
+                    disabled={status !== CONNECTED_STATUS}
+                  >
+                    Control
+                  </button>
+                  <button
+                    type="button"
+                    className={`btn inline-flex items-center gap-2 ${viewOnly ? "btn-primary-pc" : "btn-secondary"}`}
+                    onClick={() => setViewOnly(true)}
+                    aria-pressed={viewOnly}
+                    disabled={status !== CONNECTED_STATUS}
+                  >
+                    <FontAwesomeIcon icon={faEye} />
+                    View only
+                  </button>
+                </div>
                 <button
                   type="button"
                   className="btn btn-secondary inline-flex items-center gap-2"
@@ -453,6 +514,16 @@ function DesktopViewer({ className = "" }: Props) {
                     className="min-w-[12rem] flex-1 rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white outline-none focus:border-blue-400"
                   />
                 )}
+                <button
+                  type="button"
+                  className="btn btn-secondary inline-flex items-center gap-2"
+                  onClick={() => setRotation((current) => getNextDesktopRotation(current))}
+                  disabled={status !== CONNECTED_STATUS}
+                  aria-label={`Rotate desktop screen to ${getNextDesktopRotation(rotation)} degrees`}
+                >
+                  <FontAwesomeIcon icon={faRotate} />
+                  Rotate {rotation}°
+                </button>
                 <button
                   type="button"
                   className="btn btn-secondary ml-auto inline-flex items-center gap-2"

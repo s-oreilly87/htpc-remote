@@ -12,14 +12,23 @@ Caddy must proxy that path as a WebSocket endpoint to the websockify service on
 the HTPC. The client chooses `wss://` for an HTTPS page and `ws://` for an HTTP
 page, preserving the current host and port.
 
-The viewer starts in control mode with local viewport scaling. The View only
-toggle updates noVNC's `viewOnly` property, and the mobile Keyboard control
-sends text and backspaces through noVNC keysyms so punctuation, spaces, and
-Unicode input remain intact. Enter, Escape, Tab, and an empty-buffer Backspace
-also dispatch to the HTPC. The mobile input disables autocorrection and
-capitalization so URLs are preserved. Touch handling belongs to the modal
+The viewer starts in control mode with local viewport scaling. The explicit
+Control and View only buttons update noVNC's `viewOnly` property; View only
+disables the mobile keyboard and remote pointer events. The mobile Keyboard
+control sends text and backspaces through noVNC keysyms so punctuation, spaces,
+and Unicode input remain intact. Enter, Escape, Tab, and an empty-buffer
+Backspace also dispatch to the HTPC. The mobile input disables autocorrection
+and capitalization so URLs are preserved. Touch handling belongs to the modal
 surface so desktop gestures do not trigger the remote panel's ancestor swipe
 navigation.
+
+The Rotate button rotates the local desktop viewport in 90-degree steps. The
+noVNC canvas remains untransformed while a visible mirror renders the rotated
+frame. Mouse, wheel, and touch coordinates are inverse-mapped from that mirror
+before noVNC receives them, including mouse capture events after a drag leaves
+the viewer. This keeps clicks and gestures aligned on non-square desktops. The
+rotation is local viewport presentation only; it does not change the physical
+display orientation on the HTPC.
 
 VNC credentials are requested only when the server emits
 `credentialsrequired`. Username and password fields live in component state,
