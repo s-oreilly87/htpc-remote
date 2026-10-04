@@ -47,61 +47,19 @@ browser protocol or the portal model.
 
 ## Logical input scaling backport
 
-The connected KDE Neon host currently captures 3840x2160 physical pixels while
-KWin exposes a 1280x720 logical desktop (300% scaling). KRFB 26.04.3 forwards
-raw PipeWire/RFB coordinates to the portal, so pointer input can land in the
-top-left quarter of the noVNC image. KDE Bug [524406](https://bugs.kde.org/show_bug.cgi?id=524406)
-tracks this class of mismatch.
+The connected host captures 3840x2160 physical pixels while KWin exposes a
+1280x720 logical desktop (300% scaling). The physical cursor can cover the
+whole HTPC screen while the client pointer remains near the upper-left; the
+measured mismatch is 3x. The repository records the compiled KRFB 26.04.3
+backport in `patches/krfb-26.04.3-logical-input.patch`. It maps pointer
+coordinates through the PipeWire stream's logical size, keeps an identity
+fallback when metadata is absent, and sends the changed button's current state.
 
-`patches/krfb-26.04.3-logical-input.patch` is the repository's narrow backport
-record for the official Neon 26.04.3 source package. It exposes the PipeWire
-stream logical size, converts absolute pointer coordinates from frame pixels to
-logical coordinates with an identity fallback when metadata is absent, and
-reports each changed button using the current button state. It is pending an
-exact-source build and host installation; no host validation is implied here.
-
-Apply and build it only against the matching source package:
-
-```bash
-KRFB_VERSION='4:26.04.3-0zneon+24.04+noble+release+build53'
-apt-cache policy krfb
-apt-cache showsrc krfb | rg -n "^(Package|Version):"
-apt source "krfb=${KRFB_VERSION}"
-KRFB_SOURCE="$(find . -maxdepth 1 -mindepth 1 -type d -name 'krfb-*' -print -quit)"
-cd "$KRFB_SOURCE"
-patch --dry-run -p0 < /path/to/htpc-remote/linux/desktop-sharing/patches/krfb-26.04.3-logical-input.patch
-patch -p0 < /path/to/htpc-remote/linux/desktop-sharing/patches/krfb-26.04.3-logical-input.patch
-dpkg-buildpackage -b -uc -us
-```
-
-The source must retain the expected ABI: `frameBuffer()` must provide a shared
-pointer usable as `const FrameBuffer *` via `.data()`; `customProperty` must
-return a `QVariant`; stream metadata must expose a `size` as `QSize` or a
-width/height `QDBusArgument` structure; and the generated portal proxy must
-accept floating-point absolute coordinates and an unsigned button mask. Stop
-if the exact source paths or interfaces differ. Use the normal Neon Qt 6,
-KDE Frameworks, PipeWire, and XDG Desktop Portal build dependencies.
-
-Keep the pinned 26.04.3 package available for rollback. A later package can be
-unheld only after source review confirms an equivalent physical-to-logical XDP
-mapping, missing-metadata fallback, and current per-button state behavior, then
-repeat listener, capture, authentication, reconnect, and TV-off checks:
-
-```bash
-sudo apt-mark unhold krfb
-sudo apt install --only-upgrade krfb
-systemctl --user restart htpc-desktop-vnc.service htpc-desktop-websockify.service
-ss -ltnp | grep -E ':(5900|6080)\b'
-```
-
-If the candidate lacks the fix or any check regresses, restore and hold the
-verified Neon build:
-
-```bash
-sudo apt install --allow-downgrades \
-  krfb=4:26.04.3-0zneon+24.04+noble+release+build53
-sudo apt-mark hold krfb
-```
+The canonical source-package recipe, Debian quilt registration, `+htpc1`
+build, package metadata, rollback backup, ABI checks, and fixed-upstream
+criteria are in [the desktop preview guide](../../docs/desktop-preview.md#krfb-logical-input-scaling-backport).
+The matching unsigned package compiled successfully, but host installation and
+runtime capture, input, reconnect, and TV-off checks remain pending.
 
 KRFB stores its passwords through KDE Desktop Sharing/KWallet, which requires
 one-time graphical configuration. KRFB 26.04.3's VNC listener binds

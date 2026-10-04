@@ -52,8 +52,8 @@
          return;
      }
  
-+    d->streamLogicalSize = streamSize(streams.first().map.value(QStringLiteral("size")));
-+    if (d->streamLogicalSize.isEmpty()) {
++    streamLogicalSize = streamSize(streams.first().map.value(QStringLiteral("size")));
++    if (streamLogicalSize.isEmpty()) {
 +        qCWarning(KRFB_FB_PIPEWIRE) << "Screencast stream did not provide a logical size; pointer scaling disabled";
 +    }
 +
@@ -84,7 +84,7 @@
  
  Q_GLOBAL_STATIC(EventData, data)
  
-+static QPointF logicalPosition(const FrameBuffer *frameBuffer, int x, int y)
++static QPointF logicalPosition(FrameBuffer *frameBuffer, int x, int y)
 +{
 +    const QSize frameSize(frameBuffer->width(), frameBuffer->height());
 +    const QSize logicalSize = frameBuffer->customProperty(QStringLiteral("stream_logical_size")).toSize();

@@ -29,67 +29,99 @@ services for the logged-in graphical session.
 
 ## KRFB logical input scaling backport
 
-The host's capture stream is currently observed at 3840x2160 physical pixels while
-KWin exposes a 1280x720 logical desktop (300% scaling). KRFB 26.04.3 forwards
-raw framebuffer coordinates to the XDG Desktop Portal, so a pointer can appear
-in the top-left quarter of the noVNC image even when the browser and portal
-connections are healthy. KDE Bug [524406](https://bugs.kde.org/show_bug.cgi?id=524406)
-tracks this physical/logical coordinate mismatch.
+The host's capture stream is observed at 3840x2160 physical pixels while KWin
+exposes a 1280x720 logical desktop (300% scaling). The physical cursor can cover
+the whole HTPC screen while the client pointer remains near the upper-left of the
+image; the measured mismatch is 3x, not 2x. KDE Bug
+[524406](https://bugs.kde.org/show_bug.cgi?id=524406) tracks this
+physical/logical coordinate mismatch.
 
-The repository records a narrow source backport at
-`linux/desktop-sharing/patches/krfb-26.04.3-logical-input.patch`. It adds the
-PipeWire stream's logical size as a framebuffer custom property, maps absolute
-pointer coordinates from frame pixels to that logical size, falls back to the
-original coordinates when metadata is missing, and reports each changed button
-with the current button state. The patch is for the official Neon 26.04.3
-source package only. It is a source record pending an exact-source build and
-host installation; this repository does not claim that the host has installed
-or validated it.
+The repository records the narrow source backport at
+`linux/desktop-sharing/patches/krfb-26.04.3-logical-input.patch`. It exposes the
+PipeWire stream's logical size, maps absolute pointer coordinates from frame
+pixels to that logical size, falls back to the original coordinates when
+metadata is absent, and reports each changed button with its current button
+state. A matching official Neon 26.04.3 source tree compiled successfully into
+this unsigned package:
 
-Build and apply it against a matching Neon source package, without mixing it
-with another KRFB release:
+```text
+krfb_26.04.3-0zneon+24.04+noble+release+build53+htpc1_amd64.deb
+SHA-256: 71e2ebaf597b8548209bfb146c9fca476972d567c82e6019a3fe917f461f34bf
+```
+
+The package contains both rebuilt plugins:
+`usr/lib/x86_64-linux-gnu/qt6/plugins/krfb/events/xdp.so` and
+`usr/lib/x86_64-linux-gnu/qt6/plugins/krfb/framebuffer/pw.so`. Host installation,
+runtime capture/input, reconnect, and TV-off checks remain pending.
+
+Build the exact Neon source package with Debian quilt registration and the
+local `+htpc1` revision. Keep the source directory explicit so a wrapper or
+build-output directory cannot be selected accidentally:
 
 ```bash
 KRFB_VERSION='4:26.04.3-0zneon+24.04+noble+release+build53'
 apt-cache policy krfb
-apt-cache showsrc krfb | rg -n "^(Package|Version):"
+apt-cache showsrc krfb | grep -E '^(Package|Version):'
 apt source "krfb=${KRFB_VERSION}"
-KRFB_SOURCE="$(find . -maxdepth 1 -mindepth 1 -type d -name 'krfb-*' -print -quit)"
+KRFB_SOURCE="$PWD/krfb-26.04.3"
+test -f "$KRFB_SOURCE/debian/rules"
 cd "$KRFB_SOURCE"
-patch --dry-run -p0 < /path/to/htpc-remote/linux/desktop-sharing/patches/krfb-26.04.3-logical-input.patch
-patch -p0 < /path/to/htpc-remote/linux/desktop-sharing/patches/krfb-26.04.3-logical-input.patch
-dpkg-buildpackage -b -uc -us
+install -m 0644 /path/to/htpc-remote/linux/desktop-sharing/patches/krfb-26.04.3-logical-input.patch debian/patches/htpc-logical-input.patch
+grep -qxF 'htpc-logical-input.patch' debian/patches/series || printf '%s\n' 'htpc-logical-input.patch' >> debian/patches/series
+dch --local +htpc1 'Fix logical pointer scaling for a 300% Wayland output'
+dpkg-source --before-build
+dpkg-buildpackage -us -uc -b -j4
 ```
 
-Before compiling, verify that the source is the official 26.04.3 package and
-that these source interfaces still match: `frameBuffer()` returns a shared
-pointer whose `.data()` is a `const FrameBuffer *`; `FrameBuffer::customProperty`
-accepts a property name and returns `QVariant`; the PipeWire stream metadata
-contains a `size` value decodable as `QSize` or a two-integer
-`QDBusArgument` structure; and the generated RemoteDesktop D-Bus proxy accepts
-floating-point absolute coordinates plus an unsigned button mask. Stop rather
-than forcing the patch if any of those ABI or source-path assumptions differ.
-The patch requires the package's normal Qt 6, KDE Frameworks, PipeWire, and
-XDG Desktop Portal development dependencies; `dpkg-buildpackage` should use the
-same Neon build dependencies as the unmodified source package.
-
-Install a reviewed locally built package only after checking its package
-metadata and preserving the pinned Neon package for rollback. The rollback is:
+Verify the resulting package metadata and plugin payload before installation:
 
 ```bash
-sudo apt install --allow-downgrades \
-  krfb=4:26.04.3-0zneon+24.04+noble+release+build53
+BUILT_PACKAGE="$KRFB_SOURCE/../krfb_26.04.3-0zneon+24.04+noble+release+build53+htpc1_amd64.deb"
+dpkg-deb -f "$BUILT_PACKAGE" Package Version Architecture Size
+sha256sum "$BUILT_PACKAGE"
+dpkg-deb -c "$BUILT_PACKAGE" | grep -E '/(events/xdp|framebuffer/pw)\.so$'
+```
+
+Before compiling, verify that the 26.04.3 source retains these interfaces:
+`frameBuffer()` returns a shared pointer passed as `.data()` to a helper taking
+`FrameBuffer *`; `FrameBuffer::customProperty` returns `QVariant`; stream
+metadata exposes a `size` decodable as `QSize` or a two-integer
+`QDBusArgument` structure; and the generated RemoteDesktop proxy accepts
+floating-point absolute coordinates plus an unsigned button state. The patch
+uses `QSize::isEmpty()` guards and accesses `streamLogicalSize` directly inside
+`PWFrameBuffer::Private`. Stop rather than forcing the patch if source paths or
+APIs differ. Use the normal Neon Qt 6, KDE Frameworks, PipeWire, and XDG Desktop
+Portal build dependencies.
+
+Back up the pinned official package before installing a locally built one, and
+keep its metadata and digest with the recovery copy:
+
+```bash
+RECOVERY_DIR="$HOME/.local/share/htpc-desktop/recovery-20261004"
+mkdir -p "$RECOVERY_DIR"
+(cd "$RECOVERY_DIR" && apt download "krfb=${KRFB_VERSION}")
+dpkg-deb -f "$RECOVERY_DIR"/krfb_*.deb Package Version Architecture Size
+sha256sum "$RECOVERY_DIR"/krfb_*.deb
+```
+
+Install the reviewed package only after checking its metadata. If the live
+package must be restored, use the saved official `.deb`, hold that exact
+version, and restart the user services:
+
+```bash
+sudo apt install "$BUILT_PACKAGE"
+# rollback
+sudo apt install --allow-downgrades "$RECOVERY_DIR"/krfb_*.deb
 sudo apt-mark hold krfb
 systemctl --user restart htpc-desktop-vnc.service htpc-desktop-websockify.service
 ```
 
-When a later official source/package is available, inspect that source and its
-release notes before changing the hold. Treat it as fixed only when its XDP
-input path maps physical frame coordinates to the compositor's logical stream
-size, preserves an identity fallback for absent metadata, and sends each
-changed button using the resulting current state. Confirm the candidate source
-contains the equivalent fix (the symbol names may differ), build or install
-that candidate, and repeat listener, capture, and input checks. Only then run:
+Before unholding for a later official candidate, inspect its source and release
+notes against Bug 524406. Treat it as fixed only after source review shows an
+equivalent physical-to-logical XDP mapping, an identity fallback for absent
+metadata, and changed-button notifications using the current button state.
+Build or install that candidate, repeat listener, capture, authentication,
+reconnect, and TV-off checks, and only then run:
 
 ```bash
 sudo apt-mark unhold krfb
@@ -98,9 +130,8 @@ systemctl --user restart htpc-desktop-vnc.service htpc-desktop-websockify.servic
 ss -ltnp | grep -E ':(5900|6080)\b'
 ```
 
-Keep the hold and the reviewed 26.04.3 package if the candidate lacks the
-logical-coordinate fix or if any listener, capture, authentication, reconnect,
-or TV-off check regresses.
+Keep the pinned official package if the candidate lacks the fix or any runtime
+check regresses.
 
 ## Connection topology
 
