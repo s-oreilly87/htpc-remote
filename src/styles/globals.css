@@ -91,7 +91,7 @@
    Shared chrome dimensions keep body height correct in either layout. */
 @layer components {
   .remote-area {
-    --remote-brand-height: 56px;
+    --remote-brand-height: 3.5rem;
     --remote-header-height: 0px;
     --remote-frame-top: 0px;
     --remote-frame-bottom: 8px;
@@ -116,20 +116,21 @@
   .remote-panels {
     padding-top: var(--remote-frame-top);
     padding-bottom: var(--remote-frame-bottom);
-    @apply relative mx-auto flex h-full w-full max-w-[550px] flex-col overflow-hidden;
+    @apply relative mx-auto flex h-full w-full flex-col overflow-hidden;
   }
   .remote-area[data-layout="compact"] .remote-brand-row {
     @apply gap-1;
   }
   .remote-compact-tabs {
     height: var(--remote-brand-height);
-    @apply grid min-w-0 flex-1 grid-cols-3 items-end self-end;
+    @apply grid min-w-0 flex-1 grid-cols-3 grid-rows-[minmax(0,1fr)] items-end self-end;
   }
   .remote-tab {
     @apply relative min-w-0 rounded-t-2xl rounded-b-none px-1 py-2 text-base font-medium select-none transition-all duration-500 ease-in-out focus-visible:z-20 focus-visible:outline-2 focus-visible:outline-slate-300;
   }
   .remote-tab-active {
-    @apply z-10 h-14 border border-b-0 text-white shadow-md;
+    height: var(--remote-brand-height);
+    @apply z-10 border border-b-0 text-white shadow-md;
   }
   .remote-tab-inactive {
     @apply h-[50px] bg-slate-800 text-gray-400 hover:text-slate-200;
@@ -162,8 +163,18 @@
   .remote-shell {
     @apply absolute inset-0 w-full;
   }
+  /* Travel only far enough to place the centered shell beyond the area edge. */
+  .remote-slide-left {
+    transform: translateX(calc((100% + min(100%, 550px)) / -2));
+  }
+  .remote-slide-right {
+    transform: translateX(calc((100% + min(100%, 550px)) / 2));
+  }
+  .remote-slide-rest {
+    transform: translateX(0);
+  }
   .remote-shell-inner {
-    @apply isolate flex h-full min-h-0 flex-col overflow-hidden rounded-3xl border border-slate-600/70 bg-slate-800/30 shadow-xl shadow-black/30;
+    @apply isolate mx-auto flex h-full w-full max-w-[550px] min-h-0 flex-col overflow-hidden rounded-3xl border border-slate-600/70 bg-slate-800/30 shadow-xl shadow-black/30;
   }
   .remote-content {
     @apply min-h-0 flex-1 overflow-y-auto overflow-x-hidden;
@@ -182,7 +193,7 @@
     );
   }
   .remote-area[data-layout="desktop"] .remote-panels {
-    @apply grid max-w-none grid-cols-[repeat(3,550px)] justify-center gap-6 px-4;
+    @apply grid max-w-none grid-cols-[repeat(3,550px)] justify-center gap-[24px] px-[16px];
   }
   .remote-area[data-layout="desktop"] .remote-slides {
     display: contents;
