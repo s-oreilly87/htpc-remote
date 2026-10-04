@@ -85,7 +85,7 @@ KRFB_VERSION='4:26.04.3-0zneon+24.04+noble+release+build53'
 LOCAL_VERSION="${KRFB_VERSION}+htpc1"
 apt-cache policy krfb
 apt-cache showsrc krfb | grep -E '^(Package|Version):'
-apt source "${KRFB_VERSION}"
+apt source "krfb=${KRFB_VERSION}"
 KRFB_SOURCE="$PWD/krfb-26.04.3"
 test -f "$KRFB_SOURCE/debian/rules"
 cd "$KRFB_SOURCE"
