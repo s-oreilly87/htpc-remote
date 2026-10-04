@@ -1,5 +1,5 @@
 import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
-import { faDesktop, faKeyboard, faRotateRight, faEye, faGamepad, faRotate } from "@fortawesome/free-solid-svg-icons";
+import { faDesktop, faKeyboard, faRotateRight, faEye, faGamepad, faRotate, faBars } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -68,6 +68,7 @@ function DesktopViewer({ className = "" }: Props) {
   const [viewOnly, setViewOnly] = useState(false);
   const [keyboardOpen, setKeyboardOpen] = useState(false);
   const [keyboardText, setKeyboardText] = useState("");
+  const [controlsOpen, setControlsOpen] = useState(true);
   const [rotation, setRotation] = useState<DesktopRotation>(0);
   const [credentialTypes, setCredentialTypes] = useState<string[]>(["password"]);
   const [credentials, setCredentials] = useState<CredentialFormState>({ password: "", username: "" });
@@ -262,9 +263,18 @@ function DesktopViewer({ className = "" }: Props) {
 
   function closeViewer() {
     setIsOpen(false);
+    setControlsOpen(true);
     setKeyboardOpen(false);
     setKeyboardText("");
     setCredentials({ password: "", username: "" });
+  }
+
+  function toggleControls() {
+    if (controlsOpen) {
+      setKeyboardOpen(false);
+      setKeyboardText("");
+    }
+    setControlsOpen((current) => !current);
   }
 
   function reconnect() {
@@ -352,44 +362,30 @@ function DesktopViewer({ className = "" }: Props) {
       <Dialog open={isOpen} onClose={closeViewer} className="relative z-50">
         <div className={`${MODAL_INSET} z-50 bg-black/75`} />
         <div
-          className={`${MODAL_INSET} z-50 overflow-y-auto overscroll-contain`}
+          className={`${MODAL_INSET} z-50 overflow-hidden overscroll-none`}
           onTouchStart={stopTouchPropagation}
           onTouchMove={stopTouchPropagation}
           onTouchEnd={stopTouchPropagation}
         >
-          <div className="flex min-h-full items-center justify-center p-3 text-left">
+          <div className="flex h-full min-h-[100dvh] w-full text-left">
             <DialogPanel
-              className="relative flex w-full max-w-3xl flex-col overflow-hidden rounded-2xl border border-slate-700/70 bg-slate-950 text-slate-100 shadow-2xl"
+              className="relative flex h-[100dvh] min-h-0 max-h-[100dvh] w-full max-w-none flex-col overflow-hidden bg-slate-950 text-slate-100 shadow-2xl"
               onTouchStart={stopTouchPropagation}
               onTouchMove={stopTouchPropagation}
               onTouchEnd={stopTouchPropagation}
             >
-              <ModalCloseButton onClick={closeViewer} ariaLabel="Close desktop viewer" className="!right-3 !top-3" />
-              <div className="flex items-center justify-between gap-3 border-b border-slate-800 px-4 py-3 pr-12">
-                <div className="min-w-0">
-                  <DialogTitle as="h2" className="truncate text-lg font-semibold text-slate-50">
-                    HTPC Desktop
-                  </DialogTitle>
-                  <p className="truncate text-xs text-slate-400">
-                    {desktopName || statusLabel(status)}
-                  </p>
-                </div>
-                <span
-                  className={`shrink-0 rounded-full px-2 py-1 text-xs font-medium ${
-                    status === CONNECTED_STATUS
-                      ? "bg-emerald-900/70 text-emerald-300"
-                      : status === "error"
-                        ? "bg-red-900/70 text-red-300"
-                        : "bg-slate-800 text-slate-300"
-                  }`}
-                >
-                  {statusLabel(status)}
-                </span>
-              </div>
+              <DialogTitle as="h2" className="sr-only">
+                HTPC Desktop
+              </DialogTitle>
+              <ModalCloseButton
+                onClick={closeViewer}
+                ariaLabel="Close desktop viewer"
+                className="!right-[calc(0.75rem+env(safe-area-inset-right))] !top-[calc(0.75rem+env(safe-area-inset-top))] !h-10 !w-10"
+              />
 
               <div
                 ref={viewerFrameRef}
-                className="relative h-[min(62vh,34rem)] min-h-[16rem] w-full overflow-hidden bg-black sm:min-h-[24rem]"
+                className="relative h-full min-h-0 w-full flex-1 overflow-hidden bg-black"
               >
                 <div
                   ref={setViewerTargetNode}
@@ -465,74 +461,108 @@ function DesktopViewer({ className = "" }: Props) {
                     <button type="submit" className="btn btn-primary-pc">Continue</button>
                   </form>
                 )}
-              </div>
 
-              <div className="flex flex-wrap items-center gap-2 border-t border-slate-800 bg-slate-900/80 p-3">
-                <div className="flex items-center gap-1" role="group" aria-label="Desktop input mode">
-                  <button
-                    type="button"
-                    className={`btn inline-flex items-center gap-2 ${viewOnly ? "btn-secondary" : "btn-primary-pc"}`}
-                    onClick={() => setViewOnly(false)}
-                    aria-pressed={!viewOnly}
-                    disabled={status !== CONNECTED_STATUS}
-                  >
-                    Control
-                  </button>
-                  <button
-                    type="button"
-                    className={`btn inline-flex items-center gap-2 ${viewOnly ? "btn-primary-pc" : "btn-secondary"}`}
-                    onClick={() => setViewOnly(true)}
-                    aria-pressed={viewOnly}
-                    disabled={status !== CONNECTED_STATUS}
-                  >
-                    <FontAwesomeIcon icon={faEye} />
-                    View only
-                  </button>
-                </div>
-                <button
-                  type="button"
-                  className="btn btn-secondary inline-flex items-center gap-2"
-                  onClick={() => setKeyboardOpen((current) => !current)}
-                  disabled={viewOnly || status !== CONNECTED_STATUS}
-                  aria-pressed={keyboardOpen}
-                >
-                  <FontAwesomeIcon icon={faKeyboard} />
-                  Keyboard
-                </button>
-                {keyboardOpen && (
-                  <input
-                    ref={keyboardInputRef}
-                    type="text"
-                    value={keyboardText}
-                    onKeyDown={handleKeyboardKeyDown}
-                    onChange={handleKeyboardChange}
-                    autoCapitalize="none"
-                    autoCorrect="off"
-                    spellCheck={false}
-                    placeholder="Type on HTPC…"
-                    aria-label="Type on HTPC"
-                    className="min-w-[12rem] flex-1 rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white outline-none focus:border-blue-400"
-                  />
+                {controlsOpen && (
+                  <div className="pointer-events-none absolute inset-x-0 top-0 z-30 px-[calc(0.5rem+env(safe-area-inset-left))] pt-[calc(0.5rem+env(safe-area-inset-top))] pr-[calc(6.75rem+env(safe-area-inset-right))]">
+                    <div className="pointer-events-auto flex items-center justify-between gap-2 rounded-b-xl border border-slate-800/80 bg-slate-950/85 px-3 py-2 shadow-lg backdrop-blur-sm">
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold text-slate-50">HTPC Desktop</p>
+                        <p className="truncate text-xs text-slate-400">{desktopName || statusLabel(status)}</p>
+                      </div>
+                      <span
+                        className={`shrink-0 rounded-full px-2 py-1 text-xs font-medium ${
+                          status === CONNECTED_STATUS
+                            ? "bg-emerald-900/70 text-emerald-300"
+                            : status === "error"
+                              ? "bg-red-900/70 text-red-300"
+                              : "bg-slate-800 text-slate-300"
+                        }`}
+                      >
+                        {statusLabel(status)}
+                      </span>
+                    </div>
+                  </div>
                 )}
+
                 <button
                   type="button"
-                  className="btn btn-secondary inline-flex items-center gap-2"
-                  onClick={() => setRotation((current) => getNextDesktopRotation(current))}
-                  disabled={status !== CONNECTED_STATUS}
-                  aria-label={`Rotate desktop screen to ${getNextDesktopRotation(rotation)} degrees`}
+                  className="btn btn-secondary absolute right-[calc(3.75rem+env(safe-area-inset-right))] top-[calc(0.75rem+env(safe-area-inset-top))] z-50 inline-flex min-h-10 min-w-10 items-center justify-center gap-1 px-2 py-1 text-xs shadow-lg"
+                  onClick={toggleControls}
+                  aria-expanded={controlsOpen}
+                  aria-label={controlsOpen ? "Hide desktop viewer controls" : "Show desktop viewer controls"}
                 >
-                  <FontAwesomeIcon icon={faRotate} />
-                  Rotate {rotation}°
+                  <FontAwesomeIcon icon={faBars} />
+                  <span className="sr-only">{controlsOpen ? "Hide controls" : "Show controls"}</span>
                 </button>
-                <button
-                  type="button"
-                  className="btn btn-secondary ml-auto inline-flex items-center gap-2"
-                  onClick={reconnect}
-                  disabled={IS_DEMO || status === "loading" || status === "connecting"}
-                >
-                  <FontAwesomeIcon icon={faRotateRight} />
-                  Reconnect
-                </button>
+
+                {controlsOpen && status === CONNECTED_STATUS && (
+                  <div className="pointer-events-none absolute inset-x-0 bottom-0 z-30 px-[calc(0.5rem+env(safe-area-inset-left))] pb-[calc(0.5rem+env(safe-area-inset-bottom))] pr-[calc(0.5rem+env(safe-area-inset-right))] pt-8">
+                    <div className="pointer-events-auto flex flex-wrap items-center gap-1 rounded-xl border border-slate-800/80 bg-slate-950/85 p-2 shadow-lg backdrop-blur-sm">
+                      <div className="flex items-center gap-1" role="group" aria-label="Desktop input mode">
+                        <button
+                          type="button"
+                          className={`btn inline-flex min-h-10 min-w-10 items-center justify-center gap-1 px-2 py-1 text-xs ${viewOnly ? "btn-secondary" : "btn-primary-pc"}`}
+                          onClick={() => setViewOnly(false)}
+                          aria-pressed={!viewOnly}
+                        >
+                          Control
+                        </button>
+                        <button
+                          type="button"
+                          className={`btn inline-flex min-h-10 min-w-10 items-center justify-center gap-1 px-2 py-1 text-xs ${viewOnly ? "btn-primary-pc" : "btn-secondary"}`}
+                          onClick={() => setViewOnly(true)}
+                          aria-pressed={viewOnly}
+                        >
+                          <FontAwesomeIcon icon={faEye} />
+                          View only
+                        </button>
+                      </div>
+                      <button
+                        type="button"
+                        className="btn btn-secondary inline-flex min-h-10 min-w-10 items-center justify-center gap-1 px-2 py-1 text-xs"
+                        onClick={() => setKeyboardOpen((current) => !current)}
+                        disabled={viewOnly}
+                        aria-pressed={keyboardOpen}
+                      >
+                        <FontAwesomeIcon icon={faKeyboard} />
+                        Keyboard
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-secondary inline-flex min-h-10 min-w-10 items-center justify-center gap-1 px-2 py-1 text-xs"
+                        onClick={() => setRotation((current) => getNextDesktopRotation(current))}
+                        aria-label={`Rotate desktop screen to ${getNextDesktopRotation(rotation)} degrees`}
+                      >
+                        <FontAwesomeIcon icon={faRotate} />
+                        Rotate {rotation}°
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-secondary ml-auto inline-flex min-h-10 min-w-10 items-center justify-center gap-1 px-2 py-1 text-xs"
+                        onClick={reconnect}
+                        disabled={IS_DEMO}
+                      >
+                        <FontAwesomeIcon icon={faRotateRight} />
+                        Reconnect
+                      </button>
+                      {keyboardOpen && (
+                        <input
+                          ref={keyboardInputRef}
+                          type="text"
+                          value={keyboardText}
+                          onKeyDown={handleKeyboardKeyDown}
+                          onChange={handleKeyboardChange}
+                          autoCapitalize="none"
+                          autoCorrect="off"
+                          spellCheck={false}
+                          placeholder="Type on HTPC…"
+                          aria-label="Type on HTPC"
+                          className="order-last basis-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-1.5 text-sm text-white outline-none focus:border-blue-400"
+                        />
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             </DialogPanel>
           </div>
