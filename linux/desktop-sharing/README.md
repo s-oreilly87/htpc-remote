@@ -83,6 +83,19 @@ when the TV is off. Disable **Announce the service on the local network**;
 the app uses the fixed same-origin Caddy route and does not need DNS-SD
 discovery.
 
+### Rotate the unattended password
+
+`~/.config/htpc-desktop/unattended-password` is a provisioning record only;
+KRFB does not read or watch it. Open **Desktop Sharing (KRFB)** from the logged-
+in Plasma application menu, or run `krfb` in a logged-in HTPC terminal. Its
+unique D-Bus service opens the running instance. Keep unattended access enabled,
+choose **Change Unattended Password**, enter the new value yourself, and
+reconnect with it. Use at most eight ASCII bytes because classic VNC
+authentication considers only the first eight bytes. The GUI setter applies the
+change immediately; an optional graceful quit/service restart is only for
+verifying persisted reload. See the [canonical password rotation and reload
+guide](../../docs/desktop-preview.md#rotate-the-unattended-password).
+
 KWallet is the preferred credential store when it is available and unlocked by
 the Plasma session. KRFB also has a no-wallet KConfig fallback: its source
 obscures the two password values in the KRFB config, but the config remains

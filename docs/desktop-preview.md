@@ -215,6 +215,45 @@ connections to manage the desktop** enabled. Disable **Announce the service on
 the local network** because the app uses the fixed same-origin Caddy route.
 The setup does not print, generate, or store a password in this repository.
 
+### Rotate the unattended password
+
+`~/.config/htpc-desktop/unattended-password` is a host provisioning record.
+KRFB does not read or watch that path, so changing it, redeploying the app,
+clearing browser cache, or restarting the service alone does not update the
+password held by the running KRFB process. Do not treat that file as the active
+credential store.
+
+Open **Desktop Sharing (KRFB)** from the logged-in Plasma application menu, or
+run `krfb` in a terminal inside the logged-in HTPC session. KRFB's unique D-Bus
+service activates the existing instance, so this opens the running server's
+configuration window. Use its supported setter:
+
+1. Keep **Enable Unattended Access** enabled.
+2. Choose **Change Unattended Password**.
+3. Enter the new password yourself and accept the dialog. Classic VNC
+   authentication considers only the first eight bytes; use at most eight ASCII
+   bytes to avoid ambiguity.
+4. KRFB saves the value immediately and updates its in-memory server state. No
+   restart is needed for the normal GUI path; reconnect and authenticate with
+   the new value. A graceful quit and service restart is optional when you want
+   to verify that the persisted value reloads:
+
+```sh
+DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus \
+  qdbus6 org.kde.krfb /MainApplication \
+  org.qtproject.Qt.QCoreApplication.quit
+systemctl --user restart htpc-desktop-vnc.service htpc-desktop-websockify.service
+```
+
+The GUI setter stores the active no-wallet value in KRFB's obfuscated KConfig
+`[Security] unattendedPassword` entry or stores the active wallet value in
+KWallet's `unattendedAccessPassword` key. Ordinary KConfig plain-password key
+editing is unnecessary. Portal approval and capture permission are separate
+state and are unaffected by this password change. See the [KRFB 26.04.3
+listener password load/save source](https://raw.githubusercontent.com/KDE/krfb/v26.04.3/krfb/invitationsrfbserver.cpp),
+[GUI password action](https://raw.githubusercontent.com/KDE/krfb/v26.04.3/krfb/mainwindow.cpp),
+and [VNC authentication length handling](https://raw.githubusercontent.com/KDE/krfb/v26.04.3/krfb/rfbclient.cpp).
+
 KRFB first checks its unattended-access password. A matching unattended
 credential auto-accepts the connection; the ordinary desktop-sharing
 credential follows the invitation path and can wait for a confirmation dialog,
