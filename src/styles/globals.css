@@ -88,17 +88,21 @@
 }
 
 /* One persistent remote tree switches between compact slides and desktop shells.
-   Shared chrome dimensions keep body height and the first control aligned. */
+   Shared chrome dimensions keep body height correct in either layout. */
 @layer components {
   .remote-area {
-    --remote-brand-height: 48px;
-    --remote-header-height: 40px;
-    --remote-frame-gutter: 16px;
-    --remote-border-height: 1px;
+    --remote-brand-height: 56px;
+    --remote-header-height: 0px;
+    --remote-frame-top: 0px;
+    --remote-frame-bottom: 8px;
+    --remote-border-height: 2px;
     --remote-chrome-width: 550px;
   }
   .remote-area[data-layout="desktop"] {
-    --remote-border-height: 2px;
+    --remote-brand-height: 48px;
+    --remote-header-height: 40px;
+    --remote-frame-top: 16px;
+    --remote-frame-bottom: 16px;
     --remote-chrome-width: 1698px;
   }
   .remote-chrome-width {
@@ -110,15 +114,44 @@
     @apply flex items-center;
   }
   .remote-panels {
-    padding-block: var(--remote-frame-gutter);
+    padding-top: var(--remote-frame-top);
+    padding-bottom: var(--remote-frame-bottom);
     @apply relative mx-auto flex h-full w-full max-w-[550px] flex-col overflow-hidden;
   }
-  .remote-tabs {
-    height: var(--remote-header-height);
-    @apply grid shrink-0 grid-cols-3 overflow-hidden rounded-t-2xl border border-b-0 border-slate-600/70 bg-slate-800/70;
+  .remote-area[data-layout="compact"] .remote-brand-row {
+    @apply gap-1;
+  }
+  .remote-compact-tabs {
+    height: var(--remote-brand-height);
+    @apply grid min-w-0 flex-1 grid-cols-3 items-end self-end;
   }
   .remote-tab {
-    @apply min-w-0 px-2 text-base font-medium text-slate-400 transition-colors hover:text-slate-200 focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-slate-300;
+    @apply relative min-w-0 rounded-t-2xl rounded-b-none px-1 py-2 text-base font-medium select-none transition-all duration-500 ease-in-out focus-visible:z-20 focus-visible:outline-2 focus-visible:outline-slate-300;
+  }
+  .remote-tab-active {
+    @apply z-10 h-14 border border-b-0 text-white shadow-md;
+  }
+  .remote-tab-inactive {
+    @apply h-[50px] bg-slate-800 text-gray-400 hover:text-slate-200;
+  }
+  /* Carry the selected tab's surface across the shell's one-pixel top seam. */
+  .remote-tab-active::after {
+    content: "";
+    position: absolute;
+    left: 1px;
+    right: 1px;
+    bottom: -1px;
+    height: 2px;
+    background: inherit;
+  }
+  .remote-tab-active[data-remote="DENON"] {
+    @apply border-teal-500/50;
+  }
+  .remote-tab-active[data-remote="ROKU"] {
+    @apply border-violet-400/50;
+  }
+  .remote-tab-active[data-remote="PC"] {
+    @apply border-blue-400/50;
   }
   .remote-tab:focus-visible {
     outline-offset: -2px;
@@ -130,7 +163,7 @@
     @apply absolute inset-0 w-full;
   }
   .remote-shell-inner {
-    @apply isolate flex h-full min-h-0 flex-col overflow-hidden rounded-b-3xl border border-t-0 border-slate-600/70 bg-slate-800/30 shadow-xl shadow-black/30;
+    @apply isolate flex h-full min-h-0 flex-col overflow-hidden rounded-3xl border border-slate-600/70 bg-slate-800/30 shadow-xl shadow-black/30;
   }
   .remote-content {
     @apply min-h-0 flex-1 overflow-y-auto overflow-x-hidden;
@@ -142,8 +175,9 @@
     min-height: max(
       740px,
       calc(
-        100dvh - var(--remote-brand-height) - 2 * var(--remote-frame-gutter) -
-          var(--remote-header-height) - var(--remote-border-height)
+        100dvh - var(--remote-brand-height) - var(--remote-frame-top) -
+          var(--remote-frame-bottom) - var(--remote-header-height) -
+          var(--remote-border-height)
       )
     );
   }
@@ -156,19 +190,13 @@
   .remote-area[data-layout="desktop"] .remote-shell {
     @apply relative inset-auto min-h-0;
   }
-  .remote-area[data-layout="desktop"] .remote-shell-inner {
-    @apply rounded-3xl border-t;
-  }
-  .remote-shell-inner[data-remote="DENON"],
-  .remote-tabs[data-remote="DENON"] {
+  .remote-shell-inner[data-remote="DENON"] {
     @apply border-teal-500/50;
   }
-  .remote-shell-inner[data-remote="ROKU"],
-  .remote-tabs[data-remote="ROKU"] {
+  .remote-shell-inner[data-remote="ROKU"] {
     @apply border-violet-400/50;
   }
-  .remote-shell-inner[data-remote="PC"],
-  .remote-tabs[data-remote="PC"] {
+  .remote-shell-inner[data-remote="PC"] {
     @apply border-blue-400/50;
   }
   .remote-heading {
@@ -176,24 +204,22 @@
     @apply flex shrink-0 items-center border-b px-5 text-lg font-semibold tracking-wide;
     box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.06);
   }
-  .remote-shell-inner[data-remote="DENON"] .remote-heading,
-  .remote-tab[data-remote="DENON"][aria-pressed="true"] {
+  .remote-shell-inner[data-remote="DENON"] .remote-heading {
     @apply border-teal-500/30 bg-teal-950 text-teal-200;
   }
-  .remote-shell-inner[data-remote="ROKU"] .remote-heading,
-  .remote-tab[data-remote="ROKU"][aria-pressed="true"] {
+  .remote-shell-inner[data-remote="ROKU"] .remote-heading {
     @apply border-violet-400/30 bg-violet-950 text-violet-200;
   }
-  .remote-shell-inner[data-remote="PC"] .remote-heading,
-  .remote-tab[data-remote="PC"][aria-pressed="true"] {
+  .remote-shell-inner[data-remote="PC"] .remote-heading {
     @apply border-blue-400/30 bg-blue-950 text-blue-200;
   }
   .remote-area[data-layout="desktop"] .remote-body {
     min-height: max(
       850px,
       calc(
-        100dvh - var(--remote-brand-height) - 2 * var(--remote-frame-gutter) -
-          var(--remote-header-height) - var(--remote-border-height)
+        100dvh - var(--remote-brand-height) - var(--remote-frame-top) -
+          var(--remote-frame-bottom) - var(--remote-header-height) -
+          var(--remote-border-height)
       )
     );
   }

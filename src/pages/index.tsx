@@ -77,7 +77,12 @@ const App = () => {
                     className="remote-area flex min-w-0 flex-1 flex-col"
                     data-layout={isDesktop ? "desktop" : "compact"}
                   >
-                    <Navbar className="relative z-50 shrink-0" />
+                    <Navbar
+                      className="relative z-50 shrink-0"
+                      isDesktop={isDesktop}
+                      selectedRemote={selectedRemote}
+                      setSelectedRemote={setSelectedRemote}
+                    />
                     <SwipeDetector
                       onSwipe={handleSwipe}
                       enabled={!isDesktop}
