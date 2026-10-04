@@ -25,9 +25,9 @@ const SlideScrollTransition: React.FC<Props> = ({
     let enterFrom = "opacity-0 ";
     if (previousIndex === null) return enterFrom;
     if (selectedIndex < previousIndex) {
-      enterFrom += "-translate-x-full";
+      enterFrom += "remote-slide-left";
     } else if (selectedIndex > previousIndex) {
-      enterFrom += "translate-x-full";
+      enterFrom += "remote-slide-right";
     }
     return enterFrom;
   };
@@ -39,9 +39,9 @@ const SlideScrollTransition: React.FC<Props> = ({
     let leaveTo = "opacity-0 ";
     if (previousIndex === null) return leaveTo;
     if (selectedIndex < previousIndex) {
-      leaveTo += "translate-x-full";
+      leaveTo += "remote-slide-right";
     } else if (selectedIndex > previousIndex) {
-      leaveTo += "-translate-x-full";
+      leaveTo += "remote-slide-left";
     }
     return leaveTo;
   };
@@ -61,11 +61,11 @@ const SlideScrollTransition: React.FC<Props> = ({
           ? enterFromClassNames(selectedComponentIndex, prevComponentIndex)
           : undefined
       }
-      enterTo={enabled ? "opacity-100 translate-x-0" : undefined}
+      enterTo={enabled ? "opacity-100 remote-slide-rest" : undefined}
       leave={
         enabled ? "transition-all ease-in-out duration-[500ms]" : undefined
       }
-      leaveFrom={enabled ? "opacity-100 translate-x-0" : undefined}
+      leaveFrom={enabled ? "opacity-100 remote-slide-rest" : undefined}
       leaveTo={
         enabled
           ? leaveToClassNames(selectedComponentIndex, prevComponentIndex)
