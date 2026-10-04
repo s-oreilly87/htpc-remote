@@ -44,12 +44,6 @@ const App = () => {
   }, [isClient]);
 
   const prevRemote = usePrevious(selectedRemote);
-  const handleSelectRemote = (event: React.MouseEvent<HTMLButtonElement>) => {
-    const remote = REMOTE_ORDER.find(
-      (remote) => remote === event.currentTarget.value,
-    );
-    if (remote) setSelectedRemote(remote);
-  };
 
   const handleSwipe = (direction: "left" | "right") => {
     setSelectedRemote((current) => {
@@ -83,12 +77,7 @@ const App = () => {
                     className="remote-area flex min-w-0 flex-1 flex-col"
                     data-layout={isDesktop ? "desktop" : "compact"}
                   >
-                    <Navbar
-                      className="relative z-50 shrink-0"
-                      isDesktop={isDesktop}
-                      onClickHandler={handleSelectRemote}
-                      selectedRemote={selectedRemote}
-                    />
+                    <Navbar className="relative z-50 shrink-0" />
                     <SwipeDetector
                       onSwipe={handleSwipe}
                       enabled={!isDesktop}

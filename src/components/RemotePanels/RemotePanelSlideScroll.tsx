@@ -8,7 +8,8 @@ import PCRemotePanel from "@/components/RemotePanels/PC/PCRemotePanel";
 import RokuRemotePanel from "@/components/RemotePanels/Roku/RokuRemotePanel";
 import DenonRemotePanel from "@/components/RemotePanels/Denon/DenonRemotePanel";
 import SlideScrollTransition from "@/components/UI/SlideScrollTransition";
-import { usePrevious } from "@/utilities/utils";
+import { buttonPress, usePrevious } from "@/utilities/utils";
+import { useState, type MouseEvent } from "react";
 import { shouldAnimateRemoteChange } from "./remoteLayout";
 
 interface Props {
@@ -25,40 +26,72 @@ function RemotePanelSlideScroll({
   prevRemote,
 }: Props) {
   const previousDesktop = usePrevious(isDesktop);
+  const [buttonPressTimerId, setButtonPressTimerId] = useState<number | null>(
+    null,
+  );
+  const selectRemote = (
+    event: MouseEvent<HTMLButtonElement>,
+    remote: RemoteType,
+  ) => {
+    setSelectedRemote(remote);
+    buttonPress(event.currentTarget, buttonPressTimerId, setButtonPressTimerId);
+  };
   // A mode change snaps the same mounted panels into place. Subsequent compact
   // selections resume the usual swipe/tab animation.
   const animate = shouldAnimateRemoteChange(isDesktop, previousDesktop);
   return (
     <div className="remote-panels" aria-label="Remote controls">
-      {REMOTE_ORDER.map((remote) => (
-        <SlideScrollTransition
-          key={remote}
-          show={isDesktop || selectedRemote === remote}
-          enabled={animate}
-          className="remote-shell"
-          selectedComponentIndex={REMOTE_INDEX[selectedRemote]}
-          prevComponentIndex={prevRemote ? REMOTE_INDEX[prevRemote] : null}
+      {!isDesktop && (
+        <div
+          className="remote-tabs"
+          data-remote={selectedRemote}
+          aria-label="Remote selection"
         >
-          <section
-            className="remote-shell-inner"
-            data-remote={remote}
-            aria-label={`${REMOTE_LABEL[remote]} remote`}
+          {REMOTE_ORDER.map((remote) => (
+            <button
+              key={remote}
+              type="button"
+              className="remote-tab"
+              data-remote={remote}
+              aria-pressed={selectedRemote === remote}
+              onClick={(event) => selectRemote(event, remote)}
+            >
+              {REMOTE_LABEL[remote]}
+            </button>
+          ))}
+        </div>
+      )}
+      <div className="remote-slides">
+        {REMOTE_ORDER.map((remote) => (
+          <SlideScrollTransition
+            key={remote}
+            show={isDesktop || selectedRemote === remote}
+            enabled={animate}
+            className="remote-shell"
+            selectedComponentIndex={REMOTE_INDEX[selectedRemote]}
+            prevComponentIndex={prevRemote ? REMOTE_INDEX[prevRemote] : null}
           >
-            {isDesktop && (
-              <h1 className="remote-heading">{REMOTE_LABEL[remote]}</h1>
-            )}
-            <div className="remote-content">
-              <div className="remote-controls">
-                {remote === RemoteType.DENON && <DenonRemotePanel />}
-                {remote === RemoteType.ROKU && (
-                  <RokuRemotePanel setSelectedRemote={setSelectedRemote} />
-                )}
-                {remote === RemoteType.PC && <PCRemotePanel />}
+            <section
+              className="remote-shell-inner"
+              data-remote={remote}
+              aria-label={`${REMOTE_LABEL[remote]} remote`}
+            >
+              {isDesktop && (
+                <h1 className="remote-heading">{REMOTE_LABEL[remote]}</h1>
+              )}
+              <div className="remote-content">
+                <div className="remote-controls">
+                  {remote === RemoteType.DENON && <DenonRemotePanel />}
+                  {remote === RemoteType.ROKU && (
+                    <RokuRemotePanel setSelectedRemote={setSelectedRemote} />
+                  )}
+                  {remote === RemoteType.PC && <PCRemotePanel />}
+                </div>
               </div>
-            </div>
-          </section>
-        </SlideScrollTransition>
-      ))}
+            </section>
+          </SlideScrollTransition>
+        ))}
+      </div>
     </div>
   );
 }
