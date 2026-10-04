@@ -1,3 +1,5 @@
+import type { Dispatch, MouseEvent, SetStateAction } from "react";
+import type { ValueButton } from "@/utilities/http";
 import { RemoteType } from "@/constants/remotes";
 import { DENON_SOUND_MODES, DOLBY_MODES, DTS_MODES } from "@/constants/denon";
 import KeypressButton from "@/components/UI/KeypressButton";
@@ -5,19 +7,26 @@ import { sendDenonCommand, sendDenonQuery } from "@/utilities/http";
 import { useDenonContext } from "@/context/denon";
 
 const CYCLE_TIMEOUT = 5000;
-const RESPONSE_TIMEOUT = 2000;
 const remote = RemoteType.DENON;
 
-function CycleSoundModes({ cycleTimeout, setCycleTimeout }) {
+interface Props {
+  cycleTimeout: ReturnType<typeof setTimeout> | null;
+  setCycleTimeout: Dispatch<
+    SetStateAction<ReturnType<typeof setTimeout> | null>
+  >;
+}
+
+function CycleSoundModes({ cycleTimeout, setCycleTimeout }: Props) {
   const { updateDenonState } = useDenonContext();
 
-  const handleCycleClick = async (event) => {
+  const handleCycleClick = async (event: MouseEvent<HTMLButtonElement>) => {
+    const button = { value: event.currentTarget.value };
     // The first click of a cycle button brings up current sound mode on display - no response from denon
     // Must click again within 5 seconds to change Sound Mode and receive a response
 
     // Check if this is the first click
     if (!cycleTimeout) {
-      sendDenonCommand(event.currentTarget); // no response on first click
+      void sendDenonCommand(button); // no response on first click
       setNewCycleTimeout();
       // when (cycleTimeout !== null && !loading), the SoundModeSelect display will animate
       return;
@@ -25,17 +34,22 @@ function CycleSoundModes({ cycleTimeout, setCycleTimeout }) {
 
     // if there is an active timeout - we want to reset it on the new click then send the command and listen for the response as usual
     resetCycleTimeout();
-    handleClick(event);
+    await sendAndUpdate(button);
   };
 
-  const handleClick = async (event) => {
-    const response = await sendDenonCommand(event.currentTarget);
+  const handleClick = (event: MouseEvent<HTMLButtonElement>) =>
+    sendAndUpdate({ value: event.currentTarget.value });
+
+  const sendAndUpdate = async (button: ValueButton) => {
+    const response = await sendDenonCommand(button);
 
     if (response.error) {
       return console.error(response.error);
     }
 
-    const soundMode = await parseSoundModeFromResponseData(Array.isArray(response.data) ? response.data : []);
+    const soundMode = await parseSoundModeFromResponseData(
+      Array.isArray(response.data) ? response.data : [],
+    );
     if (soundMode) {
       updateDenonState({ soundMode });
     }
@@ -50,14 +64,13 @@ function CycleSoundModes({ cycleTimeout, setCycleTimeout }) {
   };
 
   const resetCycleTimeout = () => {
-    clearTimeout(cycleTimeout);
+    if (cycleTimeout) clearTimeout(cycleTimeout);
     setNewCycleTimeout();
   };
 
-  const parseSoundModeFromResponseData = async (denonResponse) => {
-    //all this parsing response may be for naught, since im updating state right after anyways
+  const parseSoundModeFromResponseData = async (denonResponse: string[]) => {
     let soundMode;
-    let foundSoundMode;
+    let foundSoundMode: string | undefined;
     for (const line of denonResponse) {
       if (line.substring(0, 2) === "MS") {
         foundSoundMode = line;
@@ -78,7 +91,7 @@ function CycleSoundModes({ cycleTimeout, setCycleTimeout }) {
           '"MS?" query failed. Unable to update SoundModeSelect',
         );
       }
-      for (const line of followupResponse.data) {
+      for (const line of followupResponse.data ?? []) {
         if (line.substring(0, 2) === "MS") {
           foundSoundMode = line;
           soundMode = Object.values(DENON_SOUND_MODES).find(
@@ -88,6 +101,8 @@ function CycleSoundModes({ cycleTimeout, setCycleTimeout }) {
         }
       }
     }
+
+    if (!foundSoundMode) return undefined;
 
     if (!soundMode) {
       if (

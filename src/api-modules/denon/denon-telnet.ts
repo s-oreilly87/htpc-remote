@@ -150,10 +150,22 @@ export class DenonTelnet {
     this.active = item;
     this.lines = [];
     this.fragment = "";
-    this.deadline = setTimeout(() => {
-      if (this.socket)
-        this.failConnection(this.socket, `Denon: no response to "${item.cmd}"`);
-    }, this.options.responseTimeoutMs ?? 3000);
+    // The first cycle press only opens the AVR display and may send no reply.
+    // Complete these commands quietly so a rapid second press is still dispatched.
+    const optionalResponse = ["MSMOVIE", "MSMUSIC", "MSGAME"].includes(
+      item.cmd,
+    );
+    this.deadline = setTimeout(
+      () => {
+        if (optionalResponse) return this.finish();
+        if (this.socket)
+          this.failConnection(
+            this.socket,
+            `Denon: no response to "${item.cmd}"`,
+          );
+      },
+      optionalResponse ? 350 : (this.options.responseTimeoutMs ?? 3000),
+    );
     try {
       this.transport!.write(item.cmd + "\r");
     } catch (error) {

@@ -5,6 +5,7 @@ import { createRequire } from "node:module";
 import test from "node:test";
 import vm from "node:vm";
 import * as ts from "typescript";
+import { QueryClient } from "@tanstack/react-query";
 
 const require = createRequire(import.meta.url);
 function load(path: string, mocks: Record<string, unknown>) {
@@ -233,12 +234,16 @@ test("HTTP failures reject instead of manufacturing a false power state", async 
   assert.deepEqual(Object.keys(await queries.fetchDenonAdvancedState()), []);
 });
 
-function providerFixture(result: Promise<{ data?: boolean; error?: string }>) {
+function providerFixture(
+  result: Promise<{ data?: boolean; error?: string }>,
+  suppliedClient?: QueryClient,
+  basicFetch?: () => Promise<State>,
+) {
   let state: State = { powerOn: true, MV: 44 };
   let sends = 0;
   let invalidations = 0;
   let cancellations = 0;
-  const queryClient = {
+  const queryClient = suppliedClient ?? {
     getQueryData: () => state,
     setQueryData: (_key: unknown, update: (value: State) => State) => {
       state = update(state);
@@ -258,6 +263,9 @@ function providerFixture(result: Promise<{ data?: boolean; error?: string }>) {
     useState: (value: unknown) => [value, () => {}],
     useEffect: () => {},
   };
+  const queryOptions: {
+    queryFn: (context: { signal: AbortSignal }) => Promise<State>;
+  }[] = [];
   const { DenonProvider } = load("src/context/denon.tsx", {
     react,
     "react/jsx-runtime": {
@@ -265,11 +273,19 @@ function providerFixture(result: Promise<{ data?: boolean; error?: string }>) {
     },
     "@tanstack/react-query": {
       useQueryClient: () => queryClient,
-      useQuery: () => ({ data: state, isLoading: false }),
+      useQuery: (options: {
+        queryFn: (context: { signal: AbortSignal }) => Promise<State>;
+      }) => {
+        queryOptions.push(options);
+        return { data: state, isLoading: false };
+      },
     },
     "@/constants/denon": { DENON_SOUND_MODES: { NONE: {} } },
     "@/constants/remotes": { KEYSTROKE: { DENON: { POWER: "POWER" } } },
-    "@/lib/denon-query": { DENON_QUERY_KEY: ["denon-state"] },
+    "@/lib/denon-query": {
+      DENON_QUERY_KEY: ["denon-state"],
+      fetchDenonState: basicFetch,
+    },
     "@/utilities/http": {
       sendDenonCommand: () => {
         sends++;
@@ -284,8 +300,9 @@ function providerFixture(result: Promise<{ data?: boolean; error?: string }>) {
   const power = DenonProvider({ children: null }).props.value.togglePower;
   return {
     power,
+    basicQuery: queryOptions[0]?.queryFn,
     get state() {
-      return state;
+      return suppliedClient?.getQueryData<State>(["denon-state"]) ?? state;
     },
     get sends() {
       return sends;
@@ -349,4 +366,102 @@ test("raw sound-mode setters accept MS family responses and PS queries filter th
   } finally {
     await avr.close();
   }
+});
+
+test("silent first cycle press completes without dropping a queued rapid second press", async () => {
+  let presses = 0;
+  const avr = await fixture((value, socket) => {
+    assert.equal(value, "MSMOVIE");
+    if (++presses === 2) socket.write("MSDOLBY DIGITAL\r");
+  });
+  try {
+    const first = command(avr.client, "MSMOVIE");
+    const second = command(avr.client, "MSMOVIE");
+    assert.deepEqual(await first, []);
+    assert.deepEqual(await second, ["MSDOLBY DIGITAL"]);
+    assert.equal(presses, 2);
+  } finally {
+    await avr.close();
+  }
+});
+
+test("a cancelled pre-power HTTP poll cannot overwrite the confirmed command state", async () => {
+  const client = new QueryClient();
+  const previous = { powerOn: true, MV: 44 };
+  client.setQueryData(["denon-state"], previous);
+  let finishOldPoll!: (state: State) => void;
+  const oldPoll = new Promise<State>((resolve) => {
+    finishOldPoll = resolve;
+  });
+  const fixture = providerFixture(
+    Promise.resolve({ data: false }),
+    client,
+    () => oldPoll,
+  );
+  const poll = client
+    .fetchQuery({
+      queryKey: ["denon-state"],
+      queryFn: fixture.basicQuery,
+      retry: false,
+    })
+    .catch(() => "cancelled");
+  await fixture.power();
+  finishOldPoll(previous);
+  await poll;
+  assert.equal(fixture.state.powerOn, false);
+  client.clear();
+});
+
+test("empty command and follow-up sound-mode responses leave state unchanged without throwing", async () => {
+  let updates = 0;
+  const { default: CycleSoundModes } = load(
+    "src/components/RemotePanels/Denon/CycleSoundModeButtons.tsx",
+    {
+      "react/jsx-runtime": {
+        jsx: (_type: unknown, props: unknown) => ({ props }),
+        jsxs: (_type: unknown, props: unknown) => ({ props }),
+      },
+      "@/constants/remotes": { RemoteType: { DENON: "denon" } },
+      "@/constants/denon": {
+        DENON_SOUND_MODES: {},
+        DOLBY_MODES: [],
+        DTS_MODES: [],
+      },
+      "@/components/UI/KeypressButton": { default: "button" },
+      "@/context/denon": {
+        useDenonContext: () => ({
+          updateDenonState: () => {
+            updates++;
+          },
+        }),
+      },
+      "@/utilities/http": {
+        sendDenonCommand: async () => ({ data: [] }),
+        sendDenonQuery: async () => ({ data: [] }),
+      },
+    },
+  ) as {
+    default: (props: { cycleTimeout: null; setCycleTimeout: () => void }) => {
+      props: {
+        children: {
+          props: {
+            children: {
+              props: {
+                onClick: (event: {
+                  currentTarget: { value: string };
+                }) => Promise<void>;
+              };
+            }[];
+          };
+        };
+      };
+    };
+  };
+  const panel = CycleSoundModes({
+    cycleTimeout: null,
+    setCycleTimeout: () => {},
+  });
+  const pureButton = panel.props.children.props.children[3];
+  await pureButton.props.onClick({ currentTarget: { value: "MSDIRECT" } });
+  assert.equal(updates, 0);
 });
