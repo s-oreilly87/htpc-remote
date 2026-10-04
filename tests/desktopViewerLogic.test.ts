@@ -2,10 +2,12 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  getDesktopInputLayout,
   getDesktopViewerWebSocketUrl,
   getKeyboardKeysym,
   getKeyboardInputDelta,
   getNextDesktopRotation,
+  mapVisualClientPointToSource,
   mapRotatedPointToRemote,
 } from "../src/components/RemotePanels/PC/desktopViewerLogic.ts";
 
@@ -62,4 +64,39 @@ test("desktop rotation maps visual points back to remote coordinates", () => {
   assert.equal(getNextDesktopRotation(90), 180);
   assert.equal(getNextDesktopRotation(180), 270);
   assert.equal(getNextDesktopRotation(270), 0);
+});
+
+test("desktop rotation maps a non-square viewport and clamps an off-edge drag", () => {
+  const source = { left: 100, top: 50, width: 1024, height: 576 };
+  const frame = { left: 0, top: 0, width: 1024, height: 768 };
+
+  for (const rotation of [0, 90, 180, 270] as const) {
+    const layout = getDesktopInputLayout(source, frame, rotation);
+    const topLeft = mapVisualClientPointToSource({ x: 0, y: 0 }, layout, rotation);
+    const bottomRight = mapVisualClientPointToSource({ x: 1, y: 1 }, layout, rotation);
+    const expectedCorners = {
+      0: [
+        { x: source.left, y: source.top },
+        { x: source.left + source.width, y: source.top + source.height },
+      ],
+      90: [
+        { x: source.left, y: source.top + source.height },
+        { x: source.left + source.width, y: source.top },
+      ],
+      180: [
+        { x: source.left + source.width, y: source.top + source.height },
+        { x: source.left, y: source.top },
+      ],
+      270: [
+        { x: source.left + source.width, y: source.top },
+        { x: source.left, y: source.top + source.height },
+      ],
+    } as const;
+    assert.deepEqual(topLeft, expectedCorners[rotation][0]);
+    assert.deepEqual(bottomRight, expectedCorners[rotation][1]);
+    assert.deepEqual(
+      mapVisualClientPointToSource({ x: -1, y: 2 }, layout, rotation),
+      mapVisualClientPointToSource({ x: 0, y: 1 }, layout, rotation),
+    );
+  }
 });

@@ -10,9 +10,9 @@ import {
   getKeyboardKeysym,
   getKeyboardInputDelta,
   getNextDesktopRotation,
-  mapRotatedPointToRemote,
 } from "./desktopViewerLogic";
 import type { DesktopRotation } from "./desktopViewerLogic";
+import { attachRotatedDesktopInput, renderRotatedDesktopFrame } from "./desktopViewerInput";
 import type RFB from "@novnc/novnc";
 
 const IS_DEMO = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
@@ -34,147 +34,8 @@ interface Props {
   className?: string;
 }
 
-interface ViewerFrameSize {
-  height: number;
-  width: number;
-}
-
 function stopTouchPropagation(event: React.TouchEvent<HTMLDivElement>) {
   event.stopPropagation();
-}
-
-function clampNormalizedCoordinate(value: number): number {
-  return Math.max(0, Math.min(1, value));
-}
-
-function getRotatedClientPoint(
-  canvas: HTMLCanvasElement,
-  clientX: number,
-  clientY: number,
-  rotation: DesktopRotation,
-): { clientX: number; clientY: number } {
-  const bounds = canvas.getBoundingClientRect();
-  if (bounds.width === 0 || bounds.height === 0) return { clientX, clientY };
-
-  const visualPoint = {
-    x: clampNormalizedCoordinate((clientX - bounds.left) / bounds.width),
-    y: clampNormalizedCoordinate((clientY - bounds.top) / bounds.height),
-  };
-  const remotePoint = mapRotatedPointToRemote(visualPoint, rotation);
-  return {
-    clientX: bounds.left + clampNormalizedCoordinate(remotePoint.x) * bounds.width,
-    clientY: bounds.top + clampNormalizedCoordinate(remotePoint.y) * bounds.height,
-  };
-}
-
-function attachRotatedInput(canvas: HTMLCanvasElement, getRotation: () => DesktopRotation): () => void {
-  const syntheticEvents = new WeakSet<Event>();
-
-  function handleMouseEvent(event: Event) {
-    const rotation = getRotation();
-    if (rotation === 0 || syntheticEvents.has(event)) return;
-    const mouseEvent = event as MouseEvent;
-    const point = getRotatedClientPoint(canvas, mouseEvent.clientX, mouseEvent.clientY, rotation);
-    const syntheticEvent = new MouseEvent(event.type, {
-      altKey: mouseEvent.altKey,
-      bubbles: true,
-      button: mouseEvent.button,
-      buttons: mouseEvent.buttons,
-      cancelable: true,
-      clientX: point.clientX,
-      clientY: point.clientY,
-      ctrlKey: mouseEvent.ctrlKey,
-      detail: mouseEvent.detail,
-      metaKey: mouseEvent.metaKey,
-      screenX: mouseEvent.screenX,
-      screenY: mouseEvent.screenY,
-      shiftKey: mouseEvent.shiftKey,
-      view: window,
-    });
-    syntheticEvents.add(syntheticEvent);
-    event.preventDefault();
-    event.stopImmediatePropagation();
-    canvas.dispatchEvent(syntheticEvent);
-  }
-
-  function mapTouches(touches: TouchList): Touch[] {
-    const mapped: Touch[] = [];
-    for (let index = 0; index < touches.length; index += 1) {
-      const touch = touches.item(index);
-      if (!touch) continue;
-      const point = getRotatedClientPoint(canvas, touch.clientX, touch.clientY, getRotation());
-      mapped.push(
-        new Touch({
-          clientX: point.clientX,
-          clientY: point.clientY,
-          force: touch.force,
-          identifier: touch.identifier,
-          pageX: touch.pageX,
-          pageY: touch.pageY,
-          radiusX: touch.radiusX,
-          radiusY: touch.radiusY,
-          rotationAngle: touch.rotationAngle,
-          screenX: touch.screenX,
-          screenY: touch.screenY,
-          target: canvas,
-        }),
-      );
-    }
-    return mapped;
-  }
-
-  function handleTouchEvent(event: Event) {
-    const rotation = getRotation();
-    if (rotation === 0 || syntheticEvents.has(event)) return;
-    const touchEvent = event as TouchEvent;
-    const syntheticEvent = new TouchEvent(event.type, {
-      bubbles: true,
-      cancelable: true,
-      changedTouches: mapTouches(touchEvent.changedTouches),
-      targetTouches: mapTouches(touchEvent.targetTouches),
-      touches: mapTouches(touchEvent.touches),
-      view: window,
-    });
-    syntheticEvents.add(syntheticEvent);
-    event.preventDefault();
-    event.stopImmediatePropagation();
-    canvas.dispatchEvent(syntheticEvent);
-  }
-
-  function handleWheelEvent(event: Event) {
-    const rotation = getRotation();
-    if (rotation === 0 || syntheticEvents.has(event)) return;
-    const wheelEvent = event as WheelEvent;
-    const point = getRotatedClientPoint(canvas, wheelEvent.clientX, wheelEvent.clientY, rotation);
-    const syntheticEvent = new WheelEvent("wheel", {
-      bubbles: true,
-      cancelable: true,
-      clientX: point.clientX,
-      clientY: point.clientY,
-      deltaMode: wheelEvent.deltaMode,
-      deltaX: wheelEvent.deltaX,
-      deltaY: wheelEvent.deltaY,
-      deltaZ: wheelEvent.deltaZ,
-      view: window,
-    });
-    syntheticEvents.add(syntheticEvent);
-    event.preventDefault();
-    event.stopImmediatePropagation();
-    canvas.dispatchEvent(syntheticEvent);
-  }
-
-  const mouseEvents = ["mousedown", "mouseup", "mousemove", "click", "contextmenu"];
-  const touchEvents = ["touchstart", "touchmove", "touchend", "touchcancel"];
-  const wheelEvent = "wheel";
-  mouseEvents.forEach((type) => canvas.addEventListener(type, handleMouseEvent, true));
-  touchEvents.forEach((type) => canvas.addEventListener(type, handleTouchEvent, true));
-  canvas.addEventListener(wheelEvent, handleWheelEvent, true);
-
-  return () => {
-    mouseEvents.forEach((type) => canvas.removeEventListener(type, handleMouseEvent, true));
-    touchEvents.forEach((type) => canvas.removeEventListener(type, handleTouchEvent, true));
-    canvas.removeEventListener(wheelEvent, handleWheelEvent, true);
-  };
 }
 
 function statusLabel(status: ViewerStatus): string {
@@ -208,12 +69,12 @@ function DesktopViewer({ className = "" }: Props) {
   const [keyboardOpen, setKeyboardOpen] = useState(false);
   const [keyboardText, setKeyboardText] = useState("");
   const [rotation, setRotation] = useState<DesktopRotation>(0);
-  const [viewerFrameSize, setViewerFrameSize] = useState<ViewerFrameSize>({ height: 0, width: 0 });
   const [credentialTypes, setCredentialTypes] = useState<string[]>(["password"]);
   const [credentials, setCredentials] = useState<CredentialFormState>({ password: "", username: "" });
 
   const [viewerTarget, setViewerTarget] = useState<HTMLDivElement | null>(null);
   const viewerFrameRef = useRef<HTMLDivElement>(null);
+  const visualCanvasRef = useRef<HTMLCanvasElement>(null);
   const rfbRef = useRef<RFB | null>(null);
   const viewOnlyRef = useRef(false);
   const rotationRef = useRef<DesktopRotation>(0);
@@ -246,6 +107,30 @@ function DesktopViewer({ className = "" }: Props) {
 
     setStatus("loading");
     let detachRotatedInput = () => {};
+    let animationFrame: number | null = null;
+
+    function stopFrameMirror() {
+      detachRotatedInput();
+      detachRotatedInput = () => {};
+      if (animationFrame !== null) {
+        cancelAnimationFrame(animationFrame);
+        animationFrame = null;
+      }
+    }
+
+    function startFrameMirror(sourceCanvas: HTMLCanvasElement) {
+      const visualCanvas = visualCanvasRef.current;
+      const frame = viewerFrameRef.current;
+      if (!visualCanvas || !frame) return;
+
+      detachRotatedInput = attachRotatedDesktopInput(sourceCanvas, visualCanvas, frame, () => rotationRef.current);
+      const drawFrame = () => {
+        if (cancelled) return;
+        renderRotatedDesktopFrame(sourceCanvas, visualCanvas, frame, rotationRef.current);
+        animationFrame = requestAnimationFrame(drawFrame);
+      };
+      drawFrame();
+    }
 
     async function connectViewer() {
       try {
@@ -262,7 +147,7 @@ function DesktopViewer({ className = "" }: Props) {
         rfb.addEventListener("connect", () => {
           if (cancelled) return;
           const canvas = target.querySelector("canvas");
-          if (canvas) detachRotatedInput = attachRotatedInput(canvas, () => rotationRef.current);
+          if (canvas) startFrameMirror(canvas);
           setStatus(CONNECTED_STATUS);
           setErrorMessage("");
           securityFailureReasonRef.current = "";
@@ -285,6 +170,7 @@ function DesktopViewer({ className = "" }: Props) {
         });
         rfb.addEventListener("disconnect", (event) => {
           if (cancelled) return;
+          stopFrameMirror();
           if (connectionTimedOutRef.current) {
             setStatus("error");
             setErrorMessage(securityFailureReasonRef.current || "The desktop connection timed out.");
@@ -311,7 +197,7 @@ function DesktopViewer({ className = "" }: Props) {
 
     return () => {
       cancelled = true;
-      detachRotatedInput();
+      stopFrameMirror();
       connectionTimedOutRef.current = true;
       if (connectionDeadlineRef.current) {
         clearTimeout(connectionDeadlineRef.current);
@@ -331,19 +217,6 @@ function DesktopViewer({ className = "" }: Props) {
   useEffect(() => {
     rotationRef.current = rotation;
   }, [rotation]);
-
-  useEffect(() => {
-    if (!isOpen || !viewerFrameRef.current) return;
-    const frame = viewerFrameRef.current;
-    const updateFrameSize = () => {
-      const bounds = frame.getBoundingClientRect();
-      setViewerFrameSize({ height: bounds.height, width: bounds.width });
-    };
-    const observer = new ResizeObserver(updateFrameSize);
-    observer.observe(frame);
-    updateFrameSize();
-    return () => observer.disconnect();
-  }, [isOpen]);
 
   useEffect(() => {
     if (status !== "loading" && status !== "connecting") return;
@@ -393,19 +266,6 @@ function DesktopViewer({ className = "" }: Props) {
     setKeyboardText("");
     setCredentials({ password: "", username: "" });
   }
-
-  const targetWidth =
-    viewerFrameSize.width > 0
-      ? rotation % 180 === 0
-        ? viewerFrameSize.width
-        : viewerFrameSize.height
-      : null;
-  const targetHeight =
-    viewerFrameSize.height > 0
-      ? rotation % 180 === 0
-        ? viewerFrameSize.height
-        : viewerFrameSize.width
-      : null;
 
   function reconnect() {
     setStatus("loading");
@@ -533,13 +393,14 @@ function DesktopViewer({ className = "" }: Props) {
               >
                 <div
                   ref={setViewerTargetNode}
-                  className="absolute left-1/2 top-1/2 touch-none overflow-hidden bg-black"
+                  className="pointer-events-none absolute inset-0 touch-none overflow-hidden bg-black opacity-0"
+                  aria-hidden="true"
+                />
+                <canvas
+                  ref={visualCanvasRef}
+                  className="absolute inset-0 h-full w-full touch-none"
                   aria-label="Remote desktop display"
-                  style={{
-                    height: targetHeight ? `${targetHeight}px` : "100%",
-                    transform: `translate(-50%, -50%) rotate(${rotation}deg)`,
-                    width: targetWidth ? `${targetWidth}px` : "100%",
-                  }}
+                  style={{ cursor: "crosshair" }}
                 />
                 {(status === "loading" || status === "connecting") && (
                   <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/40 px-6 text-center text-sm text-slate-300">

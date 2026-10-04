@@ -15,6 +15,18 @@ export interface NormalizedPoint {
   y: number;
 }
 
+export interface ViewerRect {
+  height: number;
+  left: number;
+  top: number;
+  width: number;
+}
+
+export interface DesktopInputLayout {
+  source: ViewerRect;
+  visual: ViewerRect;
+}
+
 export function getKeyboardKeysym(character: string): number {
   const codePoint = character.codePointAt(0);
   if (codePoint === undefined) return 0;
@@ -36,6 +48,47 @@ export function mapRotatedPointToRemote(point: NormalizedPoint, rotation: Deskto
     default:
       return point;
   }
+}
+
+function clampUnit(value: number): number {
+  return Math.max(0, Math.min(1, value));
+}
+
+export function getDesktopInputLayout(
+  source: ViewerRect,
+  frame: ViewerRect,
+  rotation: DesktopRotation,
+): DesktopInputLayout {
+  const outputWidth = rotation % 180 === 0 ? source.width : source.height;
+  const outputHeight = rotation % 180 === 0 ? source.height : source.width;
+  const scale = outputWidth > 0 && outputHeight > 0 ? Math.min(frame.width / outputWidth, frame.height / outputHeight) : 0;
+  const visualWidth = outputWidth * scale;
+  const visualHeight = outputHeight * scale;
+
+  return {
+    source,
+    visual: {
+      height: visualHeight,
+      left: frame.left + (frame.width - visualWidth) / 2,
+      top: frame.top + (frame.height - visualHeight) / 2,
+      width: visualWidth,
+    },
+  };
+}
+
+export function mapVisualClientPointToSource(
+  point: NormalizedPoint,
+  layout: DesktopInputLayout,
+  rotation: DesktopRotation,
+): NormalizedPoint {
+  const visualX = clampUnit(point.x);
+  const visualY = clampUnit(point.y);
+  const remotePoint = mapRotatedPointToRemote({ x: visualX, y: visualY }, rotation);
+
+  return {
+    x: layout.source.left + remotePoint.x * layout.source.width,
+    y: layout.source.top + remotePoint.y * layout.source.height,
+  };
 }
 
 export function getDesktopViewerWebSocketUrl(

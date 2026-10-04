@@ -22,11 +22,13 @@ and capitalization so URLs are preserved. Touch handling belongs to the modal
 surface so desktop gestures do not trigger the remote panel's ancestor swipe
 navigation.
 
-The Rotate button rotates the local desktop viewport in 90-degree steps. Mouse,
-wheel, and touch coordinates are inverse-mapped before noVNC receives them, so
-clicks and gestures continue to address the same remote locations after a
-rotation. This is a viewport rotation; it does not change the physical display
-orientation on the HTPC.
+The Rotate button rotates the local desktop viewport in 90-degree steps. The
+noVNC canvas remains untransformed while a visible mirror renders the rotated
+frame. Mouse, wheel, and touch coordinates are inverse-mapped from that mirror
+before noVNC receives them, including mouse capture events after a drag leaves
+the viewer. This keeps clicks and gestures aligned on non-square desktops. The
+rotation is local viewport presentation only; it does not change the physical
+display orientation on the HTPC.
 
 VNC credentials are requested only when the server emits
 `credentialsrequired`. Username and password fields live in component state,
