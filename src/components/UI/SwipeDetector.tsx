@@ -1,11 +1,18 @@
 import React, { useCallback, useEffect, useRef } from "react";
 
-interface SwipeDetectorProps {
+interface Props {
+  enabled?: boolean;
+  className?: string;
   children: React.ReactNode;
   onSwipe: (direction: "left" | "right") => void;
 }
 
-const SwipeDetector: React.FC<SwipeDetectorProps> = ({ children, onSwipe }) => {
+const SwipeDetector: React.FC<Props> = ({
+  children,
+  onSwipe,
+  enabled = true,
+  className,
+}) => {
   const childRef = useRef<HTMLDivElement>(null);
   const startXRef = useRef<number | null>(null);
 
@@ -28,6 +35,8 @@ const SwipeDetector: React.FC<SwipeDetectorProps> = ({ children, onSwipe }) => {
   );
 
   useEffect(() => {
+    startXRef.current = null;
+    if (!enabled) return;
     const currentChild = childRef.current;
     if (currentChild) {
       currentChild.addEventListener("touchstart", handleTouchStart);
@@ -38,9 +47,13 @@ const SwipeDetector: React.FC<SwipeDetectorProps> = ({ children, onSwipe }) => {
         currentChild.removeEventListener("touchend", handleTouchEnd);
       };
     }
-  }, [handleTouchEnd, handleTouchStart]);
+  }, [enabled, handleTouchEnd, handleTouchStart]);
 
-  return <div ref={childRef}>{children}</div>;
+  return (
+    <div ref={childRef} className={className}>
+      {children}
+    </div>
+  );
 };
 
 export default SwipeDetector;

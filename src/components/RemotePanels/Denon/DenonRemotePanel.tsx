@@ -16,7 +16,7 @@ function DenonRemote() {
       <Overlay show={!denonState.powerOn} />
       <div
         id="denon-remote"
-        className="absolute panel-height w-full p-3 flex flex-col justify-between"
+        className="remote-body w-full p-3 flex flex-col justify-between"
       >
         <div className="flex flex-col gap-3 grow justify-between pb-[15%]">
           <InputButtons />

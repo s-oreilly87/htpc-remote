@@ -8,9 +8,10 @@ import SwipeDetector from "@/components/UI/SwipeDetector";
 import { DenonProvider } from "@/context/denon";
 import { RokuProvider } from "@/context/roku";
 import { TplinkProvider } from "@/context/tplink";
-import { RemoteType, REMOTE_INDEX } from "@/constants/remotes";
+import { RemoteType, REMOTE_INDEX, REMOTE_ORDER } from "@/constants/remotes";
 import { archivo_narrow } from "@/styles/fonts";
-import { getKeyByValue, usePrevious } from "@/utilities/utils";
+import { usePrevious } from "@/utilities/utils";
+import { canFitDesktopRemotes } from "@/components/RemotePanels/remoteLayout";
 
 const IS_DEMO = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
 const DemoPanel = dynamic(
@@ -19,94 +20,100 @@ const DemoPanel = dynamic(
 );
 
 const App = () => {
-  const [selectedRemote, setSelectedRemote] = useState<RemoteType>(RemoteType.ROKU);
-  const resetDocHeight = () => {
-    const vh = window.innerHeight * 0.01;
-    document.documentElement.style.setProperty("--vh", `${vh}px`);
-  };
-
-  useEffect(() => {
-    resetDocHeight();
-    window.addEventListener("resize", resetDocHeight);
-  }, []);
+  const [selectedRemote, setSelectedRemote] = useState<RemoteType>(
+    RemoteType.ROKU,
+  );
+  const remoteAreaRef = useRef<HTMLElement>(null);
+  const [isDesktop, setIsDesktop] = useState(false);
 
   const [isClient, setIsClient] = useState(false);
   useEffect(() => {
     setIsClient(true);
   }, []);
 
-  const currentlySelectedRemote = useRef<RemoteType>(null);
-  const prevRemote = usePrevious(selectedRemote);
-
   useEffect(() => {
-    currentlySelectedRemote.current = selectedRemote;
-  }, [selectedRemote]);
+    const area = remoteAreaRef.current;
+    if (!area) return;
+    const updateLayout = () => {
+      setIsDesktop(canFitDesktopRemotes(area.getBoundingClientRect().width));
+    };
+    updateLayout();
+    const observer = new ResizeObserver(updateLayout);
+    observer.observe(area);
+    return () => observer.disconnect();
+  }, [isClient]);
 
+  const prevRemote = usePrevious(selectedRemote);
   const handleSelectRemote = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setSelectedRemote(event.currentTarget.value as RemoteType);
+    const remote = REMOTE_ORDER.find(
+      (remote) => remote === event.currentTarget.value,
+    );
+    if (remote) setSelectedRemote(remote);
   };
 
   const handleSwipe = (direction: "left" | "right") => {
-    if (!currentlySelectedRemote.current) return;
-
-    if (direction === "right") {
-      if (REMOTE_INDEX[currentlySelectedRemote.current] > 0) {
-        setSelectedRemote((prevSelectedRemote) =>
-            (getKeyByValue(REMOTE_INDEX, REMOTE_INDEX[prevSelectedRemote] - 1) ?? prevSelectedRemote) as RemoteType,
-        );
-      }
-    } else {
-      if (
-        REMOTE_INDEX[currentlySelectedRemote.current] <
-        Object.keys(REMOTE_INDEX).length - 1
-      ) {
-        setSelectedRemote((prevSelectedRemote) =>
-            (getKeyByValue(REMOTE_INDEX, REMOTE_INDEX[prevSelectedRemote] + 1) ?? prevSelectedRemote) as RemoteType
-        );
-      }
-    }
+    setSelectedRemote((current) => {
+      const nextIndex =
+        REMOTE_INDEX[current] + (direction === "right" ? -1 : 1);
+      return REMOTE_ORDER[nextIndex] ?? current;
+    });
   };
 
   return (
     <>
       {isClient && (
         <DenonProvider>
-        <RokuProvider>
-        <TplinkProvider>
-          <div
-            id="root"
-            className={`bg-slate-900 viewport-height overflow-y-hidden ${archivo_narrow.className}`}
-          >
-            <Head>
-              <title>HTPC Remote</title>
-              <meta name="viewport" content="width=device-width, initial-scale=1" />
-              <link rel="icon" href="/favicon.ico" />
-            </Head>
-            <div className={IS_DEMO ? "flex flex-col lg:flex-row" : "flex flex-col"}>
-              <Navbar
-                className={IS_DEMO ? "fixed top-0 w-screen lg:max-w-[550px] lg:min-w-[330px]" : "fixed top-0 w-screen"}
-                onClickHandler={handleSelectRemote}
-                selectedRemote={selectedRemote}
-              />
-              <div className={IS_DEMO ? "lg:w-[550px] lg:shrink-0" : ""}>
-                <SwipeDetector onSwipe={handleSwipe}>
-                  <RemotePanelSlideScroll
-                    className={`min-w-[330px] max-w-[550px] w-full mt-16 mx-auto${IS_DEMO ? " lg:mx-0" : ""}`}
-                    selectedRemote={selectedRemote}
-                    setSelectedRemote={setSelectedRemote}
-                    prevRemote={prevRemote}
+          <RokuProvider>
+            <TplinkProvider>
+              <div
+                id="root"
+                className={`bg-slate-900 h-dvh overflow-hidden ${archivo_narrow.className}`}
+              >
+                <Head>
+                  <title>HTPC Remote</title>
+                  <meta
+                    name="viewport"
+                    content="width=device-width, initial-scale=1"
                   />
-                </SwipeDetector>
-              </div>
-              {IS_DEMO && (
-                <div className="hidden lg:flex flex-1 overflow-hidden">
-                  <DemoPanel />
+                  <link rel="icon" href="/favicon.ico" />
+                </Head>
+                <div className="flex h-full min-h-0">
+                  <main
+                    ref={remoteAreaRef}
+                    className="remote-area flex min-w-0 flex-1 flex-col"
+                    data-layout={isDesktop ? "desktop" : "compact"}
+                  >
+                    <Navbar
+                      className="relative z-50 shrink-0"
+                      isDesktop={isDesktop}
+                      onClickHandler={handleSelectRemote}
+                      selectedRemote={selectedRemote}
+                    />
+                    <SwipeDetector
+                      onSwipe={handleSwipe}
+                      enabled={!isDesktop}
+                      className="min-h-0 flex-1"
+                    >
+                      <RemotePanelSlideScroll
+                        isDesktop={isDesktop}
+                        selectedRemote={selectedRemote}
+                        setSelectedRemote={setSelectedRemote}
+                        prevRemote={prevRemote}
+                      />
+                    </SwipeDetector>
+                  </main>
+                  {IS_DEMO && (
+                    <aside
+                      className="hidden w-[480px] shrink-0 overflow-hidden lg:flex"
+                      aria-label="Home theater simulator"
+                    >
+                      <DemoPanel />
+                    </aside>
+                  )}
                 </div>
-              )}
-            </div>
-          </div>
-        </TplinkProvider>
-        </RokuProvider>
+              </div>
+            </TplinkProvider>
+          </RokuProvider>
         </DenonProvider>
       )}
     </>

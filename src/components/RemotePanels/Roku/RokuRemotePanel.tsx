@@ -9,11 +9,11 @@ import { useRokuContext } from "@/context/roku";
 
 const remote = RemoteType.ROKU;
 
-interface RokuRemotePanelProps {
+interface Props {
   setSelectedRemote: (remote: RemoteType) => void;
 }
 
-function RokuRemotePanel({ setSelectedRemote }: RokuRemotePanelProps) {
+function RokuRemotePanel({ setSelectedRemote }: Props) {
   const { rokuState } = useRokuContext();
 
   return (
@@ -21,7 +21,7 @@ function RokuRemotePanel({ setSelectedRemote }: RokuRemotePanelProps) {
       <Overlay show={!rokuState.powerOn} />
       <div
         id="roku-remote"
-        className="absolute panel-height w-full p-3 flex flex-col justify-between"
+        className="remote-body w-full p-3 flex flex-col justify-between"
       >
         <div className="flex flex-col flex-grow pb-[10%] gap-4 justify-between">
           <div className="flex flex-col gap-3">
