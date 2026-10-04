@@ -29,7 +29,6 @@ function PCRemote() {
       className="absolute w-full panel-height p-3 flex flex-col justify-between"
     >
       <div className="flex flex-col gap-4 justify-between">
-        <DesktopViewer className="w-full" />
         {hasFullHtpcControl
           ? <HTPCPresets />
           // LINUX_X11 remote: only ydotool keystrokes work — no shell scripts
@@ -37,6 +36,7 @@ function PCRemote() {
         }
         <MediaButtons remote={remote} />
         {hasFullHtpcControl && <AppButtons />}
+        <DesktopViewer className="w-full" />
         {showAirMouse && <AirMouse />}
       </div>
       <div className="shrink-0">
