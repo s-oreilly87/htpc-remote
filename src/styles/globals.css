@@ -158,3 +158,13 @@
     min-height: max(850px, calc(100dvh - 154px));
   }
 }
+
+@layer utilities {
+  /* Keep controls and their shadows clear of the rounded shell's clipped edge.
+     Padding stays inside the body's height so tall remotes don't gain a scroll
+     just for breathing room; short remotes retain the existing scroll reach. */
+  .remote-controls > .remote-body {
+    @apply pb-9;
+    padding-bottom: calc(2.25rem + env(safe-area-inset-bottom, 0px));
+  }
+}
