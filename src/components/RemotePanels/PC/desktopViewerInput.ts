@@ -119,9 +119,9 @@ export function attachRotatedDesktopInput(
   function dispatchMappedMouseEvent(event: MouseEvent, target: HTMLCanvasElement) {
     const mappedEvent = mapMouseEvent(event, getCurrentLayout(), getRotation());
     syntheticEvents.add(mappedEvent);
+    target.dispatchEvent(mappedEvent);
     event.preventDefault();
     event.stopImmediatePropagation();
-    target.dispatchEvent(mappedEvent);
   }
 
   function handleVisualMouseEvent(event: Event) {
