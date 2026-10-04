@@ -58,8 +58,11 @@ fallback when metadata is absent, and sends the changed button's current state.
 The canonical source-package recipe, Debian quilt registration, `+htpc1`
 build, package metadata, rollback backup, ABI checks, and fixed-upstream
 criteria are in [the desktop preview guide](../../docs/desktop-preview.md#krfb-logical-input-scaling-backport).
-The matching unsigned package compiled successfully, but host installation and
-runtime capture, input, reconnect, and TV-off checks remain pending.
+The matching unsigned package compiled successfully and is now installed
+and held on the host at the exact `+htpc1` version. The activation receipt,
+package digest, listener/bridge checks, and pinned-package rollback are in the
+canonical guide. Actual cursor/click mapping, portal permission persistence
+after restart, and TV-off behavior remain pending.
 
 KRFB stores its passwords through KDE Desktop Sharing/KWallet, which requires
 one-time graphical configuration. KRFB 26.04.3's VNC listener binds

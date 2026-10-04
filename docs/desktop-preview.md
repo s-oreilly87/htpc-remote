@@ -51,8 +51,19 @@ SHA-256: 71e2ebaf597b8548209bfb146c9fca476972d567c82e6019a3fe917f461f34bf
 
 The package contains both rebuilt plugins:
 `usr/lib/x86_64-linux-gnu/qt6/plugins/krfb/events/xdp.so` and
-`usr/lib/x86_64-linux-gnu/qt6/plugins/krfb/framebuffer/pw.so`. Host installation,
-runtime capture/input, reconnect, and TV-off checks remain pending.
+`usr/lib/x86_64-linux-gnu/qt6/plugins/krfb/framebuffer/pw.so`.
+
+Host activation receipt (2026-10-04): the local package
+`4:26.04.3-0zneon+24.04+noble+release+build53+htpc1` with SHA-256
+`71e2ebaf597b8548209bfb146c9fca476972d567c82e6019a3fe917f461f34bf` is
+installed and held. The installed artifact is
+`/home/sean/.local/share/htpc-desktop/recovery-20261004/krfb-logical-input-build/krfb_26.04.3-0zneon+24.04+noble+release+build53+htpc1_amd64.deb`.
+The previous KRFB process was gracefully quit, both desktop user services
+restarted successfully, KRFB is listening on 5900 and websockify on loopback
+6080, the local app returned HTTP 200 on port 3000, and LAN connections to
+5900/6080 were refused. These checks confirm activation and transport. Actual
+cursor/click mapping, portal permission persistence after restart, and TV-off
+behavior remain pending.
 
 Build the exact Neon source package with Debian quilt registration and the
 local `+htpc1` revision. Keep the source directory explicit so a wrapper or
