@@ -14,6 +14,12 @@ interface Props {
   setSelectedRemote: (remote: RemoteType) => void;
 }
 
+const REMOTE_TAB_ACCENT: Record<RemoteType, string> = {
+  [RemoteType.DENON]: "btn-primary-denon",
+  [RemoteType.ROKU]: "btn-primary-roku",
+  [RemoteType.PC]: "btn-primary-pc",
+};
+
 function Navbar({
   className,
   isDesktop,
@@ -68,7 +74,11 @@ function Navbar({
                 <button
                   key={remote}
                   type="button"
-                  className="remote-tab"
+                  className={`remote-tab ${
+                    selectedRemote === remote
+                      ? `remote-tab-active ${REMOTE_TAB_ACCENT[remote]}`
+                      : "remote-tab-inactive"
+                  }`}
                   data-remote={remote}
                   aria-pressed={selectedRemote === remote}
                   onClick={(event) => selectRemote(event, remote)}
