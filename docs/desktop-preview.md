@@ -15,17 +15,152 @@ and does not provide the existing Wayland desktop server needed here.
 
 KRFB is the practical backend for this host, with one version constraint. KDE
 Bug 524610 affects the confirmed KRFB 26.08.0 and 26.08.1 releases: the
-process can be active while its RFB listener is never created. The connected
-host is therefore running the
-official Neon build `4:26.04.3-0zneon+24.04+noble+release+build53`, with
-`krfb` held at that version until a fixed release is verified. Its Wayland
-entry point selects the PipeWire framebuffer plugin, which uses the XDG
-Desktop Portal for screen capture and remote keyboard, pointer, and touch
-control. The 26.04.3 and 26.08.1 PipeWire sources use the same
-`persist_mode=2` and restore-token flow, so this rollback preserves the
-portal permission model while restoring the listener.
+process can be active while its RFB listener is never created. The checked-in
+source targets the official Neon build
+`4:26.04.3-0zneon+24.04+noble+release+build53`. The connected host now runs
+the local `+htpc1` logical-input rebuild described below and holds that exact
+custom package until both the listener regression and the logical-coordinate
+fix are covered by a later official candidate. Its Wayland entry point selects
+the PipeWire framebuffer plugin, which uses the XDG Desktop Portal for screen
+capture and remote keyboard, pointer, and touch control. The 26.04.3 and
+26.08.1 PipeWire sources use the same `persist_mode=2` and restore-token flow,
+so the pinned-package rollback preserves the portal permission model while
+restoring the listener.
 The host setup files are under `linux/desktop-sharing/` and generate user
 services for the logged-in graphical session.
+
+## KRFB logical input scaling backport
+
+The host's capture stream is observed at 3840x2160 physical pixels while KWin
+exposes a 1280x720 logical desktop (300% scaling). The physical cursor can cover
+the whole HTPC screen while the client pointer remains near the upper-left of the
+image; the measured mismatch is 3x, not 2x. KDE Bug
+[524406](https://bugs.kde.org/show_bug.cgi?id=524406) tracks this
+physical/logical coordinate mismatch.
+
+The repository records the narrow source backport at
+`linux/desktop-sharing/patches/krfb-26.04.3-logical-input.patch`. It exposes the
+PipeWire stream's logical size, maps absolute pointer coordinates from frame
+pixels to that logical size, falls back to the original coordinates when
+metadata is absent, and reports each changed button with its current button
+state. A matching official Neon 26.04.3 source tree compiled successfully into
+this unsigned package:
+
+```text
+krfb_26.04.3-0zneon+24.04+noble+release+build53+htpc1_amd64.deb
+SHA-256: 71e2ebaf597b8548209bfb146c9fca476972d567c82e6019a3fe917f461f34bf
+```
+
+The package contains both rebuilt plugins:
+`usr/lib/x86_64-linux-gnu/qt6/plugins/krfb/events/xdp.so` and
+`usr/lib/x86_64-linux-gnu/qt6/plugins/krfb/framebuffer/pw.so`.
+
+Host activation receipt (2026-10-04): the local package
+`4:26.04.3-0zneon+24.04+noble+release+build53+htpc1` with SHA-256
+`71e2ebaf597b8548209bfb146c9fca476972d567c82e6019a3fe917f461f34bf` is
+installed and held. The installed artifact is
+`/home/sean/.local/share/htpc-desktop/recovery-20261004/krfb-logical-input-build/krfb_26.04.3-0zneon+24.04+noble+release+build53+htpc1_amd64.deb`.
+The previous KRFB process was gracefully quit, both desktop user services
+restarted successfully, KRFB is listening on 5900 and websockify on loopback
+6080, the local app returned HTTP 200 on port 3000, and LAN connections to
+5900/6080 were refused. These checks confirm activation and transport. Actual
+cursor/click mapping, portal permission persistence after restart, and TV-off
+behavior remain pending.
+
+Before applying or compiling, verify that the official 26.04.3 source retains
+these interfaces: `frameBuffer()` returns a shared pointer passed as `.data()`
+to a helper taking `FrameBuffer *`; `FrameBuffer::customProperty` returns
+`QVariant`; stream metadata exposes a `size` decodable as `QSize` or a
+two-integer `QDBusArgument` structure; and the generated RemoteDesktop proxy
+accepts floating-point absolute coordinates plus an unsigned button state. The
+patch uses `QSize::isEmpty()` guards and accesses `streamLogicalSize` directly
+inside `PWFrameBuffer::Private`. Stop rather than forcing the patch if source
+paths or APIs differ. Use the normal Neon Qt 6, KDE Frameworks, PipeWire, and
+XDG Desktop Portal build dependencies.
+
+Build the exact Neon source package with Debian quilt registration and the
+exact local `+htpc1` revision. Keep the source directory explicit so a wrapper
+or build-output directory cannot be selected accidentally:
+
+```bash
+KRFB_VERSION='4:26.04.3-0zneon+24.04+noble+release+build53'
+LOCAL_VERSION="${KRFB_VERSION}+htpc1"
+apt-cache policy krfb
+apt-cache showsrc krfb | grep -E '^(Package|Version):'
+apt source "krfb=${KRFB_VERSION}"
+KRFB_SOURCE="$PWD/krfb-26.04.3"
+test -f "$KRFB_SOURCE/debian/rules"
+cd "$KRFB_SOURCE"
+install -m 0644 /path/to/htpc-remote/linux/desktop-sharing/patches/krfb-26.04.3-logical-input.patch debian/patches/htpc-logical-input.patch
+grep -qxF 'htpc-logical-input.patch' debian/patches/series || printf '%s\n' 'htpc-logical-input.patch' >> debian/patches/series
+dch --newversion "$LOCAL_VERSION" 'Fix logical pointer scaling for a 300% Wayland output'
+test "$(dpkg-parsechangelog -S Version)" = "$LOCAL_VERSION"
+dpkg-source --before-build
+dpkg-buildpackage -us -uc -b -j4
+```
+
+Verify the resulting package metadata and plugin payload before installation:
+
+```bash
+BUILT_PACKAGE="$KRFB_SOURCE/../krfb_26.04.3-0zneon+24.04+noble+release+build53+htpc1_amd64.deb"
+test "$(dpkg-deb -f "$BUILT_PACKAGE" Version)" = "$LOCAL_VERSION"
+dpkg-deb -f "$BUILT_PACKAGE" Package Version Architecture Size
+sha256sum "$BUILT_PACKAGE"
+dpkg-deb -c "$BUILT_PACKAGE" | grep -E '/(events/xdp|framebuffer/pw)\.so$'
+```
+
+Back up the pinned official package before installing a locally built one. The
+recovery directory may also contain an older 26.08.1 package; always use this
+exact pinned filename and validate its version, never a wildcard:
+
+```bash
+RECOVERY_DIR="$HOME/.local/share/htpc-desktop/recovery-20261004"
+OFFICIAL_PACKAGE="$RECOVERY_DIR/krfb_26.04.3-0zneon+24.04+noble+release+build53_amd64.deb"
+mkdir -p "$RECOVERY_DIR"
+if [ ! -f "$OFFICIAL_PACKAGE" ]; then
+  (cd "$RECOVERY_DIR" && apt download "krfb=${KRFB_VERSION}")
+fi
+test -f "$OFFICIAL_PACKAGE"
+test "$(dpkg-deb -f "$OFFICIAL_PACKAGE" Version)" = "$KRFB_VERSION"
+dpkg-deb -f "$OFFICIAL_PACKAGE" Package Version Architecture Size
+sha256sum "$OFFICIAL_PACKAGE"
+```
+
+Install the reviewed local package in its own step, allowing the explicitly
+held package to change, then hold the exact local version and restart services:
+
+```bash
+sudo apt install --allow-change-held-packages "$BUILT_PACKAGE"
+sudo apt-mark hold krfb
+systemctl --user restart htpc-desktop-vnc.service htpc-desktop-websockify.service
+```
+
+Rollback is a separate operation. Validate the exact official package again,
+then install only that file with downgrade and held-package allowances:
+
+```bash
+test "$(dpkg-deb -f "$OFFICIAL_PACKAGE" Version)" = "$KRFB_VERSION"
+sudo apt install --allow-downgrades --allow-change-held-packages "$OFFICIAL_PACKAGE"
+sudo apt-mark hold krfb
+systemctl --user restart htpc-desktop-vnc.service htpc-desktop-websockify.service
+```
+
+Before unholding for a later official candidate, inspect its source and release
+notes against Bug 524406. Treat it as fixed only after source review shows an
+equivalent physical-to-logical XDP mapping, an identity fallback for absent
+metadata, and changed-button notifications using the current button state.
+Build or install that candidate, repeat listener, capture, authentication,
+reconnect, and TV-off checks, and only then run:
+
+```bash
+sudo apt-mark unhold krfb
+sudo apt install --only-upgrade krfb
+systemctl --user restart htpc-desktop-vnc.service htpc-desktop-websockify.service
+ss -ltnp | grep -E ':(5900|6080)\b'
+```
+
+Keep the pinned official package if the candidate lacks the fix or any runtime
+check regresses.
 
 ## Connection topology
 
@@ -65,29 +200,14 @@ unverified 26.08.0 or 26.08.1 build. Keep the original package in a host-local
 recovery directory if a later rollback is needed. The package hold is a temporary
 operational guard, not an application dependency.
 
-When official release notes or source document a fixed KRFB release, inspect
-the candidate before removing the hold:
-
-Only remove the hold after the fixed version has been confirmed. Then install
-only the KRFB candidate and restart the user services:
-
-```bash
-apt-cache policy krfb
-sudo apt-mark unhold krfb
-sudo apt install --only-upgrade krfb
-systemctl --user restart htpc-desktop-vnc.service htpc-desktop-websockify.service
-ss -ltnp | grep -E ':(5900|6080)\b'
-```
-
-This installs only the KRFB candidate. Repeat the authentication, portal, and
-LAN-block checks. If the listener regresses, restore the pinned build and hold
-it again:
-
-```bash
-sudo apt install --allow-downgrades \
-  krfb=4:26.04.3-0zneon+24.04+noble+release+build53
-sudo apt-mark hold krfb
-```
+For a fresh machine, complete the graphical KRFB setup above, then follow
+[the logical-input backport section](#krfb-logical-input-scaling-backport) to
+apply and install the reviewed local package. On the connected host, retain the
+held `+htpc1` package until a later official candidate has been checked against
+both KDE Bug 524610 (listener creation) and KDE Bug 524406 (logical pointer
+scaling). Use that section's exact package validation, install, rollback, and
+unhold steps; repeat listener, authentication, portal, LAN-block, scaling, and
+TV-off checks before changing the hold.
 
 In KRFB's graphical settings, enable **Allow connections without an
 invitation**, set its unattended-access password, and keep **Allow remote
