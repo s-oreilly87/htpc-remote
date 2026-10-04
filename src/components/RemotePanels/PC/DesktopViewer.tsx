@@ -1,5 +1,5 @@
 import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
-import { faDesktop, faKeyboard, faRotateRight, faEye, faGamepad, faRotate, faBars } from "@fortawesome/free-solid-svg-icons";
+import { faDesktop, faKeyboard, faRotateRight, faEye, faEyeSlash, faGamepad, faRotate } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -380,7 +380,7 @@ function DesktopViewer({ className = "" }: Props) {
               <ModalCloseButton
                 onClick={closeViewer}
                 ariaLabel="Close desktop viewer"
-                className="!right-[calc(0.75rem+env(safe-area-inset-right))] !top-[calc(0.75rem+env(safe-area-inset-top))] !h-10 !w-10"
+                className="!right-[calc(0.75rem+env(safe-area-inset-right))] !top-[calc(0.75rem+env(safe-area-inset-top))] !h-10 !w-10 !bg-red-700/70 hover:!bg-red-600/85"
               />
 
               <div
@@ -464,7 +464,7 @@ function DesktopViewer({ className = "" }: Props) {
 
                 {controlsOpen && (
                   <div className="pointer-events-none absolute inset-x-0 top-0 z-30 px-[calc(0.5rem+env(safe-area-inset-left))] pt-[calc(0.5rem+env(safe-area-inset-top))] pr-[calc(6.75rem+env(safe-area-inset-right))]">
-                    <div className="pointer-events-auto flex items-center justify-between gap-2 rounded-b-xl border border-slate-800/80 bg-slate-950/85 px-3 py-2 shadow-lg backdrop-blur-sm">
+                    <div className="pointer-events-none flex items-center justify-between gap-2 rounded-b-xl border border-slate-200/20 bg-slate-950/25 px-3 py-2">
                       <div className="min-w-0">
                         <p className="truncate text-sm font-semibold text-slate-50">HTPC Desktop</p>
                         <p className="truncate text-xs text-slate-400">{desktopName || statusLabel(status)}</p>
@@ -472,10 +472,10 @@ function DesktopViewer({ className = "" }: Props) {
                       <span
                         className={`shrink-0 rounded-full px-2 py-1 text-xs font-medium ${
                           status === CONNECTED_STATUS
-                            ? "bg-emerald-900/70 text-emerald-300"
+                            ? "bg-emerald-900/35 text-emerald-200"
                             : status === "error"
-                              ? "bg-red-900/70 text-red-300"
-                              : "bg-slate-800 text-slate-300"
+                              ? "bg-red-900/40 text-red-200"
+                              : "bg-slate-800/40 text-slate-200"
                         }`}
                       >
                         {statusLabel(status)}
@@ -486,22 +486,24 @@ function DesktopViewer({ className = "" }: Props) {
 
                 <button
                   type="button"
-                  className="btn btn-secondary absolute right-[calc(3.75rem+env(safe-area-inset-right))] top-[calc(0.75rem+env(safe-area-inset-top))] z-50 inline-flex min-h-10 min-w-10 items-center justify-center gap-1 px-2 py-1 text-xs shadow-lg"
+                  className="btn btn-secondary absolute right-[calc(3.75rem+env(safe-area-inset-right))] top-[calc(0.75rem+env(safe-area-inset-top))] z-50 inline-flex min-h-10 min-w-10 items-center justify-center gap-1 bg-slate-600/50 px-2 py-1 text-xs hover:bg-slate-500/70"
                   onClick={toggleControls}
                   aria-expanded={controlsOpen}
                   aria-label={controlsOpen ? "Hide desktop viewer controls" : "Show desktop viewer controls"}
+                  title={controlsOpen ? "Hide desktop viewer controls" : "Show desktop viewer controls"}
                 >
-                  <FontAwesomeIcon icon={faBars} />
-                  <span className="sr-only">{controlsOpen ? "Hide controls" : "Show controls"}</span>
+                  <FontAwesomeIcon icon={controlsOpen ? faEyeSlash : faEye} />
+                  <span className="hidden sm:inline">{controlsOpen ? "Hide" : "Show"}</span>
+                  <span className="sr-only"> controls</span>
                 </button>
 
                 {controlsOpen && status === CONNECTED_STATUS && (
                   <div className="pointer-events-none absolute inset-x-0 bottom-0 z-30 px-[calc(0.5rem+env(safe-area-inset-left))] pb-[calc(0.5rem+env(safe-area-inset-bottom))] pr-[calc(0.5rem+env(safe-area-inset-right))] pt-8">
-                    <div className="pointer-events-auto flex flex-wrap items-center gap-1 rounded-xl border border-slate-800/80 bg-slate-950/85 p-2 shadow-lg backdrop-blur-sm">
+                    <div className="pointer-events-none flex flex-wrap items-center gap-1 rounded-xl border border-slate-200/20 bg-slate-950/25 p-2">
                       <div className="flex items-center gap-1" role="group" aria-label="Desktop input mode">
                         <button
                           type="button"
-                          className={`btn inline-flex min-h-10 min-w-10 items-center justify-center gap-1 px-2 py-1 text-xs ${viewOnly ? "btn-secondary" : "btn-primary-pc"}`}
+                          className={`btn pointer-events-auto inline-flex min-h-10 min-w-10 items-center justify-center gap-1 px-2 py-1 text-xs ${viewOnly ? "btn-secondary bg-slate-600/50 hover:bg-slate-500/70" : "btn-primary-pc bg-blue-600/70 hover:bg-blue-500/80"}`}
                           onClick={() => setViewOnly(false)}
                           aria-pressed={!viewOnly}
                         >
@@ -509,7 +511,7 @@ function DesktopViewer({ className = "" }: Props) {
                         </button>
                         <button
                           type="button"
-                          className={`btn inline-flex min-h-10 min-w-10 items-center justify-center gap-1 px-2 py-1 text-xs ${viewOnly ? "btn-primary-pc" : "btn-secondary"}`}
+                          className={`btn pointer-events-auto inline-flex min-h-10 min-w-10 items-center justify-center gap-1 px-2 py-1 text-xs ${viewOnly ? "btn-primary-pc bg-blue-600/70 hover:bg-blue-500/80" : "btn-secondary bg-slate-600/50 hover:bg-slate-500/70"}`}
                           onClick={() => setViewOnly(true)}
                           aria-pressed={viewOnly}
                         >
@@ -519,7 +521,7 @@ function DesktopViewer({ className = "" }: Props) {
                       </div>
                       <button
                         type="button"
-                        className="btn btn-secondary inline-flex min-h-10 min-w-10 items-center justify-center gap-1 px-2 py-1 text-xs"
+                        className="btn btn-secondary pointer-events-auto inline-flex min-h-10 min-w-10 items-center justify-center gap-1 bg-slate-600/50 px-2 py-1 text-xs hover:bg-slate-500/70"
                         onClick={() => setKeyboardOpen((current) => !current)}
                         disabled={viewOnly}
                         aria-pressed={keyboardOpen}
@@ -529,7 +531,7 @@ function DesktopViewer({ className = "" }: Props) {
                       </button>
                       <button
                         type="button"
-                        className="btn btn-secondary inline-flex min-h-10 min-w-10 items-center justify-center gap-1 px-2 py-1 text-xs"
+                        className="btn btn-secondary pointer-events-auto inline-flex min-h-10 min-w-10 items-center justify-center gap-1 bg-slate-600/50 px-2 py-1 text-xs hover:bg-slate-500/70"
                         onClick={() => setRotation((current) => getNextDesktopRotation(current))}
                         aria-label={`Rotate desktop screen to ${getNextDesktopRotation(rotation)} degrees`}
                       >
@@ -538,7 +540,7 @@ function DesktopViewer({ className = "" }: Props) {
                       </button>
                       <button
                         type="button"
-                        className="btn btn-secondary ml-auto inline-flex min-h-10 min-w-10 items-center justify-center gap-1 px-2 py-1 text-xs"
+                        className="btn btn-secondary pointer-events-auto ml-auto inline-flex min-h-10 min-w-10 items-center justify-center gap-1 bg-slate-600/50 px-2 py-1 text-xs hover:bg-slate-500/70"
                         onClick={reconnect}
                         disabled={IS_DEMO}
                       >
@@ -557,7 +559,7 @@ function DesktopViewer({ className = "" }: Props) {
                           spellCheck={false}
                           placeholder="Type on HTPC…"
                           aria-label="Type on HTPC"
-                          className="order-last basis-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-1.5 text-sm text-white outline-none focus:border-blue-400"
+                          className="pointer-events-auto order-last basis-full rounded-lg border border-slate-200/25 bg-slate-950/45 px-3 py-1.5 text-sm text-white outline-none focus:border-blue-300"
                         />
                       )}
                     </div>
