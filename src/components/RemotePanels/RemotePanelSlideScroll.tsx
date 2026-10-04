@@ -8,6 +8,8 @@ import PCRemotePanel from "@/components/RemotePanels/PC/PCRemotePanel";
 import RokuRemotePanel from "@/components/RemotePanels/Roku/RokuRemotePanel";
 import DenonRemotePanel from "@/components/RemotePanels/Denon/DenonRemotePanel";
 import SlideScrollTransition from "@/components/UI/SlideScrollTransition";
+import { usePrevious } from "@/utilities/utils";
+import { shouldAnimateRemoteChange } from "./remoteLayout";
 
 interface Props {
   isDesktop: boolean;
@@ -22,13 +24,17 @@ function RemotePanelSlideScroll({
   setSelectedRemote,
   prevRemote,
 }: Props) {
+  const previousDesktop = usePrevious(isDesktop);
+  // A mode change snaps the same mounted panels into place. Subsequent compact
+  // selections resume the usual swipe/tab animation.
+  const animate = shouldAnimateRemoteChange(isDesktop, previousDesktop);
   return (
     <div className="remote-panels" aria-label="Remote controls">
       {REMOTE_ORDER.map((remote) => (
         <SlideScrollTransition
           key={remote}
           show={isDesktop || selectedRemote === remote}
-          enabled={!isDesktop}
+          enabled={animate}
           className="remote-shell"
           selectedComponentIndex={REMOTE_INDEX[selectedRemote]}
           prevComponentIndex={prevRemote ? REMOTE_INDEX[prevRemote] : null}

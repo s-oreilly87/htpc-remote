@@ -8,3 +8,10 @@ export const DESKTOP_REMOTE_MIN_WIDTH =
 export function canFitDesktopRemotes(availableWidth: number): boolean {
   return availableWidth >= DESKTOP_REMOTE_MIN_WIDTH;
 }
+
+export function shouldAnimateRemoteChange(
+  isDesktop: boolean,
+  previousDesktop: boolean | null,
+): boolean {
+  return !isDesktop && previousDesktop !== true;
+}
