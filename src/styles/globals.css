@@ -28,8 +28,6 @@
     @apply py-2 px-2 rounded-lg shadow-md font-medium text-white focus:outline-none focus:ring-1 focus:ring-gray-700/75 select-none transition-colors active:brightness-[0.85];
   }
 
-  /* Primary/secondary buttons — defined BEFORE nav-tab-* so nav-tab-active's shadow-md    */
-  /* (defined later, wins cascade) picks up --tw-shadow-color set here → colored underglow. */
   .btn-primary-denon {
     @apply bg-teal-600 hover:bg-teal-500 focus:ring-teal-400 disabled:bg-teal-700/60 disabled:opacity-60 shadow-inner shadow-teal-400/70;
   }
@@ -38,20 +36,6 @@
   }
   .btn-primary-pc {
     @apply bg-blue-600 hover:bg-blue-500 focus:ring-blue-400 shadow-inner shadow-blue-400/70;
-  }
-
-  /* Nav tabs — defined AFTER btn-primary-* so shadow-md wins the box-shadow cascade and   */
-  /* reads --tw-shadow-color (set by whichever btn-primary-* is paired) → colored underglow */
-  /* nav-tab-active omits bg — always paired with btn-primary-* which supplies the color.   */
-  .nav-tab-active {
-    @apply py-2 px-2 rounded-lg shadow-md font-medium focus:outline-none focus:ring-1 focus:ring-gray-700/75 select-none transition-colors active:brightness-[0.85]
-           w-1/3 rounded-t-2xl rounded-b-none items-end transition-all duration-500 ease-in-out
-           h-14 drop-shadow-2xl text-white;
-  }
-  .nav-tab-inactive {
-    @apply py-2 px-2 rounded-lg shadow-md font-medium focus:outline-none focus:ring-1 focus:ring-gray-700/75 select-none transition-colors active:brightness-[0.85]
-           w-1/3 rounded-t-2xl rounded-b-none items-end text-gray-400 bg-slate-800 transition-all duration-500 ease-in-out
-           h-[50px];
   }
   .btn-secondary {
     @apply bg-slate-600 hover:bg-slate-500 disabled:bg-slate-700 disabled:opacity-60 shadow-inner shadow-black/30;
@@ -103,16 +87,50 @@
   transition: all 500ms ease-in-out;
 }
 
-/* One persistent remote tree switches between compact slides and desktop shells. */
+/* One persistent remote tree switches between compact slides and desktop shells.
+   Shared chrome dimensions keep body height and the first control aligned. */
 @layer components {
+  .remote-area {
+    --remote-brand-height: 48px;
+    --remote-header-height: 40px;
+    --remote-frame-gutter: 16px;
+    --remote-border-height: 1px;
+    --remote-chrome-width: 550px;
+  }
+  .remote-area[data-layout="desktop"] {
+    --remote-border-height: 2px;
+    --remote-chrome-width: 1698px;
+  }
+  .remote-chrome-width {
+    width: min(100%, var(--remote-chrome-width));
+    @apply mx-auto;
+  }
+  .remote-brand-row {
+    height: var(--remote-brand-height);
+    @apply flex items-center;
+  }
   .remote-panels {
-    @apply relative mx-auto h-full w-full max-w-[550px] overflow-hidden;
+    padding-block: var(--remote-frame-gutter);
+    @apply relative mx-auto flex h-full w-full max-w-[550px] flex-col overflow-hidden;
+  }
+  .remote-tabs {
+    height: var(--remote-header-height);
+    @apply grid shrink-0 grid-cols-3 overflow-hidden rounded-t-2xl border border-b-0 border-slate-600/70 bg-slate-800/70;
+  }
+  .remote-tab {
+    @apply min-w-0 px-2 text-base font-medium text-slate-400 transition-colors hover:text-slate-200 focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-slate-300;
+  }
+  .remote-tab:focus-visible {
+    outline-offset: -2px;
+  }
+  .remote-slides {
+    @apply relative min-h-0 flex-1;
   }
   .remote-shell {
     @apply absolute inset-0 w-full;
   }
   .remote-shell-inner {
-    @apply flex h-full min-h-0 flex-col;
+    @apply isolate flex h-full min-h-0 flex-col overflow-hidden rounded-b-3xl border border-t-0 border-slate-600/70 bg-slate-800/30 shadow-xl shadow-black/30;
   }
   .remote-content {
     @apply min-h-0 flex-1 overflow-y-auto overflow-x-hidden;
@@ -121,41 +139,63 @@
     @apply relative isolate;
   }
   .remote-body {
-    min-height: max(740px, calc(100dvh - 64px));
+    min-height: max(
+      740px,
+      calc(
+        100dvh - var(--remote-brand-height) - 2 * var(--remote-frame-gutter) -
+          var(--remote-header-height) - var(--remote-border-height)
+      )
+    );
   }
   .remote-area[data-layout="desktop"] .remote-panels {
-    @apply grid max-w-none grid-cols-[repeat(3,550px)] justify-center gap-6 p-4;
+    @apply grid max-w-none grid-cols-[repeat(3,550px)] justify-center gap-6 px-4;
+  }
+  .remote-area[data-layout="desktop"] .remote-slides {
+    display: contents;
   }
   .remote-area[data-layout="desktop"] .remote-shell {
     @apply relative inset-auto min-h-0;
   }
   .remote-area[data-layout="desktop"] .remote-shell-inner {
-    @apply isolate overflow-hidden rounded-3xl border border-slate-600/70 bg-slate-800/30 shadow-xl shadow-black/30;
+    @apply rounded-3xl border-t;
   }
-  .remote-area[data-layout="desktop"] .remote-shell-inner[data-remote="DENON"] {
-    @apply border-teal-500/40;
+  .remote-shell-inner[data-remote="DENON"],
+  .remote-tabs[data-remote="DENON"] {
+    @apply border-teal-500/50;
   }
-  .remote-area[data-layout="desktop"] .remote-shell-inner[data-remote="ROKU"] {
-    @apply border-violet-400/40;
+  .remote-shell-inner[data-remote="ROKU"],
+  .remote-tabs[data-remote="ROKU"] {
+    @apply border-violet-400/50;
   }
-  .remote-area[data-layout="desktop"] .remote-shell-inner[data-remote="PC"] {
-    @apply border-blue-400/40;
+  .remote-shell-inner[data-remote="PC"],
+  .remote-tabs[data-remote="PC"] {
+    @apply border-blue-400/50;
   }
   .remote-heading {
-    @apply flex h-14 shrink-0 items-center border-b border-slate-600/40 bg-slate-800/70 px-5 text-xl font-semibold tracking-wide text-slate-100;
+    height: var(--remote-header-height);
+    @apply flex shrink-0 items-center border-b px-5 text-lg font-semibold tracking-wide;
     box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.06);
   }
-  .remote-shell-inner[data-remote="DENON"] .remote-heading {
-    @apply text-teal-200;
+  .remote-shell-inner[data-remote="DENON"] .remote-heading,
+  .remote-tab[data-remote="DENON"][aria-pressed="true"] {
+    @apply border-teal-500/30 bg-teal-950 text-teal-200;
   }
-  .remote-shell-inner[data-remote="ROKU"] .remote-heading {
-    @apply text-violet-200;
+  .remote-shell-inner[data-remote="ROKU"] .remote-heading,
+  .remote-tab[data-remote="ROKU"][aria-pressed="true"] {
+    @apply border-violet-400/30 bg-violet-950 text-violet-200;
   }
-  .remote-shell-inner[data-remote="PC"] .remote-heading {
-    @apply text-blue-200;
+  .remote-shell-inner[data-remote="PC"] .remote-heading,
+  .remote-tab[data-remote="PC"][aria-pressed="true"] {
+    @apply border-blue-400/30 bg-blue-950 text-blue-200;
   }
   .remote-area[data-layout="desktop"] .remote-body {
-    min-height: max(850px, calc(100dvh - 154px));
+    min-height: max(
+      850px,
+      calc(
+        100dvh - var(--remote-brand-height) - 2 * var(--remote-frame-gutter) -
+          var(--remote-header-height) - var(--remote-border-height)
+      )
+    );
   }
 }
 
