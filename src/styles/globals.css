@@ -96,7 +96,7 @@
     --remote-frame-top: 0px;
     --remote-frame-bottom: 0px;
     --remote-border-height: 2px;
-    --remote-chrome-width: 550px;
+    --remote-chrome-width: 100%;
   }
   .remote-area[data-layout="desktop"] {
     --remote-brand-height: 48px;
@@ -163,12 +163,12 @@
   .remote-shell {
     @apply absolute inset-0 w-full;
   }
-  /* Travel only far enough to place the centered shell beyond the area edge. */
+  /* Compact frames span the available area and enter from its edge. */
   .remote-slide-left {
-    transform: translateX(calc((100% + min(100%, 550px)) / -2));
+    transform: translateX(-100%);
   }
   .remote-slide-right {
-    transform: translateX(calc((100% + min(100%, 550px)) / 2));
+    transform: translateX(100%);
   }
   .remote-slide-rest {
     transform: translateX(0);
@@ -177,13 +177,17 @@
     @apply isolate mx-auto flex h-full w-full max-w-[550px] min-h-0 flex-col overflow-hidden rounded-3xl border border-slate-600/70 bg-slate-800/30 shadow-xl shadow-black/30;
   }
   .remote-area[data-layout="compact"] .remote-shell-inner {
-    @apply rounded-t-none;
+    @apply max-w-none rounded-tr-none;
+  }
+  .remote-area[data-layout="compact"]:has(nav[data-has-lights="true"])
+    .remote-shell-inner {
+    @apply rounded-tr-3xl;
   }
   .remote-content {
     @apply min-h-0 flex-1 overflow-y-auto overflow-x-hidden;
   }
   .remote-controls {
-    @apply relative isolate;
+    @apply relative isolate mx-auto w-full max-w-[548px];
   }
   .remote-body {
     min-height: max(

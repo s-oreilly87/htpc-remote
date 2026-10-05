@@ -48,7 +48,11 @@ function Navbar({
           setIsOpen={setSmartHomeModalOpen}
         />
       )}
-      <nav className={className} aria-label="HTPC Remote app bar">
+      <nav
+        className={className}
+        aria-label="HTPC Remote app bar"
+        data-has-lights={HAS_TPLINK_DEVICES}
+      >
         <div className="remote-brand-row remote-chrome-width">
           <button
             type="button"
