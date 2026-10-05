@@ -1,0 +1,7 @@
+#!/bin/sh
+# thrifty:project-workflow:begin (generated from thrifty.project.yml; do not edit)
+# Validates the commit message against thrifty.project.yml.
+if command -v thrifty >/dev/null 2>&1; then
+  thrifty workflow check-commit --file "$1" || exit 1
+fi
+# thrifty:project-workflow:end

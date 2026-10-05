@@ -1,0 +1,32 @@
+# Repository customization (outside the generated marker block): this Next.js
+# repository has no Python package, so CI cannot run the generated `pip install .`
+# step. The checker reads the tracked contract directly with Ruby's standard YAML
+# library and applies the same template rules without external packages.
+# Source of truth remains `thrifty.project.yml`; keep this invocation and the
+# checker alongside any contract change. The generated hooks and local Thrifty
+# CLI remain the source for local validation.
+
+# thrifty:project-workflow:begin (generated from thrifty.project.yml; do not edit)
+name: agent-conventions
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  conventions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Check branch, PR title, and target branch
+        env:
+          THRIFTY_BRANCH: ${{ github.head_ref }}
+          THRIFTY_PR_TITLE: ${{ github.event.pull_request.title }}
+          THRIFTY_BASE_BRANCH: ${{ github.base_ref }}
+        run: ruby .github/scripts/check-agent-conventions.rb
+# thrifty:project-workflow:end
