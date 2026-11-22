@@ -2,8 +2,18 @@
 set -euo pipefail
 
 CARD="alsa_card.pci-0000_00_1f.3"  # from `pactl list cards short`
+READY_MAX_ATTEMPTS=75 # 75 × 0.2s = 15 seconds
+POLL_INTERVAL=0.2
+PROFILE_TIMEOUT=10
 
 mode="${1:-}"
+expected_profile=""
+expected_sink=""
+old_profile=""
+old_sink=""
+transition_module=""
+transition_sink=""
+moved_inputs=()
 
 usage() {
   cat <<EOF
@@ -19,24 +29,247 @@ EOF
   exit 1
 }
 
+active_profile() {
+  pactl list cards 2>/dev/null | awk -v card="$CARD" '
+    /^Card #[0-9]+/ { in_card=0 }
+    /^[[:space:]]*Name: / { in_card=($2 == card) }
+    in_card && /^[[:space:]]*Active Profile: / {
+      sub(/^[[:space:]]*Active Profile: /, "")
+      print
+      exit
+    }
+  '
+}
+
+sink_exists() {
+  pactl list short sinks 2>/dev/null |
+    awk -v sink="$1" '$2 == sink { found=1 } END { exit !found }'
+}
+
+sink_index() {
+  pactl list short sinks 2>/dev/null |
+    awk -v sink="$1" '$2 == sink { print $1; exit }'
+}
+
+sink_input_exists() {
+  local current_inputs
+  if ! current_inputs="$(pactl list short sink-inputs 2>/dev/null)"; then
+    return 2
+  fi
+
+  printf '%s\\n' "$current_inputs" |
+    awk -v input="$1" '$1 == input { found=1 } END { exit !found }'
+}
+
+wait_for_profile() {
+  local profile="$1"
+  local sink="$2"
+  local current_profile
+
+  for ((attempt = 0; attempt < READY_MAX_ATTEMPTS; attempt++)); do
+    if ! current_profile="$(active_profile 2>/dev/null)"; then
+      return 1
+    fi
+    if [[ "$current_profile" == "$profile" ]] &&
+      { [[ -z "$sink" ]] || sink_exists "$sink"; }; then
+      return 0
+    fi
+    sleep "$POLL_INTERVAL"
+  done
+
+  return 1
+}
+
+move_inputs() {
+  local target_sink="$1"
+  local input_id
+  local failed=0
+
+  for input_id in "${moved_inputs[@]}"; do
+    if sink_input_exists "$input_id"; then
+      if ! pactl move-sink-input "$input_id" "$target_sink"; then
+        echo "Failed to move active audio stream $input_id to '$target_sink'." >&2
+        failed=1
+      fi
+    else
+      local status=$?
+      if [[ "$status" -ne 1 ]]; then
+        echo "Could not verify whether audio stream $input_id still exists." >&2
+        failed=1
+      fi
+    fi
+  done
+
+  return "$failed"
+}
+
+cleanup_transition_sink() {
+  [[ -n "$transition_module" ]] || return 0
+
+  local transition_index
+  transition_index="$(sink_index "$transition_sink" || true)"
+  if [[ -z "$transition_index" ]]; then
+    echo "Could not verify the temporary transition sink; leaving its module loaded to protect any attached streams." >&2
+    return 0
+  fi
+
+  local current_inputs
+  if ! current_inputs="$(pactl list short sink-inputs 2>/dev/null)"; then
+    echo "Could not verify transition-sink clients; keeping '$transition_sink' to avoid dropping audio streams." >&2
+    return 0
+  fi
+
+  if [[ -n "$transition_index" ]] &&
+    printf '%s\\n' "$current_inputs" |
+      awk -v sink="$transition_index" '$2 == sink { found=1 } END { exit !found }'; then
+    echo "Keeping temporary transition sink '$transition_sink': an audio stream is still attached." >&2
+    return 0
+  fi
+
+  pactl unload-module "$transition_module" >/dev/null 2>&1 || true
+}
+
+restore_old_audio() {
+  local current_profile
+  current_profile="$(active_profile 2>/dev/null || true)"
+
+  if [[ -n "$old_profile" && "$current_profile" != "$old_profile" ]]; then
+    timeout "${PROFILE_TIMEOUT}s" pactl set-card-profile "$CARD" "$old_profile" || true
+  fi
+
+  if [[ -n "$old_profile" && -n "$old_sink" ]] &&
+    wait_for_profile "$old_profile" "$old_sink"; then
+    move_inputs "$old_sink" || true
+  else
+    echo "Could not restore the original audio profile/sink. Active streams remain on the transition sink if one was created." >&2
+  fi
+
+  cleanup_transition_sink
+}
+
 case "$mode" in
   analog-stereo)
-    pactl set-card-profile "$CARD" output:analog-stereo
+    expected_profile="output:analog-stereo"
+    expected_sink="alsa_output.pci-0000_00_1f.3.analog-stereo"
     ;;
-
   hdmi-stereo)
-    pactl set-card-profile "$CARD" output:hdmi-stereo
+    expected_profile="output:hdmi-stereo"
+    expected_sink="alsa_output.pci-0000_00_1f.3.hdmi-stereo"
     ;;
-
   surround51-hdmi)
-    pactl set-card-profile "$CARD" output:hdmi-surround
+    expected_profile="output:hdmi-surround"
+    expected_sink="alsa_output.pci-0000_00_1f.3.hdmi-surround"
     ;;
-
   surround71-hdmi)
-    pactl set-card-profile "$CARD" output:hdmi-surround71
+    expected_profile="output:hdmi-surround71"
+    expected_sink="alsa_output.pci-0000_00_1f.3.hdmi-surround71"
     ;;
-
   *)
     usage
     ;;
 esac
+
+# Serialize profile changes. A second dropdown selection must not race the
+# first while PipeWire is destroying and recreating the HDMI sink.
+LOCK_DIR="${XDG_RUNTIME_DIR:-/tmp}"
+[[ -d "$LOCK_DIR" ]] || LOCK_DIR="/tmp"
+umask 077
+exec 9>"$LOCK_DIR/htpc-audio-${UID}.lock"
+flock -w 20 9 || {
+  echo "Timed out waiting for another audio-mode change to finish." >&2
+  exit 1
+}
+
+old_profile="$(active_profile)"
+case "$old_profile" in
+  output:analog-stereo) old_sink="alsa_output.pci-0000_00_1f.3.analog-stereo" ;;
+  output:hdmi-stereo) old_sink="alsa_output.pci-0000_00_1f.3.hdmi-stereo" ;;
+  output:hdmi-surround) old_sink="alsa_output.pci-0000_00_1f.3.hdmi-surround" ;;
+  output:hdmi-surround71) old_sink="alsa_output.pci-0000_00_1f.3.hdmi-surround71" ;;
+esac
+
+# Selecting the already-active profile should be a no-op. Re-applying the
+# same profile needlessly tears down the sink beneath a live Plexamp stream.
+if [[ "$old_profile" == "$expected_profile" ]] && sink_exists "$expected_sink"; then
+  exit 0
+fi
+
+# Find active streams attached to the sink that is about to disappear.
+old_sink_id=""
+if [[ -n "$old_sink" ]]; then
+  old_sink_id="$(sink_index "$old_sink")"
+fi
+
+if [[ -n "$old_sink_id" ]]; then
+  sink_inputs_output="$(pactl list short sink-inputs)" || {
+    echo "Could not inspect active audio streams; profile was not changed." >&2
+    exit 1
+  }
+  mapfile -t active_inputs < <(
+    printf '%s\\n' "$sink_inputs_output" |
+      awk -v sink="$old_sink_id" '$2 == sink { print $1 }'
+  )
+
+  if (("${#active_inputs[@]}" > 0)); then
+    # Park streams on a temporary 7.1 null sink while the HDMI profile changes.
+    # This keeps clients alive instead of destroying their active sink-inputs.
+    transition_sink="htpc_audio_transition_$$"
+    transition_module="$(pactl load-module module-null-sink \
+      sink_name="$transition_sink" channels=8 \
+      channel_map=front-left,front-right,front-center,lfe,rear-left,rear-right,side-left,side-right \
+      sink_properties=device.description=HTPC_Audio_Transition)" || {
+      echo "Could not create a temporary sink to preserve active audio streams; profile was not changed." >&2
+      exit 1
+    }
+
+    if ! sink_exists "$transition_sink"; then
+      echo "Temporary audio transition sink was not created; profile was not changed." >&2
+      cleanup_transition_sink
+      exit 1
+    fi
+
+    for input_id in "${active_inputs[@]}"; do
+      if sink_input_exists "$input_id"; then
+        if ! pactl move-sink-input "$input_id" "$transition_sink"; then
+          echo "Could not safely park active audio stream $input_id; restoring the original streams." >&2
+          moved_inputs+=("$input_id")
+          restore_old_audio
+          exit 1
+        fi
+        moved_inputs+=("$input_id")
+      else
+        input_status=$?
+        if [[ "$input_status" -ne 1 ]]; then
+          echo "Could not verify active audio stream $input_id; profile was not changed." >&2
+          restore_old_audio
+          exit 1
+        fi
+      fi
+    done
+  fi
+fi
+
+# Change profile only after all streams have been detached from the sink that
+# PipeWire is about to remove. Bound the command in case the audio server hangs.
+if ! timeout "${PROFILE_TIMEOUT}s" pactl set-card-profile "$CARD" "$expected_profile"; then
+  echo "Failed to set audio profile '$expected_profile'." >&2
+  restore_old_audio
+  exit 1
+fi
+
+if ! wait_for_profile "$expected_profile" "$expected_sink"; then
+  current_profile="$(active_profile 2>/dev/null || true)"
+  echo "Timed out waiting for HDMI sink '$expected_sink' (active profile: '$current_profile', expected: '$expected_profile')." >&2
+  restore_old_audio
+  exit 1
+fi
+
+# Reattach the still-running application streams to the newly-created sink.
+if ! move_inputs "$expected_sink"; then
+  echo "The new audio sink is ready, but one or more streams could not be reattached. Attempting to restore the previous profile and stream routing." >&2
+  restore_old_audio
+  exit 1
+fi
+
+cleanup_transition_sink
+exit 0

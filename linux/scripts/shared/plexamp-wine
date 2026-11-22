@@ -16,9 +16,6 @@ SYSTEM_SINK="system.null"
 # HDMI card (the preset selects the profile before launching Plexamp)
 CARD_NAME="alsa_card.pci-0000_00_1f.3"
 
-# Wait for the active HDMI sink selected by the preset before launching Plexamp
-WAIT_SECS=6
-WAIT_STEP=0.2
 # ==============
 
 # Current Plexamp uses Tauri/WebView2 rather than the old Electron runtime.
@@ -77,25 +74,20 @@ if command -v pactl >/dev/null 2>&1; then
     output:hdmi-surround71) SINK_NAME="$HDMI_SURROUND71_SINK" ;;
     *)
       notify "Unsupported or inactive HDMI profile '$active_profile'. Select HDMI stereo, 5.1, or 7.1 before launching Plexamp."
-      exit 0
+      exit 1
       ;;
   esac
 
-  # Wait for the selected profile's sink to appear; do not change the profile here.
-  loops="$(awk -v s="$WAIT_SECS" -v d="$WAIT_STEP" 'BEGIN{printf "%d", (s/d)}')"
-  i=0
-  while ! sink_exists "$SINK_NAME"; do
-    i=$((i+1))
-    if [ "$i" -ge "$loops" ]; then
-      notify "Required sink '$SINK_NAME' for profile '$active_profile' is not available. Not starting Plexamp."
-      exit 0
-    fi
-    sleep "$WAIT_STEP"
-  done
+  # htpc-audio now waits for profile activation and sink creation before the
+  # preset continues. Verify it is still present, but do not add another delay.
+  if ! sink_exists "$SINK_NAME"; then
+    notify "Required sink '$SINK_NAME' for profile '$active_profile' is not available. Audio mode may not have finished switching."
+    exit 1
+  fi
   export PULSE_SINK="$SINK_NAME"
 else
   notify "pactl not found; refusing to start Plexamp because sink availability can't be verified."
-  exit 0
+  exit 1
 fi
 # --- END guard ---
 

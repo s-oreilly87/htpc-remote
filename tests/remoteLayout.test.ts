@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 import {
   canFitDesktopRemotes,
@@ -37,4 +38,23 @@ test("layout mode changes snap while compact navigation keeps its animation", ()
   assert.equal(shouldAnimateRemoteChange(false, true), false);
   assert.equal(shouldAnimateRemoteChange(false, false), true);
   assert.equal(shouldAnimateRemoteChange(false, null), true);
+});
+
+
+test("remote body sizing follows the available viewport without fixed pixel floors", () => {
+  const styles = readFileSync(
+    new URL("../src/styles/globals.css", import.meta.url),
+    "utf8",
+  );
+  const compactBody = styles.match(/\.remote-body\s*\{([\s\S]*?)\n\s*\}/)?.[1];
+  const desktopBody = styles.match(
+    /\.remote-area\[data-layout="desktop"\] \.remote-body\s*\{([\s\S]*?)\n\s*\}/,
+  )?.[1];
+
+  assert.ok(compactBody, "compact remote body rule exists");
+  assert.ok(desktopBody, "desktop remote body rule exists");
+  assert.match(compactBody, /min-height:\s*calc\(/);
+  assert.match(desktopBody, /min-height:\s*calc\(/);
+  assert.doesNotMatch(compactBody, /max\(\s*740px/);
+  assert.doesNotMatch(desktopBody, /max\(\s*850px/);
 });
