@@ -9,7 +9,7 @@ import type { AudioMode, DisplayMode, SelectOption } from "@/types/remote";
 // Single source of truth for all HTPC audio modes.
 // egValue   → EventGhost event name on Windows
 // linuxValue → htpc-audio script argument on Linux
-// denonCmd  → Denon quick-select command sent alongside the HTPC change
+// denonCmd  → Denon sound-mode or Quick Select command sent with the HTPC change
 
 export const AUDIO_MODES: Record<string, AudioMode> = {
   PLACEHOLDER: {
