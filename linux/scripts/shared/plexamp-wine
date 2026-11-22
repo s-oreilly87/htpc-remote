@@ -16,7 +16,7 @@ SYSTEM_SINK="system.null"
 # HDMI card (the preset selects the profile before launching Plexamp)
 CARD_NAME="alsa_card.pci-0000_00_1f.3"
 
-# Wait for the standard HDMI 5.1 sink before launching Plexamp
+# Wait for the active HDMI sink selected by the preset before launching Plexamp
 WAIT_SECS=6
 WAIT_STEP=0.2
 # ==============
@@ -76,7 +76,7 @@ if command -v pactl >/dev/null 2>&1; then
     output:hdmi-surround) SINK_NAME="$HDMI_SURROUND_SINK" ;;
     output:hdmi-surround71) SINK_NAME="$HDMI_SURROUND71_SINK" ;;
     *)
-      notify "Unsupported or inactive HDMI profile '$active_profile'. Select HDMI stereo or surround before launching Plexamp."
+      notify "Unsupported or inactive HDMI profile '$active_profile'. Select HDMI stereo, 5.1, or 7.1 before launching Plexamp."
       exit 0
       ;;
   esac
