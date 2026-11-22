@@ -16,7 +16,7 @@ function load(path: string, mocks: Record<string, unknown>) {
     },
   }).outputText;
   const moduleRecord = { exports: {} };
-  vm.runInNewContext(`(function(require,module,exports){${source}\\n})`, {
+  vm.runInNewContext(`(function(require,module,exports){${source}\n})`, {
     console,
     setTimeout,
     clearTimeout,
