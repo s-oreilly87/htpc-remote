@@ -66,8 +66,9 @@ case "$cmd" in
     echo 77
     ;;
   move-sink-input)
-    [[ "${MOCK_FAIL_MOVE:-0}" != 1 ]] || exit 1
     input_id="$1"; target="$2"
+    [[ "${MOCK_FAIL_PARK:-0}" != 1 || "$target" != htpc_audio_transition ]] || exit 1
+    [[ "${MOCK_FAIL_REATTACH:-0}" != 1 || "$target" != alsa_output.pci-0000_00_1f.3.hdmi-stereo ]] || exit 1
     tmp_file="$MOCK_INPUT_FILE.tmp"
     while read -r id sink_name; do
       [[ -n "$id" ]] || continue
@@ -143,10 +144,20 @@ assert_eq output:hdmi-stereo "$(cat "$MOCK_PROFILE_FILE")" "lock released after 
 
 # A failed stream move must not change the profile.
 reset_state output:hdmi-surround71 "100 alsa_output.pci-0000_00_1f.3.hdmi-surround71"
-if MOCK_FAIL_MOVE=1 run_audio hdmi-stereo; then
-  echo "FAIL: failed stream move unexpectedly succeeded" >&2; exit 1
+if MOCK_FAIL_PARK=1 run_audio hdmi-stereo; then
+  echo "FAIL: failed stream parking unexpectedly succeeded" >&2; exit 1
 fi
 assert_eq output:hdmi-surround71 "$(cat "$MOCK_PROFILE_FILE")" "failed parking preserves profile"
+assert_eq "100 alsa_output.pci-0000_00_1f.3.hdmi-surround71" "$(cat "$MOCK_INPUT_FILE")" "failed parking leaves stream on original sink"
+
+# If reattachment to the new HDMI sink fails, roll back the profile and stream.
+reset_state output:hdmi-surround71 "100 alsa_output.pci-0000_00_1f.3.hdmi-surround71"
+printf htpc_audio_transition > "$MOCK_MODULE_FILE"
+if MOCK_FAIL_REATTACH=1 run_audio hdmi-stereo; then
+  echo "FAIL: failed reattachment unexpectedly succeeded" >&2; exit 1
+fi
+assert_eq output:hdmi-surround71 "$(cat "$MOCK_PROFILE_FILE")" "reattachment failure rolls back profile"
+assert_eq "100 alsa_output.pci-0000_00_1f.3.hdmi-surround71" "$(cat "$MOCK_INPUT_FILE")" "reattachment failure restores stream"
 
 # Profile-setting failure must restore the old sink.
 reset_state output:hdmi-surround71 "100 alsa_output.pci-0000_00_1f.3.hdmi-surround71"
