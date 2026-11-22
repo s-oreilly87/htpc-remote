@@ -11,7 +11,7 @@ get_mode_id() {
 
   kscreen-doctor -o \
    | tr ' ' '\n' \
-   | grep "${res}@${rate}" \
+   | grep -F "${res}@${rate}" \
    | head -n1 \
    | cut -d: -f1
 }
@@ -68,6 +68,14 @@ case "${1:-}" in
     # 4K60 SDR, scale 3
     set_mode_res "4k60SDR" "3840x2160" 60 "3" "sdr"
     ;;
+  4k24)
+    # 4K23.98 HDR, scale 3
+    set_mode_res "4k24" "3840x2160" 23.98 "3" "hdr"
+    ;;
+  4k24SDR)
+    # 4K23.98 SDR, scale 3
+    set_mode_res "4k24SDR" "3840x2160" 23.98 "3" "sdr"
+    ;;
   1440p120)
     # 1440p120 HDR, scale 2 (TV is 119)
     set_mode_res "1440p120" "2560x1440" 119 "2" "hdr"
@@ -77,7 +85,7 @@ case "${1:-}" in
     set_mode_res "1440p120SDR" "2560x1440" 119 "2" "sdr"
     ;;
   *)
-    echo "Usage: htpc-res {4k60|4k60SDR|1440p120|1440p120SDR}" 1>&2
+    echo "Usage: htpc-res {4k60|4k60SDR|4k24|4k24SDR|1440p120|1440p120SDR}" 1>&2
     exit 1
     ;;
 esac
