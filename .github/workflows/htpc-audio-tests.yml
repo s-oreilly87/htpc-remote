@@ -1,0 +1,27 @@
+name: Linux HTPC audio tests
+
+on:
+  pull_request:
+    paths:
+      - "linux/scripts/shared/htpc-audio"
+      - "linux/agent/index.mjs"
+      - "src/pages/api/lib/command.ts"
+      - "tests/htpc-audio.test.sh"
+      - ".github/workflows/htpc-audio-tests.yml"
+
+jobs:
+  shell:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check Bash syntax
+        run: |
+          bash -n linux/scripts/shared/htpc-audio
+          bash -n tests/htpc-audio.test.sh
+      - name: Run ShellCheck for serious shell errors
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y shellcheck
+          shellcheck --severity=error linux/scripts/shared/htpc-audio tests/htpc-audio.test.sh
+      - name: Exercise normal and adversarial audio transitions
+        run: bash tests/htpc-audio.test.sh

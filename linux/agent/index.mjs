@@ -29,6 +29,7 @@ const PORT = parseInt(process.env.LINUX_HTPC_AGENT_PORT ?? "3001", 10);
 const SCRIPT_PREFIX = process.env.SHELL_SCRIPT_PREFIX ?? "";
 const SCREEN_WIDTH = parseInt(process.env.HTPC_SCREEN_WIDTH ?? "3840", 10);
 const SCREEN_HEIGHT = parseInt(process.env.HTPC_SCREEN_HEIGHT ?? "2160", 10);
+const COMMAND_TIMEOUT_MS = 45_000;
 
 // ─── Shell command dispatch ───────────────────────────────────────────────────
 
@@ -48,11 +49,12 @@ function getExecutable(command) {
 function runCommand(command, args = []) {
   return new Promise((resolve, reject) => {
     const executable = getExecutable(command);
-    execFile(executable, args, (error, stdout, stderr) => {
+    execFile(executable, args, { timeout: COMMAND_TIMEOUT_MS, killSignal: "SIGKILL" }, (error, stdout, stderr) => {
       if (error) {
         const details = [
           `Command failed: ${executable} ${args.join(" ")}`.trim(),
           typeof error.code === "number" ? `exit code ${error.code}` : undefined,
+          error.killed ? `command timed out or was killed (limit ${COMMAND_TIMEOUT_MS}ms)` : undefined,
           stderr?.toString().trim() || error.message,
         ]
           .filter(Boolean)

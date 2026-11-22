@@ -8,6 +8,7 @@ import { ClickType } from "@/constants/remotes";
 const hostIp = process.env.NEXT_PUBLIC_HOST_IP ?? "";
 const htpcIp = process.env.NEXT_PUBLIC_HTPC_IP ?? "";
 const agentPort = process.env.NEXT_PUBLIC_LINUX_HTPC_AGENT_PORT ?? "3001";
+const COMMAND_TIMEOUT_MS = 45_000;
 
 // Remote when HTPC_IP is set, not a loopback address, and differs from HOST_IP.
 // Same IP = same machine = run commands locally regardless of OS.
@@ -38,10 +39,11 @@ async function runRemoteCommand(command: string, args: string[]): Promise<void> 
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ command, args }),
+      signal: AbortSignal.timeout(COMMAND_TIMEOUT_MS + 5_000),
     });
   } catch (error) {
     throw new Error(
-      `htpc-agent unreachable at ${url}: ${error instanceof Error ? error.message : String(error)}`,
+      `htpc-agent request failed at ${url} (connection or timeout): ${error instanceof Error ? error.message : String(error)}`,
     );
   }
 
@@ -55,12 +57,13 @@ async function runLocalCommand(command: string, args: string[]): Promise<void> {
   const executable = getExecutable(command);
 
   await new Promise<void>((resolve, reject) => {
-    execFile(executable, args, (error, _stdout, stderr) => {
+    execFile(executable, args, { timeout: COMMAND_TIMEOUT_MS, killSignal: "SIGKILL" }, (error, _stdout, stderr) => {
       if (error) {
         const stderrMessage = stderr?.toString().trim();
         const details = [
           `Command failed: ${executable} ${args.join(" ")}`.trim(),
           typeof error.code === "number" ? `exit code ${error.code}` : undefined,
+          error.killed ? `command timed out or was killed (limit ${COMMAND_TIMEOUT_MS}ms)` : undefined,
           stderrMessage || error.message,
         ]
           .filter(Boolean)
