@@ -310,7 +310,7 @@ function AudioAppPresetButton({ label, onSelect }: AudioAppPresetButtonProps) {
         <>
           <PopoverButton
             type="button"
-            className="btn btn-primary-pc w-full flex flex-col justify-center items-center gap-0.5"
+            className="btn btn-primary-pc h-full w-full flex flex-col justify-center items-center gap-0.5"
           >
             <FontAwesomeIcon icon={faMusic} className="h-6 w-6" />
             <span className="leading-tight text-center text-xs">{label}</span>
