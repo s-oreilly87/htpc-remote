@@ -1,5 +1,6 @@
 import { LinuxAudioModeCommand, LinuxDisplayModeCommand } from "@/constants/htpcControls";
 import { RemoteType } from "@/constants/remotes";
+import { DENON_SOUND_MODES } from "@/constants/denon";
 import { URL_ENCODED_SYMBOLS } from "@/constants/encoding";
 import { ROKU_APPS } from "@/constants/roku";
 import type { AudioMode, DisplayMode, SelectOption } from "@/types/remote";
@@ -8,7 +9,7 @@ import type { AudioMode, DisplayMode, SelectOption } from "@/types/remote";
 // Single source of truth for all HTPC audio modes.
 // egValue   → EventGhost event name on Windows
 // linuxValue → htpc-audio script argument on Linux
-// denonCmd  → Denon quick-select command sent alongside the HTPC change
+// denonCmd  → Denon sound-mode or Quick Select command sent with the HTPC change
 
 export const AUDIO_MODES: Record<string, AudioMode> = {
   PLACEHOLDER: {
@@ -36,7 +37,7 @@ export const AUDIO_MODES: Record<string, AudioMode> = {
     label: "Stereo (Dolby Surround Upmix)",
     egValue: "audioModeStereoSurround",
     linuxValue: LinuxAudioModeCommand.HdmiStereo,
-    denonCmd: "MSQUICK2",
+    denonCmd: DENON_SOUND_MODES.DOLBY.value,
   },
   SURROUND51: {
     key: "SURROUND51",

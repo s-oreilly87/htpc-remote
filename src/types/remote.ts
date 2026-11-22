@@ -19,7 +19,7 @@ export interface AudioMode {
   key: string;
   label: string;
   disabled?: boolean;
-  /** Denon quick-select command sent alongside the HTPC audio change. */
+  /** Denon sound-mode or Quick Select command sent alongside the HTPC audio change. */
   denonCmd?: string;
   /** Value sent to EventGhost on Windows HTPC. */
   egValue: string;

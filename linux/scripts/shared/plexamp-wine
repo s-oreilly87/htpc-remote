@@ -7,14 +7,16 @@ set -u  # only: fail on undefined vars, but not -e/-o pipefail
 WINEPREFIX="${WINEPREFIX:-$HOME/.wine-plexamp-4.50-test}"
 WINE_USER="${WINE_USER:-$(id -un)}"
 PLEXAMP_EXE="$WINEPREFIX/drive_c/users/$WINE_USER/AppData/Local/Plexamp/Plexamp.exe"
-SINK_NAME="alsa_output.pci-0000_00_1f.3.hdmi-surround"
+HDMI_STEREO_SINK="alsa_output.pci-0000_00_1f.3.hdmi-stereo"
+HDMI_SURROUND_SINK="alsa_output.pci-0000_00_1f.3.hdmi-surround"
+HDMI_SURROUND71_SINK="alsa_output.pci-0000_00_1f.3.hdmi-surround71"
+SINK_NAME=""
 SYSTEM_SINK="system.null"
 
-# HDMI card + profile (baked in)
+# HDMI card (the preset selects the profile before launching Plexamp)
 CARD_NAME="alsa_card.pci-0000_00_1f.3"
-SURROUND_PROFILE="output:hdmi-surround"
 
-# Wait for the standard HDMI 5.1 sink before launching Plexamp
+# Wait for the active HDMI sink selected by the preset before launching Plexamp
 WAIT_SECS=6
 WAIT_STEP=0.2
 # ==============
@@ -25,10 +27,6 @@ PLEXAMP_ARGS=()
 
 export WINEPREFIX
 export WINEDEBUG=-all
-
-# Route this Plexamp process directly to the standard HDMI 5.1 sink.
-# The denon51_remap sink remains available as a fallback for other applications.
-export PULSE_SINK="$SINK_NAME"
 
 sink_exists() {
   command -v pactl >/dev/null 2>&1 || return 1
@@ -61,22 +59,40 @@ fi
 
 sleep 0.5
 
-# --- Ensure standard HDMI 5.1 sink exists BEFORE launching Plexamp ---
+# --- Route to the HDMI sink for the profile already selected by the preset ---
 if command -v pactl >/dev/null 2>&1; then
-  # Nudge HDMI into surround profile (best-effort, harmless if already set)
-  pactl set-card-profile "$CARD_NAME" "$SURROUND_PROFILE" >/dev/null 2>&1 || true
+  active_profile="$(pactl list cards 2>/dev/null | awk -v card="$CARD_NAME" '
+    /^Card #[0-9]+/ { in_card=0 }
+    /^[[:space:]]*Name: / { in_card=($2 == card) }
+    in_card && /^[[:space:]]*Active Profile: / {
+      sub(/^[[:space:]]*Active Profile: /, "")
+      print
+      exit
+    }
+  ')"
 
-  # Wait up to WAIT_SECS for the HDMI sink to appear
+  case "$active_profile" in
+    output:hdmi-stereo) SINK_NAME="$HDMI_STEREO_SINK" ;;
+    output:hdmi-surround) SINK_NAME="$HDMI_SURROUND_SINK" ;;
+    output:hdmi-surround71) SINK_NAME="$HDMI_SURROUND71_SINK" ;;
+    *)
+      notify "Unsupported or inactive HDMI profile '$active_profile'. Select HDMI stereo, 5.1, or 7.1 before launching Plexamp."
+      exit 0
+      ;;
+  esac
+
+  # Wait for the selected profile's sink to appear; do not change the profile here.
   loops="$(awk -v s="$WAIT_SECS" -v d="$WAIT_STEP" 'BEGIN{printf "%d", (s/d)}')"
   i=0
   while ! sink_exists "$SINK_NAME"; do
     i=$((i+1))
     if [ "$i" -ge "$loops" ]; then
-      notify "Required sink '$SINK_NAME' is not available. Not starting Plexamp."
+      notify "Required sink '$SINK_NAME' for profile '$active_profile' is not available. Not starting Plexamp."
       exit 0
     fi
     sleep "$WAIT_STEP"
   done
+  export PULSE_SINK="$SINK_NAME"
 else
   notify "pactl not found; refusing to start Plexamp because sink availability can't be verified."
   exit 0
