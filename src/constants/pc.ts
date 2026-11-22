@@ -85,6 +85,20 @@ export const DISPLAY_MODES: Record<string, DisplayMode> = {
     linuxValue: LinuxDisplayModeCommand.Res4k60SDR,
     rokuChannel: ROKU_APPS.HDMI.HDMI4,
   },
+  HTPC_4K24_HDR: {
+    key: "HTPC_4K24_HDR",
+    label: "HTPC (4K24 HDR)",
+    egValue: "",
+    linuxValue: LinuxDisplayModeCommand.Res4k24HDR,
+    rokuChannel: ROKU_APPS.HDMI.HDMI4,
+  },
+  HTPC_4K24_SDR: {
+    key: "HTPC_4K24_SDR",
+    label: "HTPC (4K24 SDR)",
+    egValue: "",
+    linuxValue: LinuxDisplayModeCommand.Res4k24SDR,
+    rokuChannel: ROKU_APPS.HDMI.HDMI4,
+  },
   HTPC_1440P120_HDR: {
     key: "HTPC_1440P120_HDR",
     label: "HTPC (1440p120 HDR)",
