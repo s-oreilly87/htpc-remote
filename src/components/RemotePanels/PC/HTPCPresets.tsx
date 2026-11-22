@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import type { MouseEvent } from "react";
+import { Popover, PopoverButton, PopoverPanel } from "@headlessui/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGamepad, faMusic, faTv } from "@fortawesome/free-solid-svg-icons";
 
@@ -38,6 +39,8 @@ interface PresetEffects {
   launchApp?: string;
   killApp?: string;
   androidApp?: string;
+  /** EventGhost event used to launch this app after applying its selected audio mode. */
+  eventGhostLaunchCommand?: string;
   lightMode?: {
     deviceId: string;
     brightness?: number;
@@ -86,21 +89,15 @@ function AudioVideoPresets() {
         killApp: isLinux ? "launchPlexamp" : undefined,
         lightMode: basementLightMode(),
       },
-      presetPlexampStereo: {
-        audioMode: AUDIO_MODES.STEREO,
+      presetPlexamp: {
         launchApp: "launchPlexamp",
+        eventGhostLaunchCommand: "launchPlexamp",
         killApp: "launchKodi",
         androidApp: "plexamp",
       },
-      presetPlexampUpmix: {
-        audioMode: AUDIO_MODES.DOLBY_UPMIX,
-        launchApp: "launchPlexamp",
-        killApp: "launchKodi",
-        androidApp: "plexamp",
-      },
-      presetQobuzUpmix: {
-        audioMode: AUDIO_MODES.DOLBY_UPMIX,
+      presetQobuz: {
         launchApp: "launchQobuz",
+        eventGhostLaunchCommand: "launchQobuz",
         killApp: "launchKodi",
         androidApp: "qobuz",
       },
@@ -108,7 +105,7 @@ function AudioVideoPresets() {
     [isLinux],
   );
 
-  const handleClick = async (event: MouseEvent<HTMLButtonElement>) => {
+  const runPreset = async (preset: PresetEffects, htpcEventGhostCommand: string) => {
     if (presetInProgress) {
       console.log("Preset already running, ignoring click");
       return;
@@ -116,14 +113,6 @@ function AudioVideoPresets() {
 
     presetInProgress = true;
     try {
-      const htpcEventGhostCommand = event.currentTarget.value;
-      const preset = presetToEffectsMap[htpcEventGhostCommand];
-
-      if (!preset) {
-        console.warn(`No preset configured for ${htpcEventGhostCommand}`);
-        return;
-      }
-
       if (preset.killApp) {
         const appToKill = getLaunchAppFromValue(preset.killApp);
         if (appToKill) {
@@ -165,14 +154,14 @@ function AudioVideoPresets() {
         if (isLinux) {
           await setLinuxDisplayMode(value as LinuxDisplayModeCommand);
         } else {
-          await sendEventToHTPCEventGhost({ value: htpcEventGhostCommand });
+          await sendEventToHTPCEventGhost({ value: preset.eventGhostLaunchCommand ?? htpcEventGhostCommand });
         }
 
         // critical: let KWin settle after mode + scale change
         await sleep(3000);
       }
 
-      // 5. Audio mode
+      // 5. Audio mode — apply the selected mode before launching the app
       if (preset.audioMode) {
         setSelectedAudioMode(preset.audioMode);
         const value = audioModeValue(preset.audioMode, isLinux);
@@ -201,6 +190,30 @@ function AudioVideoPresets() {
     } finally {
       presetInProgress = false;
     }
+  };
+
+  const handleClick = async (event: MouseEvent<HTMLButtonElement>) => {
+    const htpcEventGhostCommand = event.currentTarget.value;
+    const preset = presetToEffectsMap[htpcEventGhostCommand];
+
+    if (!preset) {
+      console.warn(`No preset configured for ${htpcEventGhostCommand}`);
+      return;
+    }
+
+    await runPreset(preset, htpcEventGhostCommand);
+  };
+
+  const handleAudioAppMode = async (app: "plexamp" | "qobuz", audioMode: AudioMode) => {
+    const presetCommand = app === "plexamp" ? "presetPlexamp" : "presetQobuz";
+    const preset = presetToEffectsMap[presetCommand];
+
+    if (!preset) {
+      console.warn(`No preset configured for ${presetCommand}`);
+      return;
+    }
+
+    await runPreset({ ...preset, audioMode }, presetCommand);
   };
 
   async function maybeLaunchApp(preset: PresetEffects, htpcEventGhostCommand: string) {
@@ -248,26 +261,14 @@ function AudioVideoPresets() {
           <FontAwesomeIcon icon={faTv} className="h-6 w-6" />
           <span className="leading-tight text-center">Watch<br/>Kodi</span>
         </KeypressButton>
-        <KeypressButton
-          remote={remote}
-          id="preset-plexamp-stereo"
-          className="btn btn-primary-pc w-1/4 flex flex-col justify-center items-center gap-0.5"
-          value="presetPlexampStereo"
-          onClick={handleClick}
-        >
-          <FontAwesomeIcon icon={faMusic} className="h-6 w-6" />
-          <span className="leading-tight text-center text-xs">Plexamp<br/>Stereo</span>
-        </KeypressButton>
-        <KeypressButton
-          remote={remote}
-          id="preset-qobuz-upmix"
-          className="btn btn-primary-pc w-1/4 flex flex-col justify-center items-center gap-0.5"
-          value="presetQobuzUpmix"
-          onClick={handleClick}
-        >
-          <FontAwesomeIcon icon={faMusic} className="h-6 w-6" />
-          <span className="leading-tight text-center text-xs">Qobuz<br/>Upmix</span>
-        </KeypressButton>
+        <AudioAppPresetButton
+          label="Plexamp"
+          onSelect={(mode) => handleAudioAppMode("plexamp", mode)}
+        />
+        <AudioAppPresetButton
+          label="Qobuz"
+          onSelect={(mode) => handleAudioAppMode("qobuz", mode)}
+        />
       </div>
       <CustomModesCollapse
         selectedAudioMode={selectedAudioMode}
@@ -288,4 +289,51 @@ function basementLightMode(): PresetEffects["lightMode"] {
     deviceId: BASEMENT_LIGHT.id,
     ...(BASEMENT_LIGHT.kind === "dimmer" ? { brightness: 40 } : {}),
   };
+}
+
+
+const MUSIC_AUDIO_MODES = [
+  { mode: AUDIO_MODES.PURE, label: "Stereo" },
+  { mode: AUDIO_MODES.STEREO, label: "Stereo with sub" },
+  { mode: AUDIO_MODES.DOLBY_UPMIX, label: "Dolby Upmix" },
+  { mode: AUDIO_MODES.SURROUND51, label: "5.1 Surround" },
+] as const;
+
+interface AudioAppPresetButtonProps {
+  label: string;
+  onSelect: (mode: AudioMode) => Promise<void>;
+}
+
+function AudioAppPresetButton({ label, onSelect }: AudioAppPresetButtonProps) {
+  return (
+    <Popover className="relative w-1/4">
+      {({ close }) => (
+        <>
+          <PopoverButton
+            className="btn btn-primary-pc w-full flex flex-col justify-center items-center gap-0.5"
+          >
+            <FontAwesomeIcon icon={faMusic} className="h-6 w-6" />
+            <span className="leading-tight text-center text-xs">{label}</span>
+          </PopoverButton>
+          <PopoverPanel className="absolute left-1/2 top-full z-50 mt-2 w-64 -translate-x-1/2 rounded-lg bg-gray-700 p-2 shadow-xl ring-1 ring-black/10">
+            <div className="flex flex-col gap-1">
+              {MUSIC_AUDIO_MODES.map(({ mode, label: modeLabel }) => (
+                <button
+                  key={mode.key}
+                  type="button"
+                  className="w-full rounded-md px-3 py-2 text-left text-sm text-white hover:bg-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                  onClick={() => {
+                    close();
+                    void onSelect(mode);
+                  }}
+                >
+                  {modeLabel}
+                </button>
+              ))}
+            </div>
+          </PopoverPanel>
+        </>
+      )}
+    </Popover>
+  );
 }
