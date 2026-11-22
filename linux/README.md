@@ -149,7 +149,11 @@ Two separate audio paths are in use:
 
 **Kodi → ALSA → HDMI → Denon** (bitstream HD audio / passthrough). Kodi must be launched with `AE_SINK=ALSA` — use the `kodi-alsa` wrapper script in `scripts/shared/` rather than launching Kodi directly. Passthrough only works if the AVR is powered on at Kodi startup.
 
-**Everything else (Plexamp, Qobuz) → PipeWire → Denon/TV.** Plexamp uses a remapped 5.1 PipeWire sink (`denon51_remap`) to correct the channel ordering for the Denon AVR. The `denon-remap-init` script and `denon-remap.service` set this up at login.
+**Plexamp 4.50.20 (Tauri, via Wine) → PipeWire → HDMI 5.1 directly.** On the tested KDE Neon setup, Plexamp 4.50.20 has the correct speaker-channel ordering when sent directly to the standard HDMI surround sink (`alsa_output.pci-0000_00_1f.3.hdmi-surround`). The `plexamp-wine` launcher sets `PULSE_SINK` to this device; Plexamp does not need the remapped sink.
+
+**Qobuz listen mode → PipeWire → HDMI stereo.** The `htpc-listen qobuz` command switches the card to its HDMI stereo profile.
+
+**The 5.1 remap is retained as a fallback.** The `denon-remap-init` script and `denon-remap.service` still create the `denon51_remap` sink at login. Keep this configuration if another application or a future Plexamp version needs it, but the current Plexamp launcher does not target it. `htpc-listen plexamp` also leaves Plexamp on the direct HDMI 5.1 sink.
 
 The `denon-remap.service` systemd unit hardcodes an ALSA card ID (`alsa_card.pci-0000_00_1f.3`). The install scripts warn about this. Check yours with:
 ```bash
@@ -167,7 +171,7 @@ sudo apt install pipewire pipewire-pulse pipewire-audio-client-libraries alsa-ut
 
 Plexamp and Qobuz run via Wine. Wine prefixes must be configured before the launch scripts will work:
 
-- `plexamp-wine`: uses `~/.wine-plexamp` — install Plexamp for Windows into this prefix
+- `plexamp-wine`: defaults to `~/.wine-plexamp-4.50-test` and launches the current Windows/Tauri build from `drive_c/users/<Wine user>/AppData/Local/Plexamp/Plexamp.exe`. Set `WINEPREFIX` to override the prefix.
 - `qobuz-wine`: uses `~/.wine-qobuz` — install Qobuz for Windows into this prefix
 
 A native Plexamp AppImage launcher (`plexamp`) is also included if you prefer the native build, but the Wine version is what `htpc-launch` and `htpc-listen` use.
