@@ -4,6 +4,11 @@ set -euo pipefail
 CARD="alsa_card.pci-0000_00_1f.3"  # from `pactl list cards short`
 
 mode="${1:-}"
+expected_profile=""
+expected_sink=""
+
+READY_MAX_ATTEMPTS=75 # 75 × 0.2s = 15 seconds
+POLL_INTERVAL=0.2
 
 usage() {
   cat <<EOF
@@ -19,24 +24,64 @@ EOF
   exit 1
 }
 
+active_profile() {
+  pactl list cards 2>/dev/null | awk -v card="$CARD" '
+    /^Card #[0-9]+/ { in_card=0 }
+    /^[[:space:]]*Name: / { in_card=($2 == card) }
+    in_card && /^[[:space:]]*Active Profile: / {
+      sub(/^[[:space:]]*Active Profile: /, "")
+      print
+      exit
+    }
+  '
+}
+
+sink_exists() {
+  pactl list short sinks 2>/dev/null |
+    awk -v sink="$1" '$2 == sink { found=1 } END { exit !found }'
+}
+
 case "$mode" in
   analog-stereo)
-    pactl set-card-profile "$CARD" output:analog-stereo
+    expected_profile="output:analog-stereo"
+    pactl set-card-profile "$CARD" "$expected_profile"
     ;;
-
   hdmi-stereo)
-    pactl set-card-profile "$CARD" output:hdmi-stereo
+    expected_profile="output:hdmi-stereo"
+    expected_sink="alsa_output.pci-0000_00_1f.3.hdmi-stereo"
+    pactl set-card-profile "$CARD" "$expected_profile"
     ;;
-
   surround51-hdmi)
-    pactl set-card-profile "$CARD" output:hdmi-surround
+    expected_profile="output:hdmi-surround"
+    expected_sink="alsa_output.pci-0000_00_1f.3.hdmi-surround"
+    pactl set-card-profile "$CARD" "$expected_profile"
     ;;
-
   surround71-hdmi)
-    pactl set-card-profile "$CARD" output:hdmi-surround71
+    expected_profile="output:hdmi-surround71"
+    expected_sink="alsa_output.pci-0000_00_1f.3.hdmi-surround71"
+    pactl set-card-profile "$CARD" "$expected_profile"
     ;;
-
   *)
     usage
     ;;
 esac
+
+# pactl returns before PipeWire/PulseAudio has necessarily created the new
+# sink. Wait for the requested profile and its sink before allowing a preset
+# to continue to Denon commands and app launch.
+for ((attempt = 0; attempt < READY_MAX_ATTEMPTS; attempt++)); do
+  current_profile="$(active_profile)"
+  if [[ "$current_profile" == "$expected_profile" ]] &&
+    { [[ -z "$expected_sink" ]] || sink_exists "$expected_sink"; }; then
+    exit 0
+  fi
+  sleep "$POLL_INTERVAL"
+done
+
+current_profile="$(active_profile)"
+if [[ -n "$expected_sink" ]] && ! sink_exists "$expected_sink"; then
+  echo "Timed out waiting for HDMI sink '$expected_sink' (active profile: '$current_profile', expected: '$expected_profile')." >&2
+else
+  echo "Timed out waiting for audio profile '$expected_profile' (active profile: '$current_profile')." >&2
+fi
+exit 1
