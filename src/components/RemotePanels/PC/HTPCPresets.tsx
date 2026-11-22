@@ -154,7 +154,7 @@ function AudioVideoPresets() {
         if (isLinux) {
           await setLinuxDisplayMode(value as LinuxDisplayModeCommand);
         } else {
-          await sendEventToHTPCEventGhost({ value: preset.eventGhostLaunchCommand ?? htpcEventGhostCommand });
+          await sendEventToHTPCEventGhost({ value: htpcEventGhostCommand });
         }
 
         // critical: let KWin settle after mode + scale change
@@ -225,7 +225,7 @@ function AudioVideoPresets() {
       return;
     }
 
-    await sendEventToHTPCEventGhost({ value: htpcEventGhostCommand });
+    await sendEventToHTPCEventGhost({ value: preset.eventGhostLaunchCommand ?? htpcEventGhostCommand });
   }
 
   return (
