@@ -315,7 +315,7 @@ function AudioAppPresetButton({ label, onSelect }: AudioAppPresetButtonProps) {
             <FontAwesomeIcon icon={faMusic} className="h-6 w-6" />
             <span className="leading-tight text-center text-xs">{label}</span>
           </PopoverButton>
-          <PopoverPanel className="absolute left-1/2 top-full z-50 mt-2 w-64 -translate-x-1/2 rounded-lg bg-gray-700 p-2 shadow-xl ring-1 ring-black/10">
+          <PopoverPanel className="absolute right-0 top-full z-50 mt-2 w-64 rounded-lg bg-gray-700 p-2 shadow-xl ring-1 ring-black/10">
             <div className="flex flex-col gap-1">
               {MUSIC_AUDIO_MODES.map(({ mode, label: modeLabel }) => (
                 <button
