@@ -8,7 +8,11 @@ case "$app" in
     nohup flatpak run tv.kodi.Kodi >/dev/null 2>&1 &
     ;;
   plexamp)
-    nohup "$HOME/bin/plexamp-wine" >/dev/null 2>&1 &
+    if flatpak info com.plexamp.Plexamp >/dev/null 2>&1; then
+      nohup flatpak run com.plexamp.Plexamp >/dev/null 2>&1 &
+    else
+      nohup "$HOME/bin/plexamp-wine" >/dev/null 2>&1 &
+    fi
     ;;
   moonlight)
     nohup flatpak run com.moonlight_stream.Moonlight >/dev/null 2>&1 &
