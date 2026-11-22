@@ -177,6 +177,20 @@ fi
 assert_eq output:hdmi-surround71 "$(cat "$MOCK_PROFILE_FILE")" "readiness timeout restores old profile"
 assert_eq "100 alsa_output.pci-0000_00_1f.3.hdmi-surround71" "$(cat "$MOCK_INPUT_FILE")" "readiness timeout restores stream"
 
+# Exercise the exact live sequence used by the music presets:
+# Dolby upmix (HDMI stereo) -> stereo with sub (5.1) -> regular stereo (HDMI stereo).
+# Keep the same stream and persistent transition sink across all three calls.
+reset_state output:hdmi-stereo "100 alsa_output.pci-0000_00_1f.3.hdmi-stereo"
+run_audio surround51-hdmi
+assert_eq output:hdmi-surround "$(cat "$MOCK_PROFILE_FILE")" "upmix to stereo-with-sub profile"
+assert_eq "100 alsa_output.pci-0000_00_1f.3.hdmi-surround" "$(cat "$MOCK_INPUT_FILE")" "stream reattached after stereo-with-sub"
+run_audio hdmi-stereo
+assert_eq output:hdmi-stereo "$(cat "$MOCK_PROFILE_FILE")" "stereo-with-sub back to regular stereo profile"
+assert_eq "100 alsa_output.pci-0000_00_1f.3.hdmi-stereo" "$(cat "$MOCK_INPUT_FILE")" "stream reattached after return to regular stereo"
+run_audio hdmi-stereo
+assert_eq output:hdmi-stereo "$(cat "$MOCK_PROFILE_FILE")" "repeated regular stereo selection remains stable"
+assert_eq "100 alsa_output.pci-0000_00_1f.3.hdmi-stereo" "$(cat "$MOCK_INPUT_FILE")" "repeated selection keeps stream attached"
+
 # No active streams: change profile without creating a transition sink.
 reset_state output:hdmi-surround71 ""
 run_audio hdmi-stereo
