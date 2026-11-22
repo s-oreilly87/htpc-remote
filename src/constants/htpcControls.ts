@@ -37,6 +37,8 @@ export enum LinuxListenCommand {
 export enum LinuxDisplayModeCommand {
   Res4k60HDR = "4k60",
   Res4k60SDR = "4k60SDR",
+  Res4k24HDR = "4k24",
+  Res4k24SDR = "4k24SDR",
   Res1440p120HDR = "1440p120",
   Res1440p120SDR = "1440p120SDR",
 }
