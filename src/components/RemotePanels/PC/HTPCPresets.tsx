@@ -171,25 +171,37 @@ function AudioVideoPresets() {
         if (isLinux) {
           const audioResult = await setLinuxAudioMode(value as LinuxAudioModeCommand);
           if (!audioResult.ok) {
+            // A failed audio transition must not suppress the app launch.
+            // Keep the previous audio/Denon state and continue the preset.
             console.error(
-              "Preset aborted: Linux audio mode did not become ready.",
+              "Preset audio mode failed; continuing with app launch.",
               audioResult.error,
             );
-            return;
+          } else {
+            setSelectedAudioMode(preset.audioMode);
+
+            if (preset.audioMode.denonCmd) {
+              if (preset.applyAudysseyDefaults) {
+                await applyDenonMusicAudioMode(preset.audioMode);
+              } else {
+                // Non-music presets retain their existing Quick Select behavior.
+                await sendDenonCommand({ value: preset.audioMode.denonCmd });
+                await sleep(500);
+              }
+            }
           }
         } else {
           await sendEventToHTPCEventGhost({ value });
-        }
+          setSelectedAudioMode(preset.audioMode);
 
-        setSelectedAudioMode(preset.audioMode);
-
-        if (preset.audioMode.denonCmd) {
-          if (preset.applyAudysseyDefaults) {
-            await applyDenonMusicAudioMode(preset.audioMode);
-          } else {
-            // Non-music presets retain their existing Quick Select behavior.
-            await sendDenonCommand({ value: preset.audioMode.denonCmd });
-            await sleep(500);
+          if (preset.audioMode.denonCmd) {
+            if (preset.applyAudysseyDefaults) {
+              await applyDenonMusicAudioMode(preset.audioMode);
+            } else {
+              // Non-music presets retain their existing Quick Select behavior.
+              await sendDenonCommand({ value: preset.audioMode.denonCmd });
+              await sleep(500);
+            }
           }
         }
       }
