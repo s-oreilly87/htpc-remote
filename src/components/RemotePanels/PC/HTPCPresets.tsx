@@ -80,7 +80,7 @@ function AudioVideoPresets() {
       presetWatchPlex: {
         // Linux: Kodi is set up to bitstream — don't change audio mode
         audioMode: isLinux ? null : AUDIO_MODES.ATMOS,
-        displayModeHTPC: DISPLAY_MODES.HTPC_4K60_HDR,
+        displayModeHTPC: DISPLAY_MODES.HTPC_4K24_HDR,
         rokuApp: ROKU_APPS.HDMI.HDMI4,
         launchApp: isLinux ? "launchKodi" : "launchPlex",
         killApp: isLinux ? "launchPlexamp" : undefined,
