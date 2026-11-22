@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-ROOT="$(cd "$(dirname "\${BASH_SOURCE[0]}")/.." && pwd)"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SCRIPT="$ROOT/linux/scripts/shared/htpc-audio"
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
@@ -13,7 +13,7 @@ export PATH="$TMP/bin:$PATH" HTPC_AUDIO_PACTL_TIMEOUT=1 HTPC_AUDIO_READY_TIMEOUT
 cat > "$TMP/bin/pactl" <<'MOCK'
 #!/usr/bin/env bash
 set -euo pipefail
-cmd="\${1:-}"; shift || true
+cmd="${1:-}"; shift || true
 profile="$(cat "$MOCK_PROFILE_FILE")"
 sink_for_profile() {
   case "$1" in
@@ -37,10 +37,10 @@ sink_index() {
 printf '%s\n' "$cmd $*" >> "$MOCK_LOG_FILE"
 case "$cmd" in
   list)
-    case "\${1:-}" in
+    case "${1:-}" in
       cards) printf 'Card #0\n Name: alsa_card.pci-0000_00_1f.3\n Active Profile: %s\n' "$profile" ;;
       short)
-        case "\${2:-}" in
+        case "${2:-}" in
           sinks)
             sink="$(sink_for_profile "$profile")"
             printf '%s\t%s\tdriver\t48000 Hz\n' "$(sink_index "$sink")" "$sink"
@@ -51,7 +51,7 @@ case "$cmd" in
             fi
             ;;
           sink-inputs)
-            [[ "\${MOCK_HANG_SINK_INPUT:-0}" != 1 ]] || sleep 30
+            [[ "${MOCK_HANG_SINK_INPUT:-0}" != 1 ]] || sleep 30
             while read -r id sink_name; do
               [[ -n "$id" ]] || continue
               printf '%s\t%s\tprotocol-native.c\tfloat32le 2ch 48000Hz\n' "$id" "$(sink_index "$sink_name")"
@@ -62,11 +62,11 @@ case "$cmd" in
     esac
     ;;
   load-module)
-    for arg in "$@"; do case "$arg" in sink_name=*) printf '%s' "\${arg#sink_name=}" > "$MOCK_MODULE_FILE" ;; esac; done
+    for arg in "$@"; do case "$arg" in sink_name=*) printf '%s' "${arg#sink_name=}" > "$MOCK_MODULE_FILE" ;; esac; done
     echo 77
     ;;
   move-sink-input)
-    [[ "\${MOCK_FAIL_MOVE:-0}" != 1 ]] || exit 1
+    [[ "${MOCK_FAIL_MOVE:-0}" != 1 ]] || exit 1
     input_id="$1"; target="$2"
     tmp_file="$MOCK_INPUT_FILE.tmp"
     while read -r id sink_name; do
@@ -77,8 +77,8 @@ case "$cmd" in
     mv "$tmp_file" "$MOCK_INPUT_FILE"
     ;;
   set-card-profile)
-    [[ "\${MOCK_FAIL_PROFILE:-0}" != 1 ]] || exit 1
-    [[ "\${MOCK_IGNORE_PROFILE:-0}" == 1 ]] || printf '%s' "$2" > "$MOCK_PROFILE_FILE"
+    [[ "${MOCK_FAIL_PROFILE:-0}" != 1 ]] || exit 1
+    [[ "${MOCK_IGNORE_PROFILE:-0}" == 1 ]] || printf '%s' "$2" > "$MOCK_PROFILE_FILE"
     ;;
   *)
     echo "unexpected pactl command (unload should never be used): $cmd $*" >&2

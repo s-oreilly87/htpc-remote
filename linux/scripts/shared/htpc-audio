@@ -2,13 +2,13 @@
 set -euo pipefail
 
 CARD="alsa_card.pci-0000_00_1f.3"  # from \`pactl list cards short\`
-READY_TIMEOUT="\${HTPC_AUDIO_READY_TIMEOUT:-15}"
+READY_TIMEOUT="${HTPC_AUDIO_READY_TIMEOUT:-15}"
 POLL_INTERVAL=0.2
 PROFILE_TIMEOUT=10
-PACTL_COMMAND_TIMEOUT="\${HTPC_AUDIO_PACTL_TIMEOUT:-3}"
+PACTL_COMMAND_TIMEOUT="${HTPC_AUDIO_PACTL_TIMEOUT:-3}"
 TRANSITION_SINK="htpc_audio_transition"
 
-mode="\${1:-}"
+mode="${1:-}"
 expected_profile=""
 expected_sink=""
 old_profile=""
@@ -35,12 +35,12 @@ pactl_with_timeout() {
   local duration="$1"
   shift
   local status=0
-  if ( exec 9>&-; timeout --signal=TERM --kill-after=1s "\${duration}s" pactl "$@" ); then
+  if ( exec 9>&-; timeout --signal=TERM --kill-after=1s "${duration}s" pactl "$@" ); then
     return 0
   else
     status=$?
     if [[ "$status" -eq 124 || "$status" -eq 137 ]]; then
-      echo "Timed out after \${duration}s: pactl $*" >&2
+      echo "Timed out after ${duration}s: pactl $*" >&2
     fi
     return "$status"
   fi
@@ -135,7 +135,7 @@ move_inputs() {
   local input_id
   local failed=0
 
-  for input_id in "\${moved_inputs[@]}"; do
+  for input_id in "${moved_inputs[@]}"; do
     if sink_input_exists "$input_id"; then
       if ! pactl_cmd move-sink-input "$input_id" "$target_sink"; then
         echo "Failed to move active audio stream $input_id to '$target_sink'." >&2
@@ -193,10 +193,10 @@ esac
 
 # Serialize profile changes. A later request must not race an in-progress
 # PipeWire profile recreation.
-LOCK_DIR="\${XDG_RUNTIME_DIR:-/tmp}"
+LOCK_DIR="${XDG_RUNTIME_DIR:-/tmp}"
 [[ -d "$LOCK_DIR" ]] || LOCK_DIR="/tmp"
 umask 077
-exec 9>"$LOCK_DIR/htpc-audio-\${UID}.lock"
+exec 9>"$LOCK_DIR/htpc-audio-${UID}.lock"
 flock -w 20 9 || {
   echo "Timed out waiting for another audio-mode change to finish." >&2
   exit 1
@@ -227,7 +227,7 @@ tracked_sink_ids="$old_sink_id $transition_sink_id $legacy_transition_ids"
 sink_inputs_output=""
 active_inputs=()
 declare -A input_source_sinks=()
-if [[ -n "\${tracked_sink_ids//[[:space:]]/}" ]]; then
+if [[ -n "${tracked_sink_ids//[[:space:]]/}" ]]; then
   sink_inputs_output="$(pactl_cmd list short sink-inputs)" || {
     echo "Could not inspect active audio streams; profile was not changed." >&2
     exit 1
@@ -245,12 +245,12 @@ fi
 # parked on a transition sink by an interrupted/older invocation.
 if [[ "$old_profile" == "$expected_profile" ]] && sink_exists "$expected_sink"; then
   moved_inputs=()
-  for input_id in "\${active_inputs[@]}"; do
-    if [[ "\${input_source_sinks[$input_id]}" != "$old_sink_id" ]]; then
+  for input_id in "${active_inputs[@]}"; do
+    if [[ "${input_source_sinks[$input_id]}" != "$old_sink_id" ]]; then
       moved_inputs+=("$input_id")
     fi
   done
-  if (("\${#moved_inputs[@]}" > 0)) && ! move_inputs "$expected_sink"; then
+  if (("${#moved_inputs[@]}" > 0)) && ! move_inputs "$expected_sink"; then
     echo "Could not recover audio streams parked on the transition sink." >&2
     exit 1
   fi
@@ -260,7 +260,7 @@ fi
 # If there are streams to preserve, create the persistent transition sink once.
 # It is intentionally left loaded: unloading/reloading a Pulse module on every
 # mode change adds another PipeWire graph teardown and can itself stall.
-if (("\${#active_inputs[@]}" > 0)); then
+if (("${#active_inputs[@]}" > 0)); then
   if [[ -z "$transition_sink_id" ]]; then
     pactl_cmd load-module module-null-sink \
       sink_name="$TRANSITION_SINK" channels=8 \
@@ -281,9 +281,9 @@ if (("\${#active_inputs[@]}" > 0)); then
     transition_sink_id="$(printf '%s\n' "$transition_sinks_output" | sink_index_from_list "$TRANSITION_SINK")"
   fi
 
-  moved_inputs=("\${active_inputs[@]}")
-  for input_id in "\${active_inputs[@]}"; do
-    if [[ "\${input_source_sinks[$input_id]}" == "$transition_sink_id" ]]; then
+  moved_inputs=("${active_inputs[@]}")
+  for input_id in "${active_inputs[@]}"; do
+    if [[ "${input_source_sinks[$input_id]}" == "$transition_sink_id" ]]; then
       continue
     fi
     if sink_input_exists "$input_id"; then
