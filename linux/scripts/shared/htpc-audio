@@ -273,7 +273,12 @@ if (("\${#active_inputs[@]}" > 0)); then
       echo "Persistent transition sink '$TRANSITION_SINK' did not appear; profile was not changed." >&2
       exit 1
     fi
-    transition_sink_id="$(sink_index_from_list "$(pactl_cmd list short sinks)" "$TRANSITION_SINK")"
+    transition_sinks_output="$(pactl_cmd list short sinks)" || {
+      echo "Could not verify the persistent transition sink; preserving streams on it." >&2
+      restore_old_audio
+      exit 1
+    }
+    transition_sink_id="$(printf '%s\n' "$transition_sinks_output" | sink_index_from_list "$TRANSITION_SINK")"
   fi
 
   moved_inputs=("\${active_inputs[@]}")

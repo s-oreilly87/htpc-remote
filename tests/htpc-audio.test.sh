@@ -45,7 +45,10 @@ case "$cmd" in
             sink="$(sink_for_profile "$profile")"
             printf '%s\t%s\tdriver\t48000 Hz\n' "$(sink_index "$sink")" "$sink"
             [[ ! -s "$MOCK_MODULE_FILE" ]] || printf '90\thtpc_audio_transition\tdriver\t48000 Hz\n'
-            [[ ! -s "$MOCK_LEGACY_SINK_FILE" ]] || printf '91\t$(cat "$MOCK_LEGACY_SINK_FILE")\tdriver\t48000 Hz\n'
+            if [[ -s "$MOCK_LEGACY_SINK_FILE" ]]; then
+              legacy_sink="$(cat "$MOCK_LEGACY_SINK_FILE")"
+              printf '91\t%s\tdriver\t48000 Hz\n' "$legacy_sink"
+            fi
             ;;
           sink-inputs)
             [[ "\${MOCK_HANG_SINK_INPUT:-0}" != 1 ]] || sleep 30
