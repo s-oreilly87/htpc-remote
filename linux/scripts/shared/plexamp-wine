@@ -4,34 +4,30 @@
 set -u  # only: fail on undefined vars, but not -e/-o pipefail
 
 # === CONFIG ===
-WINEPREFIX="${WINEPREFIX:-$HOME/.wine-plexamp}"
-PLEXAMP_EXE="$WINEPREFIX/drive_c/Program Files/Plexamp/Plexamp.exe"
-SINK_NAME="denon51_remap"
+WINEPREFIX="${WINEPREFIX:-$HOME/.wine-plexamp-4.50-test}"
+WINE_USER="${WINE_USER:-$(id -un)}"
+PLEXAMP_EXE="$WINEPREFIX/drive_c/users/$WINE_USER/AppData/Local/Plexamp/Plexamp.exe"
+SINK_NAME="alsa_output.pci-0000_00_1f.3.hdmi-surround"
 SYSTEM_SINK="system.null"
 
 # HDMI card + profile (baked in)
 CARD_NAME="alsa_card.pci-0000_00_1f.3"
 SURROUND_PROFILE="output:hdmi-surround"
 
-# Wait for remap sink before launching Plexamp (prevents losing device binding)
+# Wait for the standard HDMI 5.1 sink before launching Plexamp
 WAIT_SECS=6
 WAIT_STEP=0.2
 # ==============
 
-# Disable the software GPU fallback too; --disable-gpu alone leaves it enabled.
-# This avoids white / blank Electron windows under Wine.
-PLEXAMP_ARGS=(
-  --disable-gpu
-  --disable-gpu-rasterization
-  --disable-software-rasterizer
-  --force-device-scale-factor=2
-)
+# Current Plexamp uses Tauri/WebView2 rather than the old Electron runtime.
+# Do not pass the old Electron GPU workaround flags.
+PLEXAMP_ARGS=()
 
 export WINEPREFIX
 export WINEDEBUG=-all
 
-# Force Plexamp (this process only) to use the remap sink,
-# WITHOUT changing the system-wide default sink.
+# Route this Plexamp process directly to the standard HDMI 5.1 sink.
+# The denon51_remap sink remains available as a fallback for other applications.
 export PULSE_SINK="$SINK_NAME"
 
 sink_exists() {
@@ -65,18 +61,18 @@ fi
 
 sleep 0.5
 
-# --- Ensure remap sink exists BEFORE launching Plexamp ---
+# --- Ensure standard HDMI 5.1 sink exists BEFORE launching Plexamp ---
 if command -v pactl >/dev/null 2>&1; then
   # Nudge HDMI into surround profile (best-effort, harmless if already set)
   pactl set-card-profile "$CARD_NAME" "$SURROUND_PROFILE" >/dev/null 2>&1 || true
 
-  # Wait up to WAIT_SECS for the remap sink to appear
+  # Wait up to WAIT_SECS for the HDMI sink to appear
   loops="$(awk -v s="$WAIT_SECS" -v d="$WAIT_STEP" 'BEGIN{printf "%d", (s/d)}')"
   i=0
   while ! sink_exists "$SINK_NAME"; do
     i=$((i+1))
     if [ "$i" -ge "$loops" ]; then
-      notify "Required sink '$SINK_NAME' is not available. Not starting Plexamp (prevents losing device binding)."
+      notify "Required sink '$SINK_NAME' is not available. Not starting Plexamp."
       exit 0
     fi
     sleep "$WAIT_STEP"
@@ -91,7 +87,7 @@ fi
 nohup wine "$PLEXAMP_EXE" "${PLEXAMP_ARGS[@]}" >/dev/null 2>&1 &
 disown
 
-# Wake the remap / HDMI graph so audio actually flows
+# Wake the HDMI graph so audio actually flows
 if command -v pactl >/dev/null 2>&1; then
   (
     sleep 1
