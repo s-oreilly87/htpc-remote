@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-CARD="alsa_card.pci-0000_00_1f.3"  # from `pactl_cmd list cards short`
+CARD="alsa_card.pci-0000_00_1f.3"  # from `pactl list cards short`
 READY_MAX_ATTEMPTS=75 # 75 × 0.2s = 15 seconds
 POLL_INTERVAL=0.2
 PROFILE_TIMEOUT=10

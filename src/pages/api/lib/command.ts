@@ -43,7 +43,7 @@ async function runRemoteCommand(command: string, args: string[]): Promise<void> 
     });
   } catch (error) {
     throw new Error(
-      `htpc-agent unreachable at ${url}: ${error instanceof Error ? error.message : String(error)}`,
+      `htpc-agent request failed at ${url} (connection or timeout): ${error instanceof Error ? error.message : String(error)}`,
     );
   }
 
