@@ -107,7 +107,11 @@ cleanup_transition_sink() {
   [[ -n "$transition_module" ]] || return 0
 
   local transition_index
-  transition_index="$(sink_index "$transition_sink")"
+  transition_index="$(sink_index "$transition_sink" || true)"
+  if [[ -z "$transition_index" ]]; then
+    echo "Could not verify the temporary transition sink; leaving its module loaded to protect any attached streams." >&2
+    return 0
+  fi
 
   local current_inputs
   if ! current_inputs="$(pactl list short sink-inputs 2>/dev/null)"; then
@@ -146,9 +150,7 @@ restore_old_audio() {
 case "$mode" in
   analog-stereo)
     expected_profile="output:analog-stereo"
-    # Keep the legacy profile-only check; this mode is not used by the
-    # Plexamp HDMI selector and the analog sink name is host-dependent.
-    expected_sink=""
+    expected_sink="alsa_output.pci-0000_00_1f.3.analog-stereo"
     ;;
   hdmi-stereo)
     expected_profile="output:hdmi-stereo"
@@ -180,7 +182,7 @@ flock -w 20 9 || {
 
 old_profile="$(active_profile)"
 case "$old_profile" in
-  output:analog-stereo) old_sink="" ;;
+  output:analog-stereo) old_sink="alsa_output.pci-0000_00_1f.3.analog-stereo" ;;
   output:hdmi-stereo) old_sink="alsa_output.pci-0000_00_1f.3.hdmi-stereo" ;;
   output:hdmi-surround) old_sink="alsa_output.pci-0000_00_1f.3.hdmi-surround" ;;
   output:hdmi-surround71) old_sink="alsa_output.pci-0000_00_1f.3.hdmi-surround71" ;;
@@ -264,7 +266,8 @@ fi
 
 # Reattach the still-running application streams to the newly-created sink.
 if ! move_inputs "$expected_sink"; then
-  echo "The new audio sink is ready, but one or more streams could not be reattached. The temporary sink is being kept to avoid dropping them." >&2
+  echo "The new audio sink is ready, but one or more streams could not be reattached. Attempting to restore the previous profile and stream routing." >&2
+  restore_old_audio
   exit 1
 fi
 
