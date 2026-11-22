@@ -11,7 +11,8 @@
     "build": "next build --webpack && cp -r public .next/standalone/public && mkdir -p .next/standalone/.next && cp -r .next/static .next/standalone/.next/static",
     "start": "node .next/standalone/server.js",
     "deploy": "npm run build && npm run start",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "test:htpc-audio": "bash tests/htpc-audio.test.sh"
   },
   "dependencies": {
     "@achingbrain/ssdp": "^4.0.1",
