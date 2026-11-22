@@ -52,7 +52,12 @@ sink_index() {
 }
 
 sink_input_exists() {
-  pactl list short sink-inputs 2>/dev/null |
+  local current_inputs
+  if ! current_inputs="$(pactl list short sink-inputs 2>/dev/null)"; then
+    return 2
+  fi
+
+  printf '%s\\n' "$current_inputs" |
     awk -v input="$1" '$1 == input { found=1 } END { exit !found }'
 }
 
@@ -230,6 +235,13 @@ if [[ -n "$old_sink_id" ]]; then
           exit 1
         fi
         moved_inputs+=("$input_id")
+      else
+        input_status=$?
+        if [[ "$input_status" -ne 1 ]]; then
+          echo "Could not verify active audio stream $input_id; profile was not changed." >&2
+          restore_old_audio
+          exit 1
+        fi
       fi
     done
   fi
@@ -244,7 +256,7 @@ if ! timeout "${PROFILE_TIMEOUT}s" pactl set-card-profile "$CARD" "$expected_pro
 fi
 
 if ! wait_for_profile "$expected_profile" "$expected_sink"; then
-  current_profile="$(active_profile)"
+  current_profile="$(active_profile 2>/dev/null || true)"
   echo "Timed out waiting for HDMI sink '$expected_sink' (active profile: '$current_profile', expected: '$expected_profile')." >&2
   restore_old_audio
   exit 1
