@@ -63,7 +63,8 @@ wait_for_profile() {
 
   for ((attempt = 0; attempt < READY_MAX_ATTEMPTS; attempt++)); do
     current_profile="$(active_profile)"
-    if [[ "$current_profile" == "$profile" ]] && sink_exists "$sink"; then
+    if [[ "$current_profile" == "$profile" ]] &&
+      { [[ -z "$sink" ]] || sink_exists "$sink"; }; then
       return 0
     fi
     sleep "$POLL_INTERVAL"
@@ -126,7 +127,9 @@ restore_old_audio() {
 case "$mode" in
   analog-stereo)
     expected_profile="output:analog-stereo"
-    expected_sink="alsa_output.pci-0000_00_1f.3.analog-stereo"
+    # Keep the legacy profile-only check; this mode is not used by the
+    # Plexamp HDMI selector and the analog sink name is host-dependent.
+    expected_sink=""
     ;;
   hdmi-stereo)
     expected_profile="output:hdmi-stereo"
@@ -156,7 +159,7 @@ flock -w 20 9 || {
 
 old_profile="$(active_profile)"
 case "$old_profile" in
-  output:analog-stereo) old_sink="alsa_output.pci-0000_00_1f.3.analog-stereo" ;;
+  output:analog-stereo) old_sink="" ;;
   output:hdmi-stereo) old_sink="alsa_output.pci-0000_00_1f.3.hdmi-stereo" ;;
   output:hdmi-surround) old_sink="alsa_output.pci-0000_00_1f.3.hdmi-surround" ;;
   output:hdmi-surround71) old_sink="alsa_output.pci-0000_00_1f.3.hdmi-surround71" ;;
