@@ -149,7 +149,7 @@ Two separate audio paths are in use:
 
 **Kodi → ALSA → HDMI → Denon** (bitstream HD audio / passthrough). Kodi must be launched with `AE_SINK=ALSA` — use the `kodi-alsa` wrapper script in `scripts/shared/` rather than launching Kodi directly. Passthrough only works if the AVR is powered on at Kodi startup.
 
-**Plexamp 4.50.20 (Tauri, via Wine) → PipeWire → HDMI directly.** On the tested KDE Neon setup, Plexamp has the correct speaker-channel ordering on the standard HDMI stereo and surround sinks. The `plexamp-wine` launcher detects the card profile selected by the preset and routes `PULSE_SINK` to its matching sink; it does not change the profile itself. This lets the Dolby Surround upmix preset remain on HDMI stereo while 5.1 playback uses HDMI surround. Plexamp does not need the remapped sink.
+**Plexamp 4.50.20 (Tauri, via Wine) → PipeWire → HDMI directly.** On the tested KDE Neon setup, Plexamp routes to the standard HDMI stereo or surround sink matching the active card profile. The 5.1 channel ordering was verified on the surround sink. The `plexamp-wine` launcher detects the profile selected by the preset and routes `PULSE_SINK` to its matching sink; it does not change the profile itself. This lets the Dolby Surround upmix preset remain on HDMI stereo while 5.1 playback uses HDMI surround. Plexamp does not need the remapped sink.
 
 **Qobuz listen mode → PipeWire → HDMI stereo.** The `htpc-listen qobuz` command switches the card to its HDMI stereo profile. `htpc-listen plexamp` explicitly selects HDMI 5.1 before launching; the normal Plexamp audio presets retain whichever HDMI profile they select.
 
