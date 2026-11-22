@@ -151,6 +151,8 @@ esac
 # Serialize profile changes. A second dropdown selection must not race the
 # first while PipeWire is destroying and recreating the HDMI sink.
 LOCK_DIR="${XDG_RUNTIME_DIR:-/tmp}"
+[[ -d "$LOCK_DIR" ]] || LOCK_DIR="/tmp"
+umask 077
 exec 9>"$LOCK_DIR/htpc-audio-${UID}.lock"
 flock -w 20 9 || {
   echo "Timed out waiting for another audio-mode change to finish." >&2
