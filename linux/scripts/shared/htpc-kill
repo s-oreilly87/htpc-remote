@@ -8,7 +8,8 @@ case "$app" in
     pkill -9 -f kodi || true
     ;;
   plexamp)
-    pkill -9 -f Plexamp || true
+    flatpak kill com.plexamp.Plexamp >/dev/null 2>&1 || true
+    pkill -9 -f "[Pp]lexamp" || true
     ;;
   moonlight)
     pkill -9 -f Moonlight || true
