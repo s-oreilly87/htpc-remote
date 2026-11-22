@@ -1,5 +1,6 @@
 import { LinuxAudioModeCommand, LinuxDisplayModeCommand } from "@/constants/htpcControls";
 import { RemoteType } from "@/constants/remotes";
+import { DENON_SOUND_MODES } from "@/constants/denon";
 import { URL_ENCODED_SYMBOLS } from "@/constants/encoding";
 import { ROKU_APPS } from "@/constants/roku";
 import type { AudioMode, DisplayMode, SelectOption } from "@/types/remote";
@@ -36,7 +37,7 @@ export const AUDIO_MODES: Record<string, AudioMode> = {
     label: "Stereo (Dolby Surround Upmix)",
     egValue: "audioModeStereoSurround",
     linuxValue: LinuxAudioModeCommand.HdmiStereo,
-    denonCmd: "MSQUICK2",
+    denonCmd: DENON_SOUND_MODES.DOLBY.value,
   },
   SURROUND51: {
     key: "SURROUND51",
