@@ -2,7 +2,7 @@ import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from "@headless
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheck, faChevronDown } from "@fortawesome/free-solid-svg-icons";
 
-import { sendDenonCommand, sendEventToHTPCEventGhost, setLinuxAudioMode } from "@/utilities/http";
+import { sendEventToHTPCEventGhost, setLinuxAudioMode } from "@/utilities/http";
 import { AUDIO_MODES, audioModeValue } from "@/constants/pc";
 import { usePlatform } from "@/hooks/usePlatform";
 import type { AudioMode } from "@/types/remote";
