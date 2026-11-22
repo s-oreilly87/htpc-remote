@@ -22,15 +22,21 @@ function AudioModeSelect({ selectedAudioMode, setSelectedAudioMode }: AudioModeS
   );
 
   const handleSelect = async (mode: AudioMode) => {
-    setSelectedAudioMode(mode);
-
     const value = audioModeValue(mode, isLinux);
     if (isLinux) {
-      await setLinuxAudioMode(value as LinuxAudioModeCommand);
+      const audioResult = await setLinuxAudioMode(value as LinuxAudioModeCommand);
+      if (!audioResult.ok) {
+        console.error(
+          "Audio mode selection failed: Linux audio mode did not become ready.",
+          audioResult.error,
+        );
+        return;
+      }
     } else {
       await sendEventToHTPCEventGhost({ value });
     }
 
+    setSelectedAudioMode(mode);
     await applyDenonMusicAudioMode(mode);
   };
 

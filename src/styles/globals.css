@@ -190,13 +190,12 @@
     @apply relative isolate mx-auto w-full max-w-[548px];
   }
   .remote-body {
-    min-height: max(
-      740px,
-      calc(
-        100dvh - var(--remote-brand-height) - var(--remote-frame-top) -
-          var(--remote-frame-bottom) - var(--remote-header-height) -
-          var(--remote-border-height)
-      )
+    /* Match the usable panel height exactly; a fixed pixel floor makes the
+       compact remotes taller than short mobile viewports and forces scrolling. */
+    min-height: calc(
+      100dvh - var(--remote-brand-height) - var(--remote-frame-top) -
+        var(--remote-frame-bottom) - var(--remote-header-height) -
+        var(--remote-border-height)
     );
   }
   .remote-area[data-layout="desktop"] .remote-panels {
@@ -232,13 +231,10 @@
     @apply border-blue-400/30 bg-blue-950 text-blue-200;
   }
   .remote-area[data-layout="desktop"] .remote-body {
-    min-height: max(
-      850px,
-      calc(
-        100dvh - var(--remote-brand-height) - var(--remote-frame-top) -
-          var(--remote-frame-bottom) - var(--remote-header-height) -
-          var(--remote-border-height)
-      )
+    min-height: calc(
+      100dvh - var(--remote-brand-height) - var(--remote-frame-top) -
+        var(--remote-frame-bottom) - var(--remote-header-height) -
+        var(--remote-border-height)
     );
   }
 }

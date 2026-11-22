@@ -166,14 +166,22 @@ function AudioVideoPresets() {
 
       // 5. Audio mode — apply the selected mode before launching the app
       if (preset.audioMode) {
-        setSelectedAudioMode(preset.audioMode);
         const value = audioModeValue(preset.audioMode, isLinux);
 
         if (isLinux) {
-          await setLinuxAudioMode(value as LinuxAudioModeCommand);
+          const audioResult = await setLinuxAudioMode(value as LinuxAudioModeCommand);
+          if (!audioResult.ok) {
+            console.error(
+              "Preset aborted: Linux audio mode did not become ready.",
+              audioResult.error,
+            );
+            return;
+          }
         } else {
           await sendEventToHTPCEventGhost({ value });
         }
+
+        setSelectedAudioMode(preset.audioMode);
 
         if (preset.audioMode.denonCmd) {
           if (preset.applyAudysseyDefaults) {
