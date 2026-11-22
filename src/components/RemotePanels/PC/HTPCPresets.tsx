@@ -12,6 +12,7 @@ import { RemoteType } from "@/constants/remotes";
 import {
   killLinuxApp,
   launchLinuxApp,
+  sendDenonCommand,
   sendEventToGameStreamEventGhost,
   sendEventToHTPCEventGhost,
   sendRokuLaunchCommand,
@@ -179,7 +180,6 @@ function AudioVideoPresets() {
             await applyDenonMusicAudioMode(preset.audioMode);
           } else {
             // Non-music presets retain their existing Quick Select behavior.
-            const { sendDenonCommand } = await import("@/utilities/http");
             await sendDenonCommand({ value: preset.audioMode.denonCmd });
             await sleep(500);
           }
