@@ -90,7 +90,7 @@ chmod +x "$TMP/bin/pactl"
 
 reset_state() {
   printf '%s' "$1" > "$MOCK_PROFILE_FILE"
-  printf '%s' "$2" > "$MOCK_INPUT_FILE"
+  printf '%s\n' "$2" > "$MOCK_INPUT_FILE"
   : > "$MOCK_MODULE_FILE"
   : > "$MOCK_LEGACY_SINK_FILE"
   : > "$MOCK_LOG_FILE"
