@@ -7,6 +7,7 @@ import { AUDIO_MODES, audioModeValue } from "@/constants/pc";
 import { usePlatform } from "@/hooks/usePlatform";
 import type { AudioMode } from "@/types/remote";
 import type { LinuxAudioModeCommand } from "@/constants/htpcControls";
+import { applyDenonMusicAudioMode } from "@/utilities/denonAudio";
 
 export interface AudioModeSelectProps {
   selectedAudioMode: AudioMode;
@@ -20,19 +21,17 @@ function AudioModeSelect({ selectedAudioMode, setSelectedAudioMode }: AudioModeS
     (m) => m.disabled || audioModeValue(m, isLinux) !== "",
   );
 
-  const handleSelect = (mode: AudioMode) => {
+  const handleSelect = async (mode: AudioMode) => {
     setSelectedAudioMode(mode);
 
     const value = audioModeValue(mode, isLinux);
     if (isLinux) {
-      setLinuxAudioMode(value as LinuxAudioModeCommand);
+      await setLinuxAudioMode(value as LinuxAudioModeCommand);
     } else {
-      sendEventToHTPCEventGhost({ value });
+      await sendEventToHTPCEventGhost({ value });
     }
 
-    if (mode.denonCmd) {
-      sendDenonCommand({ value: mode.denonCmd });
-    }
+    await applyDenonMusicAudioMode(mode);
   };
 
   return (
