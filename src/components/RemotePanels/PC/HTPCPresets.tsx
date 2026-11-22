@@ -12,7 +12,6 @@ import { RemoteType } from "@/constants/remotes";
 import {
   killLinuxApp,
   launchLinuxApp,
-  sendDenonCommand,
   sendEventToGameStreamEventGhost,
   sendEventToHTPCEventGhost,
   sendRokuLaunchCommand,
@@ -27,6 +26,7 @@ import { openPlexampAndroidApp, openQobuzAndroidApp } from "@/utilities/utils";
 import type { AudioMode, DisplayMode, RokuChannel } from "@/types/remote";
 import type { LinuxAudioModeCommand, LinuxDisplayModeCommand } from "@/constants/htpcControls";
 import { BASEMENT_LIGHT } from "@/constants/smartHome";
+import { applyDenonMusicAudioMode } from "@/utilities/denonAudio";
 
 const remote = RemoteType.PC;
 
@@ -39,6 +39,8 @@ interface PresetEffects {
   launchApp?: string;
   killApp?: string;
   androidApp?: string;
+  /** Reapply the preferred Audyssey settings after recalling a music-app mode. */
+  applyAudysseyDefaults?: boolean;
   /** EventGhost event used to launch this app after applying its selected audio mode. */
   eventGhostLaunchCommand?: string;
   lightMode?: {
@@ -173,8 +175,14 @@ function AudioVideoPresets() {
         }
 
         if (preset.audioMode.denonCmd) {
-          await sendDenonCommand({ value: preset.audioMode.denonCmd });
-          await sleep(500);
+          if (preset.applyAudysseyDefaults) {
+            await applyDenonMusicAudioMode(preset.audioMode);
+          } else {
+            // Non-music presets retain their existing Quick Select behavior.
+            const { sendDenonCommand } = await import("@/utilities/http");
+            await sendDenonCommand({ value: preset.audioMode.denonCmd });
+            await sleep(500);
+          }
         }
       }
 
@@ -213,7 +221,7 @@ function AudioVideoPresets() {
       return;
     }
 
-    await runPreset({ ...preset, audioMode }, presetCommand);
+    await runPreset({ ...preset, audioMode, applyAudysseyDefaults: true }, presetCommand);
   };
 
   async function maybeLaunchApp(preset: PresetEffects, htpcEventGhostCommand: string) {
