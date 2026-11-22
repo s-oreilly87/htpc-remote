@@ -62,7 +62,9 @@ wait_for_profile() {
   local current_profile
 
   for ((attempt = 0; attempt < READY_MAX_ATTEMPTS; attempt++)); do
-    current_profile="$(active_profile)"
+    if ! current_profile="$(active_profile 2>/dev/null)"; then
+      return 1
+    fi
     if [[ "$current_profile" == "$profile" ]] &&
       { [[ -z "$sink" ]] || sink_exists "$sink"; }; then
       return 0
@@ -84,6 +86,12 @@ move_inputs() {
         echo "Failed to move active audio stream $input_id to '$target_sink'." >&2
         failed=1
       fi
+    else
+      local status=$?
+      if [[ "$status" -ne 1 ]]; then
+        echo "Could not verify whether audio stream $input_id still exists." >&2
+        failed=1
+      fi
     fi
   done
 
@@ -96,8 +104,14 @@ cleanup_transition_sink() {
   local transition_index
   transition_index="$(sink_index "$transition_sink")"
 
+  local current_inputs
+  if ! current_inputs="$(pactl list short sink-inputs 2>/dev/null)"; then
+    echo "Could not verify transition-sink clients; keeping '$transition_sink' to avoid dropping audio streams." >&2
+    return 0
+  fi
+
   if [[ -n "$transition_index" ]] &&
-    pactl list short sink-inputs 2>/dev/null |
+    printf '%s\\n' "$current_inputs" |
       awk -v sink="$transition_index" '$2 == sink { found=1 } END { exit !found }'; then
     echo "Keeping temporary transition sink '$transition_sink': an audio stream is still attached." >&2
     return 0
@@ -108,7 +122,7 @@ cleanup_transition_sink() {
 
 restore_old_audio() {
   local current_profile
-  current_profile="$(active_profile)"
+  current_profile="$(active_profile 2>/dev/null || true)"
 
   if [[ -n "$old_profile" && "$current_profile" != "$old_profile" ]]; then
     timeout "${PROFILE_TIMEOUT}s" pactl set-card-profile "$CARD" "$old_profile" || true
@@ -180,8 +194,12 @@ if [[ -n "$old_sink" ]]; then
 fi
 
 if [[ -n "$old_sink_id" ]]; then
+  sink_inputs_output="$(pactl list short sink-inputs)" || {
+    echo "Could not inspect active audio streams; profile was not changed." >&2
+    exit 1
+  }
   mapfile -t active_inputs < <(
-    pactl list short sink-inputs 2>/dev/null |
+    printf '%s\\n' "$sink_inputs_output" |
       awk -v sink="$old_sink_id" '$2 == sink { print $1 }'
   )
 
