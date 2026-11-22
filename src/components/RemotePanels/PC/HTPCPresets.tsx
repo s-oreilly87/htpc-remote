@@ -291,7 +291,6 @@ function basementLightMode(): PresetEffects["lightMode"] {
   };
 }
 
-
 const MUSIC_AUDIO_MODES = [
   { mode: AUDIO_MODES.PURE, label: "Stereo" },
   { mode: AUDIO_MODES.STEREO, label: "Stereo with sub" },
@@ -310,6 +309,7 @@ function AudioAppPresetButton({ label, onSelect }: AudioAppPresetButtonProps) {
       {({ close }) => (
         <>
           <PopoverButton
+            type="button"
             className="btn btn-primary-pc w-full flex flex-col justify-center items-center gap-0.5"
           >
             <FontAwesomeIcon icon={faMusic} className="h-6 w-6" />
