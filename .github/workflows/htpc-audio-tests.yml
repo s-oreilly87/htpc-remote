@@ -18,5 +18,10 @@ jobs:
         run: |
           bash -n linux/scripts/shared/htpc-audio
           bash -n tests/htpc-audio.test.sh
+      - name: Run ShellCheck for serious shell errors
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y shellcheck
+          shellcheck --severity=error linux/scripts/shared/htpc-audio tests/htpc-audio.test.sh
       - name: Exercise normal and adversarial audio transitions
         run: bash tests/htpc-audio.test.sh
