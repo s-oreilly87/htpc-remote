@@ -164,32 +164,36 @@ function AudioVideoPresets() {
         await sleep(3000);
       }
 
-      // 5. Audio mode — apply the selected mode before launching the app
+      // 5. Audio mode — attempt it before launching the app.
+      // A failed Linux transition must not prevent the selected app from launching.
       if (preset.audioMode) {
         const value = audioModeValue(preset.audioMode, isLinux);
+        let audioModeReady = true;
 
         if (isLinux) {
           const audioResult = await setLinuxAudioMode(value as LinuxAudioModeCommand);
-          if (!audioResult.ok) {
+          audioModeReady = audioResult.ok;
+          if (!audioModeReady) {
             console.error(
-              "Preset aborted: Linux audio mode did not become ready.",
+              "Preset audio mode failed; continuing with app launch.",
               audioResult.error,
             );
-            return;
           }
         } else {
           await sendEventToHTPCEventGhost({ value });
         }
 
-        setSelectedAudioMode(preset.audioMode);
+        if (audioModeReady) {
+          setSelectedAudioMode(preset.audioMode);
 
-        if (preset.audioMode.denonCmd) {
-          if (preset.applyAudysseyDefaults) {
-            await applyDenonMusicAudioMode(preset.audioMode);
-          } else {
-            // Non-music presets retain their existing Quick Select behavior.
-            await sendDenonCommand({ value: preset.audioMode.denonCmd });
-            await sleep(500);
+          if (preset.audioMode.denonCmd) {
+            if (preset.applyAudysseyDefaults) {
+              await applyDenonMusicAudioMode(preset.audioMode);
+            } else {
+              // Non-music presets retain their existing Quick Select behavior.
+              await sendDenonCommand({ value: preset.audioMode.denonCmd });
+              await sleep(500);
+            }
           }
         }
       }
